@@ -1,0 +1,217 @@
+1>------ 已启动生成: 项目: ZERO_CHECK, 配置: Debug x64 ------
+1>Checking Build System
+2>------ 已启动生成: 项目: glfw, 配置: Debug x64 ------
+3>------ 已跳过生成: 项目: uninstall, 配置: Debug x64 ------
+3>没有为此解决方案配置选中要生成的项目 
+2>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/src/CMakeLists.txt
+2>context.c
+2>init.c
+2>input.c
+2>monitor.c
+2>vulkan.c
+2>window.c
+2>win32_init.c
+2>win32_joystick.c
+2>win32_monitor.c
+2>win32_time.c
+2>win32_thread.c
+2>win32_window.c
+2>wgl_context.c
+2>egl_context.c
+2>osmesa_context.c
+2>正在生成代码...
+2>glfw.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\src\Debug\glfw3.lib
+4>------ 已启动生成: 项目: inputlag, 配置: Debug x64 ------
+5>------ 已启动生成: 项目: threads, 配置: Debug x64 ------
+4>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+4>inputlag.c
+4>getopt.c
+4>glad_gl.c
+4>正在生成代码...
+5>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+5>threads.c
+5>tinycthread.c
+5>glad_gl.c
+5>正在生成代码...
+4>inputlag.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\inputlag.exe
+6>------ 已启动生成: 项目: timeout, 配置: Debug x64 ------
+6>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+5>threads.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\threads.exe
+6>timeout.c
+7>------ 已启动生成: 项目: title, 配置: Debug x64 ------
+6>glad_gl.c
+6>正在生成代码...
+7>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+6>timeout.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\timeout.exe
+8>------ 已启动生成: 项目: vulkan, 配置: Debug x64 ------
+8>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+7>title.c
+7>glad_gl.c
+7>正在生成代码...
+7>C:\Users\yue\Desktop\glfw-3.3\tests\title.c(1,1): warning C4819:  该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+8>vulkan.c
+8>glad_vulkan.c
+8>正在生成代码...
+7>title.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\title.exe
+7>已完成生成项目“title.vcxproj”的操作。
+9>------ 已启动生成: 项目: wave, 配置: Debug x64 ------
+9>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/examples/CMakeLists.txt
+8>vulkan.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\vulkan.exe
+10>------ 已启动生成: 项目: boing, 配置: Debug x64 ------
+9>wave.c
+9>glad_gl.c
+10>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/examples/CMakeLists.txt
+9>正在生成代码...
+10>boing.c
+10>glad_gl.c
+10>正在生成代码...
+9>wave.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\examples\Debug\wave.exe
+11>------ 已启动生成: 项目: clipboard, 配置: Debug x64 ------
+11>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+11>clipboard.c
+11>getopt.c
+11>glad_gl.c
+10>boing.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\examples\Debug\boing.exe
+12>------ 已启动生成: 项目: cursor, 配置: Debug x64 ------
+11>正在生成代码...
+12>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+12>cursor.c
+12>glad_gl.c
+12>正在生成代码...
+11>clipboard.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\clipboard.exe
+13>------ 已启动生成: 项目: empty, 配置: Debug x64 ------
+13>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+13>empty.c
+13>tinycthread.c
+13>glad_gl.c
+13>正在生成代码...
+12>cursor.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\cursor.exe
+14>------ 已启动生成: 项目: events, 配置: Debug x64 ------
+14>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+14>events.c
+13>empty.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\empty.exe
+15>------ 已启动生成: 项目: gamma, 配置: Debug x64 ------
+14>getopt.c
+14>glad_gl.c
+15>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+14>正在生成代码...
+15>gamma.c
+15>glad_gl.c
+15>正在生成代码...
+14>events.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\events.exe
+16>------ 已启动生成: 项目: gears, 配置: Debug x64 ------
+16>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/examples/CMakeLists.txt
+16>gears.c
+16>glad_gl.c
+15>gamma.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\gamma.exe
+17>------ 已启动生成: 项目: glfwinfo, 配置: Debug x64 ------
+16>正在生成代码...
+17>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+17>glfwinfo.c
+17>getopt.c
+17>glad_gl.c
+17>glad_vulkan.c
+16>gears.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\examples\Debug\gears.exe
+18>------ 已启动生成: 项目: heightmap, 配置: Debug x64 ------
+17>正在生成代码...
+18>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/examples/CMakeLists.txt
+18>heightmap.c
+18>glad_gl.c
+17>glfwinfo.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\glfwinfo.exe
+19>------ 已启动生成: 项目: icon, 配置: Debug x64 ------
+18>正在生成代码...
+19>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+19>icon.c
+19>glad_gl.c
+19>正在生成代码...
+18>heightmap.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\examples\Debug\heightmap.exe
+20>------ 已启动生成: 项目: iconify, 配置: Debug x64 ------
+20>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+20>iconify.c
+19>icon.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\icon.exe
+21>------ 已启动生成: 项目: windows, 配置: Debug x64 ------
+20>getopt.c
+20>glad_gl.c
+21>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+20>正在生成代码...
+21>windows.c
+21>getopt.c
+21>glad_gl.c
+21>正在生成代码...
+20>iconify.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\iconify.exe
+22>------ 已启动生成: 项目: joysticks, 配置: Debug x64 ------
+22>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+22>joysticks.c
+21>windows.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\windows.exe
+23>------ 已启动生成: 项目: monitors, 配置: Debug x64 ------
+22>glad_gl.c
+23>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+22>正在生成代码...
+23>monitors.c
+23>getopt.c
+23>glad_gl.c
+23>正在生成代码...
+22>joysticks.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\joysticks.exe
+24>------ 已启动生成: 项目: msaa, 配置: Debug x64 ------
+24>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+24>msaa.c
+23>monitors.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\monitors.exe
+25>------ 已启动生成: 项目: offscreen, 配置: Debug x64 ------
+24>getopt.c
+24>glad_gl.c
+24>正在生成代码...
+25>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/examples/CMakeLists.txt
+25>offscreen.c
+25>glad_gl.c
+25>正在生成代码...
+24>msaa.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\msaa.exe
+26>------ 已启动生成: 项目: opacity, 配置: Debug x64 ------
+26>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+26>opacity.c
+26>glad_gl.c
+26>正在生成代码...
+25>offscreen.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\examples\Debug\offscreen.exe
+27>------ 已启动生成: 项目: particles, 配置: Debug x64 ------
+27>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/examples/CMakeLists.txt
+27>particles.c
+26>opacity.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\opacity.exe
+28>------ 已启动生成: 项目: reopen, 配置: Debug x64 ------
+28>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+27>tinycthread.c
+27>getopt.c
+27>glad_gl.c
+27>正在生成代码...
+28>reopen.c
+28>glad_gl.c
+28>正在生成代码...
+28>reopen.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\reopen.exe
+29>------ 已启动生成: 项目: sharing, 配置: Debug x64 ------
+29>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/examples/CMakeLists.txt
+27>particles.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\examples\Debug\particles.exe
+30>------ 已启动生成: 项目: simple, 配置: Debug x64 ------
+30>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/examples/CMakeLists.txt
+29>sharing.c
+29>glad_gl.c
+29>正在生成代码...
+30>simple.c
+30>glad_gl.c
+30>正在生成代码...
+29>sharing.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\examples\Debug\sharing.exe
+31>------ 已启动生成: 项目: splitview, 配置: Debug x64 ------
+31>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/examples/CMakeLists.txt
+30>simple.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\examples\Debug\simple.exe
+32>------ 已启动生成: 项目: tearing, 配置: Debug x64 ------
+31>splitview.c
+31>glad_gl.c
+32>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/tests/CMakeLists.txt
+31>正在生成代码...
+32>tearing.c
+32>glad_gl.c
+32>正在生成代码...
+31>splitview.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\examples\Debug\splitview.exe
+32>tearing.vcxproj -> C:\Users\yue\Desktop\glfw-3.3\build\tests\Debug\tearing.exe
+33>------ 已启动生成: 项目: ALL_BUILD, 配置: Debug x64 ------
+33>Building Custom Rule C:/Users/yue/Desktop/glfw-3.3/CMakeLists.txt
+34>------ 已跳过生成: 项目: INSTALL, 配置: Debug x64 ------
+34>没有为此解决方案配置选中要生成的项目 
+========== 生成: 成功 32 个，失败 0 个，最新 0 个，跳过 2 个 ==========

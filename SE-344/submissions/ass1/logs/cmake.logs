@@ -1,0 +1,14 @@
+Selecting Windows SDK version 10.0.18362.0 to target Windows 10.0.17763.
+The C compiler identification is MSVC 19.22.27905.0
+Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.22.27905/bin/Hostx64/x64/cl.exe
+Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.22.27905/bin/Hostx64/x64/cl.exe -- works
+Detecting C compiler ABI info
+Detecting C compiler ABI info - done
+Detecting C compile features
+Detecting C compile features - done
+Looking for pthread.h
+Looking for pthread.h - not found
+Found Threads: TRUE  
+Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE) 
+Using Win32 for window creation
+Configuring done
