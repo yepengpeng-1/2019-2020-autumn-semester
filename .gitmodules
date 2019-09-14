@@ -1,0 +1,3 @@
+[submodule "SE-344/utilities/glfw"]
+	path = SE-344/utilities/glfw
+	url = https://github.com/glfw/glfw
