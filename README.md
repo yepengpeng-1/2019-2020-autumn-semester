@@ -1,6 +1,12 @@
 # 2019-2020-autumn-semester
 2019 - 2020 Autumn Semester Curricula Materials
 
+``` c
+[state]     [due]		[course]			   [desc]
+ongoing     09/21 23:59	计算机图形学			 ass #1
+done        09/17 12:00 编译原理                lab #1
+```
+
 ## Course Code Reference
 
 ### 专业课
