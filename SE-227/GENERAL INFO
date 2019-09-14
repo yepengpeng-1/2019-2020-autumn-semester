@@ -1,0 +1,28 @@
+GENERAL INFORMATION
+LEARNING OBJECTIVES
+
+After learning CSE, the students will be able to design their own distributed systems to solve real-world problems. The ability to design one's own distributed system includes an ability to argue for one's design choices.
+
+This primary objective is supported by a few others:
+
+The students will be able to evaluate and critique existing systems, as well as their own system designs. As part of that, students will learn to recognize design choices made in existing systems.
+The students will be able to apply the technical material taught in lecture to new system components. This implies an ability to recognize and describe:
+How common design patterns in computer system—such as abstraction and modularity—are used to limit complexity.
+How operating systems use virtualization and abstraction to enforce modularity.
+How the Internet is designed to deal with scale, a diversity of applications, and competing economic interests.
+How reliable, usable distributed systems are able to be built on top of an unreliable network.
+Common pitfalls in the security of computer systems, and how to combat them.
+PLAGIARISM
+
+There is NO TOLERANCE for plagiarism. You are welcome to discuss the assignments with your classmates and/or friends. However, you MUST write the codes by yourself, and it is FORBIDDEN to copy anything from your classmates, other projects and/or network. It is YOUR responsibility to protect your own codes, so that please don't leave your codes on the table or screen.
+
+STAFF
+
+Instructor: 
+  Yubin Xia: xiayubin@sjtu.edu.cn 
+  Zhaoguo Wang: Zhaoguowang@sjtu.edu.cn 
+TA: 
+  Mingyu Wu: timberonce@gmail.com 
+  Ziming Zhao: dumplings_ming@126.com 
+  Fuqian Huang: hfq_zyx@163.com 
+  Xu Lu: lu_xu@foxmail.com
