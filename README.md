@@ -3,6 +3,7 @@
 
 ``` c
 [state]     [due]       [course]         [desc]
+none        09/27 23:59 计算机系统组成     lab #1
 ongoing     09/21 23:59 计算机图形学       ass #1
 done        09/17 12:00 编译原理          lab #1
 ```
