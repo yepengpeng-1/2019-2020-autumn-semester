@@ -72,4 +72,20 @@
     
     点按 Debug 运行发现不报错，则说明配置完成。
 
+### 第二部分：测试 OpenGL 环境
+
+#### 操作步骤
+
+12. 在 `main.cpp` 中填入以下代码，将配置管理器的下拉框设定为 `Debug`, `x64`，尝试生成并运行项目。
+
+```c++
+#include <glad/glad.h>#include <GLFW/glfw3.h>#include <iostream>void framebuffer_size_callback( GLFWwindow* window, int width, int height );int  main() {    glfwInit();	// Initialize the glfw library    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );	// Declare the glfw version we're using: v3.3    glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );	// Make glfw runs under Core Profile	// glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );	// macOS Workaround. Unnecessary here	GLFWwindow* window = glfwCreateWindow( 800, 600, "I'm A Teapot", NULL, NULL );    if ( window == NULL ) {        std::cout << "Failed to create GLFW window" << std::endl;        glfwTerminate();        return -1;    }    glfwMakeContextCurrent( window );		if ( !gladLoadGLLoader( ( GLADloadproc )glfwGetProcAddress ) ) {        std::cout << "Failed to initialize GLAD" << std::endl;        return -1;    }	glViewport( 0, 0, 800, 600 );	glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );	while ( !glfwWindowShouldClose( window ) ) {        glfwSwapBuffers( window );        glfwPollEvents();    }	glfwTerminate();    return 0;}void framebuffer_size_callback( GLFWwindow* window, int width, int height ) {    glViewport( 0, 0, width, height );}
+```
+
+
+
+
+
+
+
 

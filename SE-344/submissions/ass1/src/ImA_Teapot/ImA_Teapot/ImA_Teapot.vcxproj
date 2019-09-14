@@ -73,6 +73,10 @@
     <IncludePath>Z:\Documents\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(IncludePath)</IncludePath>
     <LibraryPath>Z:\Documents\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>Z:\Documents\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(IncludePath)</IncludePath>
+    <LibraryPath>Z:\Documents\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -94,6 +98,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
