@@ -4,6 +4,7 @@
 ``` c
 [state]     [due]       [course]         [desc]
 none        10/29 23:59 任爹系列课程       group project #1
+none        10/10 12:00 编译原理          lab #2
 none        09/27 23:59 计算机系统组成     lab #1
 none        09/23 12:55 计算机视觉        整理并比较各种插值算法的优劣
 ongoing     09/21 23:59 计算机图形学       ass #1
