@@ -1,2 +1,3 @@
 ﻿  main.cpp
-  ImA_Teapot.vcxproj -> Z:\Documents\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\src\ImA_Teapot\x64\Debug\ImA_Teapot.exe
+LINK : warning LNK4076: 增量状态文件“Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\src\ImA_Teapot\x64\Debug\ImA_Teapot.ilk”无效(将删除)；正以非增量方式链接
+  ImA_Teapot.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\src\ImA_Teapot\x64\Debug\ImA_Teapot.exe

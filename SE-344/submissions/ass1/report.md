@@ -22,7 +22,7 @@
 
 #### 环境设定
 
-* Windows 10 LTSC 1809 (`17763.737`)
+* Windows 10 x64 LTSC 1809 (`17763.737`) 
 
 * Visual Studio 2019 Community (`16.2.4`)
 
@@ -180,9 +180,9 @@ void glClearColor(GLclampf red,
 
 即我们将笔刷颜色设定为了 `alpha = 0.0f`（完全透明）的淡紫色。但此时尚未将其刷上背景，我们需要调用 `glClear(GL_COLOR_BUFFER_BIT)` 函数将其上色。
 
-> 问题：为什么这里设置 `alpha` 的值无论是 `0.0f` 还是 `1.0f`，对最终上色的结果没有影响？
+> Q：为什么这里设置 `alpha` 的值无论是 `0.0f` 还是 `1.0f`，对最终上色的结果没有影响？
 
-> 回答：见 Report 末尾。
+> A：见下面的讨论。
 
 事实上，这里 `glClear`所做的事情是「清除颜色缓冲区」，即将缓冲区中原有的颜色值清空，并用 `glClearColor` 所设置的颜色来填充整个屏幕。
 
@@ -228,16 +228,156 @@ void glClearColor(GLclampf red,
 
 #### 第三方开源库使用说明
 
-由于肖老师在布置作业时临时改动了 Assignment 内容，要求画一个茶壶来代替原题目中要求的球。作为 GLUT 的替代品，GLFW 本身并没有预设「画茶壶」这种无聊功能。
+由于肖老师在布置作业时临时改动了 Assignment 内容，要求画一个茶壶来代替原题目中要求的球。作为 GLUT 的替代品，GLFW 本身并没有预设「画茶壶」这项功能。
 
-因此不得已使用了以下第三方开源库及模型：
+又因为 GLUT 已经死透了，因此将选择使用 `FreeGLUT + glew` 的组合来代替上面的 `GLFW + glad` 组合。 
 
-* 茶壶模型： `/ass1/obj/foolish_teapot.obj` 
+#### 操作步骤
 
- [eewano/Teapot_OpenGL_GLFW](https://github.com/eewano/Teapot_OpenGL_GLFW) ， `MIT License` 
+15. 按照第一部分中编译 `glfw` 同样的办法编译 `FreeGLUT` 和 `glew` ，并放置在上述位置。
 
-* OpenGL Mathematics: `glm`
+> 动态链接库文件参见 `ass1/dll/` 目录。
 
-[g-truc/glm](https://github.com/g-truc/glm)，`Happy Bunny License` or `MIT License`
+> ⚠️还需要将编译得到的 `freeglutd.dll` 和 `glew32.dll` 放置在 `%SystemRoot%/Windows/System32` 和 `%SystemRoot%/Windows/SysWOW64` 目录下。
+
+16. 现在我们需要用 `FreeGLUT + glew` 重写上面的代码。首先，所有的 `glut` 程序都需要首先初始化这个库。第一行会把 main 函数的两个参数传入，是标准的初始化方法。
+
+```c++
+glutInit(&argc, argv);
+```
+
+17. 随后我们初始化 `glut` 的显示设置：
+
+```c++
+glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+```
+
+这几个掩码的意思分别是：
+
+| 宏名            | 意义                            |
+| ------------- | ----------------------------- |
+| `GLUT_RGBA`   | 将窗口设定为 RGBA 彩色模式。这是默认情况下的采用值。 |
+| `GLUT_DOUBLE` | 使用双缓冲机制（见上）。                  |
+| `GLUT_DEPTH`  | 使用深度缓冲机制。                     |
+
+> Q：什么叫做深度缓冲机制呢？
+> 
+> A：深度缓冲指的是在生成每一个像素的时候，都把它的深度信息存储在一个缓冲区之中；如果另一个物体也被渲染到同一个像素处，则通过深度缓冲区对二者的深度进行比较，并消隐那个被遮挡的物体。
+> 
+> 如果这个 OpenGL 程序需要处理多个物体间的遮挡关系，那么大概率会需要将 `GLUT_DEPTH` 掩码设定上。
+
+18. 接下来我们开启一个新窗口：通过下列两个函数调用决定窗口的尺寸以及标题文字。
+
+```c++
+    glutInitWindowSize(windowWidth, windowHeight);
+    // windowWidth 和 windowHeight 是两个静态变量，用于维护窗口当前大小
+
+    glutCreateWindow("I'm a Teapot");
+    // 执行此步骤之后，窗口被正式创建
+```
+
+19. 接下来我们设定背景颜色。此处和第 14 步中的操作完全一样。
+
+```c++
+glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
+```
+
+> 因此上面的问题也留到了这里：为什么 `glClearColor` 设定透明背景的代码不起作用呢？
+
+> 事实上这个函数的实现中，调节 alpha 值并非用于生成另一种纯色，而是为了实现「半透明效果」，即可以透过背景看到半透明的其他窗口内容，类似于 `Windows 8` 之前版本中的 Aero 效果。为了使这项功能有效，我们需要使用
+
+```c++
+glEnable(GL_BLEND)
+```
+
+```c++
+glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+ // = color * alpha + background * (1-alpha)
+```
+
+> 来表明如何计算被遮挡窗口的颜色。
+
+> ⚠️Windows 平台不支持此项功能，需要在 `Linux` 下执行测试。
+
+![](https://github.com/yuetsin/private-image-repo/blob/master/2019/09/rHewB.png?raw=true)
+
+> 最终效果如上图所示。
+
+20. 最后我们需要调用函数
+    
+    ```text
+    glutMainLoop();
+    ```
+
+        来开始 GLUT 的循环。
+
+21. 现在我们回到 Windows。由于 Windows 平台下背景透明功能不起作用，我们现在能看到的窗口如图所示。
+
+![](https://github.com/yuetsin/private-image-repo/blob/master/2019/09/image.teapot.png?raw=true)
+
+21. 由于题目要求我们需要动态进行渲染生成，因此我们注册了两个回调函数：`onWindowResized` 和 `onRender`。其中窗口被重新拉伸之后将调用函数 `onWindowResized`，当需要重新渲染下一帧画面时调用 `onRender`。
+
+```c++
+
+static int windowWidth = 1280, windowHeight = 720;
+
+void onWindowResized(int w, int h)
+{
+    // 更新窗口尺寸变量
+	windowWidth = w, windowHeight = h;
+}
+
+void onRender()
+{
+    // 清除上一帧的缓存
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+    // 启用双帧缓存
+	glutSwapBuffers();
+}
+
+int main() {
+    ...
+    glutReshapeFunc(onWindowResized);
+	glutDisplayFunc(onRender);
+    ...
+}
+```
+
+22. 完成之后，我们可以开始画 Teapot 了。在 onRender 函数中我们绘制一帧茶壶，我们需要动态计算出合适的茶壶大小，并使用 `glutSolidTeapot` 函数将其画到画面中。
+
+```c++
+int teaPotSize = int(std::min(int(windowWidth * 9.0 / 16.0), windowHeight));
+glViewport((windowWidth - teaPotSize) / 2, (windowHeight - teaPotSize) / 2, teaPotSize, teaPotSize);
+glutWireTeapot(0.4f);
+```
+
+我们来逐行分析代码：其中第一行计算出按照 16: 9 重分配比例之后窗口的较短边作为 Restriction；然后将 ViewPort 设定在这个画幅的正中央处；最后按照 0.4 倍的比例画出线框茶壶。这个算法经过测试可以保证在任何窗口比例下显示合理的画面。
+
+![](https://github.com/yuetsin/private-image-repo/blob/master/2019/09/resize.1.png?raw=true)
+
+![](https://github.com/yuetsin/private-image-repo/blob/master/2019/09/resize.2.png?raw=true)
+
+23. 最后，为了以后实现变色功能，我们将硬编码的颜色值抽离出来成为变量，并在绘制茶壶之前先设置笔刷颜色：
+
+```c++
+static GLfloat teapotRed = 0.5f;
+static GLfloat teapotGreen = 0.5f;
+static GLfloat teapotBlue = 0.7f;
+
+static GLfloat bgRed = 0.7f;
+static GLfloat bgGreen = 0.7f;
+static GLfloat bgBlue = 1.0f;
+
+static void onRender() {
+    ...
+    glColor3f(teapotRed, teapotGreen, teapotBlue);
+    ...
+}
+```
+
+此部分完成后的效果如下图所示。
+
+![](https://github.com/yuetsin/private-image-repo/blob/master/2019/09/full.res.png?raw=true)
 
 

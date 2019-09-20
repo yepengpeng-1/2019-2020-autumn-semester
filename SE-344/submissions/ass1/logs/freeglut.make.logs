@@ -1,0 +1,212 @@
+------ 已启动全部重新生成: 项目: ZERO_CHECK, 配置: Debug x64 ------
+Checking Build System
+------ 已启动全部重新生成: 项目: freeglut, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+fg_callbacks.c
+fg_cursor.c
+fg_display.c
+fg_ext.c
+fg_font_data.c
+fg_gamemode.c
+fg_geometry.c
+fg_gl2.c
+fg_init.c
+fg_input_devices.c
+fg_joystick.c
+fg_main.c
+fg_misc.c
+fg_overlay.c
+fg_spaceball.c
+fg_state.c
+fg_stroke_mono_roman.c
+fg_stroke_roman.c
+fg_structure.c
+fg_teapot.c
+正在生成代码...
+正在编译...
+fg_videoresize.c
+fg_window.c
+fg_font.c
+fg_menu.c
+fg_cursor_mswin.c
+fg_display_mswin.c
+fg_ext_mswin.c
+fg_gamemode_mswin.c
+fg_init_mswin.c
+fg_input_devices_mswin.c
+fg_joystick_mswin.c
+fg_main_mswin.c
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\fg_teapot.c(1,1): warning C4819:  该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_main_mswin.c(47,80): warning C4312:  “类型强制转换”: 从“unsigned int”转换到更大的“pGetTouchInputInfo”
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_main_mswin.c(48,92): warning C4312:  “类型强制转换”: 从“unsigned int”转换到更大的“pCloseTouchInputHandle”
+fg_menu_mswin.c
+fg_spaceball_mswin.c
+fg_state_mswin.c
+fg_structure_mswin.c
+fg_window_mswin.c
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_main_mswin.c(1508,67): warning C4312:  “类型强制转换”: 从“unsigned int”转换到更大的“pGetTouchInputInfo”
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_window_mswin.c(85,86): warning C4312:  “类型强制转换”: 从“unsigned int”转换到更大的“pRegisterTouchWindow”
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_window_mswin.c(85,86): warning C4312: fgSetupPixelFormat(): there is still some work to do here!
+xparsegeometry_repl.c
+正在生成代码...
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_window_mswin.c(730,71): warning C4312:  “类型强制转换”: 从“unsigned int”转换到更大的“pRegisterTouchWindow”
+  正在创建库 Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/src/build/lib/Debug/freeglutd.lib 和对象 Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/src/build/lib/Debug/freeglutd.exp
+freeglut.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\freeglutd.dll
+已完成生成项目“freeglut.vcxproj”的操作。
+------ 已启动全部重新生成: 项目: freeglut_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+fg_callbacks.c
+fg_cursor.c
+fg_display.c
+fg_ext.c
+fg_font_data.c
+fg_gamemode.c
+fg_geometry.c
+fg_gl2.c
+fg_init.c
+fg_input_devices.c
+fg_joystick.c
+fg_main.c
+fg_misc.c
+fg_overlay.c
+fg_spaceball.c
+fg_state.c
+fg_stroke_mono_roman.c
+fg_stroke_roman.c
+fg_structure.c
+fg_teapot.c
+正在生成代码...
+正在编译...
+fg_videoresize.c
+fg_window.c
+fg_font.c
+fg_menu.c
+fg_cursor_mswin.c
+fg_display_mswin.c
+fg_ext_mswin.c
+fg_gamemode_mswin.c
+fg_init_mswin.c
+fg_input_devices_mswin.c
+fg_joystick_mswin.c
+fg_main_mswin.c
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\fg_teapot.c(1,1): warning C4819:  该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_main_mswin.c(47,80): warning C4312:  “类型强制转换”: 从“unsigned int”转换到更大的“pGetTouchInputInfo”
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_main_mswin.c(48,92): warning C4312:  “类型强制转换”: 从“unsigned int”转换到更大的“pCloseTouchInputHandle”
+fg_menu_mswin.c
+fg_spaceball_mswin.c
+fg_state_mswin.c
+fg_structure_mswin.c
+fg_window_mswin.c
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_main_mswin.c(1508,67): warning C4312:  “类型强制转换”: 从“unsigned int”转换到更大的“pGetTouchInputInfo”
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_window_mswin.c(85,86): warning C4312:  “类型强制转换”: 从“unsigned int”转换到更大的“pRegisterTouchWindow”
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_window_mswin.c(85,86): warning C4312: fgSetupPixelFormat(): there is still some work to do here!
+xparsegeometry_repl.c
+正在生成代码...
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\mswin\fg_window_mswin.c(730,71): warning C4312:  “类型强制转换”: 从“unsigned int”转换到更大的“pRegisterTouchWindow”
+freeglut_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\lib\Debug\freeglut_staticd.lib
+已完成生成项目“freeglut_static.vcxproj”的操作。
+------ 已启动全部重新生成: 项目: CallbackMaker, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+CallbackMaker.c
+CallbackMaker.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\CallbackMakerd.exe
+------ 已启动全部重新生成: 项目: CallbackMaker_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+CallbackMaker.c
+CallbackMaker_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\CallbackMaker_staticd.exe
+------ 已启动全部重新生成: 项目: Fractals, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+fractals.c
+Fractals.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\Fractalsd.exe
+------ 已启动全部重新生成: 项目: Fractals_random, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+fractals_random.c
+Fractals_random.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\Fractals_randomd.exe
+------ 已启动全部重新生成: 项目: Fractals_random_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+fractals_random.c
+Fractals_random_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\Fractals_random_staticd.exe
+------ 已启动全部重新生成: 项目: Fractals_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+fractals.c
+Fractals_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\Fractals_staticd.exe
+------ 已启动全部重新生成: 项目: Lorenz, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+lorenz.c
+Lorenz.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\Lorenzd.exe
+------ 已启动全部重新生成: 项目: Lorenz_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+lorenz.c
+Lorenz_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\Lorenz_staticd.exe
+------ 已启动全部重新生成: 项目: One, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+one.c
+One.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\Oned.exe
+------ 已启动全部重新生成: 项目: One_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+one.c
+One_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\One_staticd.exe
+------ 已启动全部重新生成: 项目: Resizer, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+Resizer.cpp
+Resizer.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\Resizerd.exe
+------ 已启动全部重新生成: 项目: Resizer_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+Resizer.cpp
+Resizer_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\Resizer_staticd.exe
+------ 已启动全部重新生成: 项目: multi-touch, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+multi-touch.c
+multi-touch.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\multi-touchd.exe
+------ 已启动全部重新生成: 项目: multi-touch_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+multi-touch.c
+multi-touch_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\multi-touch_staticd.exe
+------ 已启动全部重新生成: 项目: shapes, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+shapes.c
+glmatrix.c
+正在生成代码...
+shapes.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\shapesd.exe
+------ 已启动全部重新生成: 项目: shapes_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+shapes.c
+glmatrix.c
+正在生成代码...
+shapes_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\shapes_staticd.exe
+------ 已启动全部重新生成: 项目: smooth_opengl3, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+smooth_opengl3.c
+smooth_opengl3.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\smooth_opengl3d.exe
+------ 已启动全部重新生成: 项目: smooth_opengl3_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+smooth_opengl3.c
+smooth_opengl3_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\smooth_opengl3_staticd.exe
+------ 已启动全部重新生成: 项目: subwin, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+subwin.c
+subwin.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\subwind.exe
+------ 已启动全部重新生成: 项目: subwin_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+subwin.c
+subwin_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\subwin_staticd.exe
+------ 已启动全部重新生成: 项目: timer, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+timer.c
+timer.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\timerd.exe
+------ 已启动全部重新生成: 项目: timer_callback, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+timer.c
+timer_callback.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\timer_callbackd.exe
+------ 已启动全部重新生成: 项目: timer_callback_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+timer.c
+timer_callback_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\timer_callback_staticd.exe
+------ 已启动全部重新生成: 项目: timer_static, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+timer.c
+timer_static.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\utilities\freeglut-3.2.0\src\build\bin\Debug\timer_staticd.exe
+------ 已启动全部重新生成: 项目: ALL_BUILD, 配置: Debug x64 ------
+Building Custom Rule Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/utilities/freeglut-3.2.0/CMakeLists.txt
+------ 已跳过全部重新生成: 项目: INSTALL, 配置: Debug x64 ------
+没有为此解决方案配置选中要生成的项目 
+========== 全部重新生成: 成功 28 个，失败 0 个，跳过 1 个 ==========

@@ -70,12 +70,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>Z:\Documents\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(IncludePath)</IncludePath>
-    <LibraryPath>Z:\Documents\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(IncludePath)</IncludePath>
+    <LibraryPath>Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>Z:\Documents\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(IncludePath)</IncludePath>
-    <LibraryPath>Z:\Documents\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(IncludePath)</IncludePath>
+    <LibraryPath>Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass1\bin;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -86,7 +86,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32.lib;glew32s.lib;freeglutd.lib;freeglut_staticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -98,7 +98,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32.lib;glew32s.lib;freeglutd.lib;freeglut_staticd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -133,11 +133,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="model_loader.cpp" />
     <ClCompile Include="src\glad.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="model_loader.h" />
+    <ClInclude Include="common\controls.hpp" />
+    <ClInclude Include="common\objloader.hpp" />
+    <ClInclude Include="common\quaternion_utils.hpp" />
+    <ClInclude Include="common\shader.hpp" />
+    <ClInclude Include="common\tangentspace.hpp" />
+    <ClInclude Include="common\text2D.hpp" />
+    <ClInclude Include="common\texture.hpp" />
+    <ClInclude Include="common\vboindexer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
