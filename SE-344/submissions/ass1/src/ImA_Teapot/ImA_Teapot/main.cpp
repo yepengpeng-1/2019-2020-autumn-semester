@@ -36,8 +36,11 @@ int  main() {
 	glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
 
 	while ( !glfwWindowShouldClose( window ) ) {
-        glfwSwapBuffers( window );
+        glClearColor( 0.7f, 0.7f, 1.0f, 0.0f );
+        glClear( GL_COLOR_BUFFER_BIT );
+        // 检查并调用事件，交换缓冲
         glfwPollEvents();
+        glfwSwapBuffers( window );
     }
 
 	glfwTerminate();
