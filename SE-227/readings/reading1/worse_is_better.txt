@@ -1,0 +1,112 @@
+
+Worse Is Better
+
+Richard P. Gabriel
+
+The concept known as "worse is better" holds that in software making (and perhaps in other arenas as well) it is better to start with a minimal creation and grow it as needed. Christopher Alexander might call this "piecemeal growth." This is the story of the evolution of that concept.
+
+This is the crux of the essay: The Rise of Worse is Better.
+
+From 1984 until 1994 I had a Lisp company called "Lucid, Inc." In 1989 it was clear that the Lisp business was not going well, partly because the AI companies were floundering and partly because those AI companies were starting to blame Lisp and its implementations for the failures of AI. One day in Spring 1989, I was sitting out on the Lucid porch with some of the hackers, and someone asked me why I thought people believed C and Unix were better than Lisp. I jokingly answered, "because, well, worse is better." We laughed over it for a while as I tried to make up an argument for why something clearly lousy could be good.
+
+A few months later, in Summer 1989, a small Lisp conference called EuroPAL (European Conference on the Practical Applications of Lisp) invited me to give a keynote, probably since Lucid was the premier Lisp company. I agreed, and while casting about for what to talk about, I gravitated toward a detailed explanation of the worse-is-better ideas we joked about as applied to Lisp. At Lucid we knew a lot about how we would do Lisp over to survive business realities as we saw them, and so the result was called "Lisp: Good News, Bad News, How to Win Big." [html] (slightly abridged version) [pdf] (has more details about the Tree shaker and delivery of Lisp applications).
+
+I gave the talk in March, 1990 at Cambridge University. I had never been to Cambridge (nor to Oxford), and I was quite nervous about speaking at Newton’s school. There were about 500-800 people in the auditorium, and before my talk they played the Notting Hillbillies over the sound system - I had never heard the group before, and indeed, the album was not yet released in the US. The music seemed appropriate because I had decided to use a very colloquial American-style of writing in the talk, and the Notting Hillbillies played a style of music heavily influenced by traditional American music, though they were a British band. I gave my talk with some fear since the room was standing room only, and at the end, there was a long silence. The first person to speak up was Gerry Sussman, who largely ridiculed the talk, followed by Carl Hewitt who was similarly none too kind. I spent 30 minutes trying to justify my speech to a crowd in no way inclined to have heard such criticism - perhaps they were hoping for a cheerleader-type speech.
+
+I survived, of course, and made my way home to California. Back then, the Internet was just starting up, so it was reasonable to expect not too many people would hear about the talk and its disastrous reception. However, the press was at the talk and wrote about it extensively in the UK. Headlines in computer rags proclaimed "Lisp Dead, Gabriel States." In one, there was a picture of Bruce Springsteen with the caption, "New Jersey Style," referring to the humorous name I gave to the worse-is-better approach to design. Nevertheless, I hid the talk away and soon was convinced nothing would come of it.
+
+About a year later we hired a young kid from Pittsburgh named Jamie Zawinski. He was not much more than 20 years old and came highly recommended by Scott Fahlman. We called him "The Kid." He was a lot of fun to have around: not a bad hacker and definitely in a demographic we didn’t have much of at Lucid. He wanted to find out about the people at the company, particularly me since I had been the one to take a risk on him, including moving him to the West Coast. His way of finding out was to look through my computer directories - none of them were protected. He found the EuroPAL paper, and found the part about worse is better. He connected these ideas to those of Richard Stallman, whom I knew fairly well since I had been a spokesman for the League for Programming Freedom for a number of years. JWZ excerpted the worse-is-better sections and sent them to his friends at CMU, who sent them to their friends at Bell Labs, who sent them to their friends everywhere.
+
+Soon I was receiving 10 or so e-mails a day requesting the paper. Departments from several large companies requested permission to use the piece as part of their thought processes for their software strategies for the 1990s. The companies I remember were DEC, HP, and IBM. In June 1991, AI Expert magazine republished the piece to gain a larger readership in the US.
+
+However, despite the apparent enthusiasm by the rest of the world, I was uneasy about the concept of worse is better, and especially with my association with it. In the early 1990s, I was writing a lot of essays and columns for magazines and journals, so much so that I was using a pseudonym for some of that work: Nickieben Bourbaki. The original idea for the name was that my staff at Lucid would help with the writing, and the single pseudonym would represent the collective, much as the French mathematicians in the 1930s used "Nicolas Bourbaki" as their collective name while rewriting the foundations of mathematics in their image. However, no one but I wrote anything under that name.
+
+In the Winter of 1991-1992 I wrote an essay called "Worse Is Better Is Worse" under the name "Nickieben Bourbaki." This piece attacked worse is better. In it, the fiction was created that Nickieben was a childhood friend and colleague of Richard P. Gabriel, and as a friend and for Richard’s own good, Nickieben was correcting Richard’s beliefs.
+
+In the Autumn of 1992, the Journal of Object-Oriented Programming (JOOP) published a "rebuttal" editorial I wrote to "Worse Is Better Is Worse" called "Is Worse Really Better?" The folks at Lucid were starting to get a little worried because I would bring them review drafts of papers arguing (as me) for worse is better, and later I would bring them rebuttals (as Nickieben) against myself. One fellow was seriously nervous that I might have a mental disease.
+
+In the middle of the 1990s I was working as a management consultant (more or less), and I became interested in why worse is better really could work, so I was reading books on economics and biology to understand how evolution happened in economic systems. Most of what I learned was captured in a presentation I would give back then, typically as a keynote, called "Models of Software Acceptance: How Winners Win," and in a chapter called "Money Through Innovation Reconsidered," in my book of essays, "Patterns of Software: Tales from the Software Community."
+
+You might think that by the year 2000 I would have settled what I think of worse is better - after over a decade of thinking and speaking about it, through periods of clarity and periods of muck, and through periods of multi-mindedness on the issues. But, at OOPSLA 2000, I was scheduled to be on a panel entitled "Back to the Future: Is Worse (Still) Better?" And in preparation for this panel, the organizer, Martine Devos, asked me to write a position paper, which I did, called "Back to the Future: Is Worse (Still) Better?" In this short paper, I came out against worse is better. But a month or so later, I wrote a second one, called "Back to the Future: Worse (Still) is Better!" which was in favor of it. I still can’t decide. Martine combined the two papers into the single position paper for the panel, and during the panel itself, run as a fishbowl, participants routinely shifted from the pro-worse-is-better side of the table to the anti-side. I sat in the audience, having lost my voice giving my Mob Software talk that morning, during which I said, "risk-taking and a willingness to open one’s eyes to new possibilities and a rejection of worse-is-better make an environment where excellence is possible. Xenia invites the duende, which is battled daily because there is the possibility of failure in an aesthetic rather than merely a technical sense."
+
+Decide for yourselves.
+
+The classic essay on "worse is better" is either misunderstood or wrong.
+Jim Waldo
+
+———
+
+
+The Rise of Worse is Better
+
+Richard P. Gabriel
+
+Lucid, Inc
+
+{an excerpt from "Lisp: Good News, Bad News, How to Win Big." [html]}
+
+2.1 The Rise of Worse is Better
+
+I and just about every designer of Common Lisp and CLOS has had extreme exposure to the MIT/Stanford style of design. The essence of this style can be captured by the phrase the right thing. To such a designer it is important to get all of the following characteristics right:
+
+Simplicity -- the design must be simple, both in implementation and interface. It is more important for the interface to be simple than the implementation.
+Correctness -- the design must be correct in all observable aspects. Incorrectness is simply not allowed.
+Consistency -- the design must not be inconsistent. A design is allowed to be slightly less simple and less complete to avoid inconsistency. Consistency is as important as correctness.
+Completeness -- the design must cover as many important situations as is practical. All reasonably expected cases must be covered. Simplicity is not allowed to overly reduce completeness.
+I believe most people would agree that these are good characteristics. I will call the use of this philosophy of design the MIT approach Common Lisp (with CLOS) and Scheme represent the MIT approach to design and implementation.
+
+The worse-is-better philosophy is only slightly different:
+
+Simplicity -- the design must be simple, both in implementation and interface. It is more important for the implementation to be simple than the interface. Simplicity is the most important consideration in a design.
+Correctness -- the design must be correct in all observable aspects. It is slightly better to be simple than correct.
+Consistency -- the design must not be overly inconsistent. Consistency can be sacrificed for simplicity in some cases, but it is better to drop those parts of the design that deal with less common circumstances than to introduce either implementational complexity or inconsistency.
+Completeness -- the design must cover as many important situations as is practical. All reasonably expected cases should be covered. Completeness can be sacrificed in favor of any other quality. In fact, completeness must be sacrificed whenever implementation simplicity is jeopardized. Consistency can be sacrificed to achieve completeness if simplicity is retained; especially worthless is consistency of interface.
+Early Unix and C are examples of the use of this school of design, and I will call the use of this design strategy the New Jersey approach I have intentionally caricatured the worse-is-better philosophy to convince you that it is obviously a bad philosophy and that the New Jersey approach is a bad approach.
+
+However, I believe that worse-is-better, even in its strawman form, has better survival characteristics than the-right-thing, and that the New Jersey approach when used for software is a better approach than the MIT approach.
+
+Let me start out by retelling a story that shows that the MIT/New-Jersey distinction is valid and that proponents of each philosophy actually believe their philosophy is better.
+
+Two famous people, one from MIT and another from Berkeley (but working on Unix) once met to discuss operating system issues. The person from MIT was knowledgeable about ITS (the MIT AI Lab operating system) and had been reading the Unix sources. He was interested in how Unix solved the PC loser-ing problem. The PC loser-ing problem occurs when a user program invokes a system routine to perform a lengthy operation that might have significant state, such as IO buffers. If an interrupt occurs during the operation, the state of the user program must be saved. Because the invocation of the system routine is usually a single instruction, the PC of the user program does not adequately capture the state of the process. The system routine must either back out or press forward. The right thing is to back out and restore the user program PC to the instruction that invoked the system routine so that resumption of the user program after the interrupt, for example, re-enters the system routine. It is called PC loser-ing because the PC is being coerced into loser mode, where loser is the affectionate name for user at MIT.
+
+The MIT guy did not see any code that handled this case and asked the New Jersey guy how the problem was handled. The New Jersey guy said that the Unix folks were aware of the problem, but the solution was for the system routine to always finish, but sometimes an error code would be returned that signaled that the system routine had failed to complete its action. A correct user program, then, had to check the error code to determine whether to simply try the system routine again. The MIT guy did not like this solution because it was not the right thing.
+
+The New Jersey guy said that the Unix solution was right because the design philosophy of Unix was simplicity and that the right thing was too complex. Besides, programmers could easily insert this extra test and loop. The MIT guy pointed out that the implementation was simple but the interface to the functionality was complex. The New Jersey guy said that the right tradeoff has been selected in Unix -- namely, implementation simplicity was more important than interface simplicity.
+
+The MIT guy then muttered that sometimes it takes a tough man to make a tender chicken, but the New Jersey guy didn’t understand (I’m not sure I do either).
+
+Now I want to argue that worse-is-better is better. C is a programming language designed for writing Unix, and it was designed using the New Jersey approach. C is therefore a language for which it is easy to write a decent compiler, and it requires the programmer to write text that is easy for the compiler to interpret. Some have called C a fancy assembly language. Both early Unix and C compilers had simple structures, are easy to port, require few machine resources to run, and provide about 50%-80% of what you want from an operating system and programming language.
+
+Half the computers that exist at any point are worse than median (smaller or slower). Unix and C work fine on them. The worse-is-better philosophy means that implementation simplicity has highest priority, which means Unix and C are easy to port on such machines. Therefore, one expects that if the 50% functionality Unix and C support is satisfactory, they will start to appear everywhere. And they have, haven’t they?
+
+Unix and C are the ultimate computer viruses.
+
+A further benefit of the worse-is-better philosophy is that the programmer is conditioned to sacrifice some safety, convenience, and hassle to get good performance and modest resource use. Programs written using the New Jersey approach will work well both in small machines and large ones, and the code will be portable because it is written on top of a virus.
+
+It is important to remember that the initial virus has to be basically good. If so, the viral spread is assured as long as it is portable. Once the virus has spread, there will be pressure to improve it, possibly by increasing its functionality closer to 90%, but users have already been conditioned to accept worse than the right thing. Therefore, the worse-is-better software first will gain acceptance, second will condition its users to expect less, and third will be improved to a point that is almost the right thing. In concrete terms, even though Lisp compilers in 1987 were about as good as C compilers, there are many more compiler experts who want to make C compilers better than want to make Lisp compilers better.
+
+The good news is that in 1995 we will have a good operating system and programming language; the bad news is that they will be Unix and C++.
+
+There is a final benefit to worse-is-better. Because a New Jersey language and system are not really powerful enough to build complex monolithic software, large systems must be designed to reuse components. Therefore, a tradition of integration springs up.
+
+How does the right thing stack up? There are two basic scenarios: the big complex system scenario and the diamond-like jewel scenario.
+
+The big complex system scenario goes like this:
+
+First, the right thing needs to be designed. Then its implementation needs to be designed. Finally it is implemented. Because it is the right thing, it has nearly 100% of desired functionality, and implementation simplicity was never a concern so it takes a long time to implement. It is large and complex. It requires complex tools to use properly. The last 20% takes 80% of the effort, and so the right thing takes a long time to get out, and it only runs satisfactorily on the most sophisticated hardware.
+
+The diamond-like jewel scenario goes like this:
+
+The right thing takes forever to design, but it is quite small at every point along the way. To implement it to run fast is either impossible or beyond the capabilities of most implementors.
+
+The two scenarios correspond to Common Lisp and Scheme.
+
+The first scenario is also the scenario for classic artificial intelligence software.
+
+The right thing is frequently a monolithic piece of software, but for no reason other than that the right thing is often designed monolithically. That is, this characteristic is a happenstance.
+
+The lesson to be learned from this is that it is often undesirable to go for the right thing first. It is better to get half of the right thing available so that it spreads like a virus. Once people are hooked on it, take the time to improve it to 90% of the right thing.
+
+A wrong lesson is to take the parable literally and to conclude that C is the right vehicle for AI software. The 50% solution has to be basically right, and in this case it isn’t.
+
+But, one can conclude only that the Lisp community needs to seriously rethink its position on Lisp design. I will say more about this later....

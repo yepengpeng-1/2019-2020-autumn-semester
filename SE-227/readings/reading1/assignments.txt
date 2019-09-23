@@ -1,0 +1,13 @@
+Worse Is Better
+
+Please read Worse is Better, and answer following questions. Maybe you're not familiar with Lisp, don't be afraid, just finish the article and try to get the main idea. Be critical to anything you are reading, since the article is written more than 20 years ago, the environment has changed a lot since then. No worship.
+
+How to explain the idea to one of your friends whose major is not computer/software?
+Which contexts does "worse is better” suitable for? Which contexts doesn’t? Please give at least two cases for each situation.
+Please describe one of your own projects, and think whether “worse is better” is suitable for it.
+The deadline is Sep 26 23:59.
+
+Please write your answer into a text file and upload it to ftp://public.sjtu.edu.cn/upload/reading1/[your-student-id].txt, like 517021910000.txt
+
+Ftp username: followmoon
+Ftp password: public

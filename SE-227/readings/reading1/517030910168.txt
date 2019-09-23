@@ -1,0 +1,81 @@
+# 517030910168
+# 
+# ASSIGNMENT 1
+#
+
+Q1: How to explain the idea to one of your friends whose major is not computer/software?
+A1: I’ll explain it as sometimes an object with less correctness or completeness 
+    in some extent can be more fascinating and accepted than those who are more correct 
+    and complete but lacking simplicity.
+
+Q2: Which contexts does "worse is better” suitable for? Which contexts doesn’t? Please  
+    give at least two cases for each situation.
+A2: The suitable context are: the loss of correctness and completeness must not greatly 
+    affects the normal operations, or merely makes difference on rare corner cases. And
+    fixing the correctness and completeness will definitely result in the rising of
+    complexity.
+
+    Oppositely, when we can easily fixes an incorrectness and inconsistent without 
+    leading in much complexity, then we should certainly accept that fix.
+    Furthermore, if an incorrectness and incompleteness happens all the time and affects
+    users’ normal operations, we should never say “Well Worse is Better, so I’m not gonna
+    fix it!“, but we should fix that as soon as possible.
+
+    Example: C++ Original Author Bjarne Stroustrup personally hates the C style string 
+    formatting tricks. He thinks that using “%7.2f\n”-like format string will ruin C++’s 
+    format safety. So in C++, he uses another different syntax to implement the string
+    format output, it may looks like that:
+
+    ...
+    #include <iostream>
+    #include <iomanip>
+    ...
+    std::cout << std::setw(7) << std::setprecision(2) << f << std::endl;
+    ...
+
+    That did the same thing like ```printf(“%7.2f\n”, f);```. Truly it improves the type
+    safety and readability, however since it’s too complicated to code, seldom C++
+    programmers format string in this way. That’s the proof that fixing the correctness 
+    and completeness results in great rising of complexity.
+
+    Another Example: Earlier Python version programmers insist that “In order to keep the
+    consistency and correctness, those expressions with the same type could only generates 
+    one generic type as the result.
+
+    For example, they declares that 4 / 2 and 3 / 2 should all be integer type,
+    and 2 ** 16 and 2 ** 32 should be integer type (but 2 ** 32 already causes an overflow).
+
+    Later they think this rule has caused lots of confusing and inconvenience for Python
+    users. So they decided to abolish this rule and now calculating int / int might be an
+    float, and int ** int might be an long (automatically wide-conversion to avoid overflow).
+
+    That should be the proof of this piece: “The suitable context are: the loss of correctness
+    and completeness must not greatly affects the normal operations, or merely makes difference
+    on rare corner cases.”
+
+Q3: Please describe one of your own projects, and think whether “worse is better” is suitable for it.
+A3: I’ll take this project as example. This project could automatically detects the
+    Chinese character rhymes and prints it out, which is useful when you’re going to write
+    traditional Chinese poems.
+
+    Here’s a problem: where should I put those rhyme sheet data? Should I put them in a JSON file,
+    CSV file or design a custom data structure to store them?
+
+    Finally I decided to directly hard-encode them in a separate `.py` file. Here’s my reason why.
+
+    1. These data won’t frequently changes as they’re solidified hundreds years ago. So there won’t
+       be much modification on them.
+    2. Python source files won’t be compiled but stored as ASCII code itself. Fixing them are just 
+       so easy as saving them in other ways.
+    3. The key feature of this program isn’t related to this data structure. So this hard-encode won’t
+       deteriorate the users’ experience at all.
+
+    According to the reasons above, using the `hard-encode` worse way:
+
+    1. Will not affect user experience at all.
+    2. Will not add much difficulty in program maintaining works.
+    3. Will save much time in data storing & reading meaningless works.
+
+    So I should choose the `worse` way since it’s the better way practically.
+
+    The original source code can be found here [https://github.com/yuetsin/ping-shui-rhymes].
