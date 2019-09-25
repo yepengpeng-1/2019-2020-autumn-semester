@@ -1,1 +1,27 @@
-./start.sh: line 11: ./yfs_client: No such file or directory
+	im: get_inode 1
+	im: inode not exist
+	im: put_inode 1
+FUSE library version: 2.9.9
+unique: 2, opcode: INIT (26), nodeid: 0, insize: 56, pid: 0
+INIT: 7.28
+flags=0x00fffffb
+max_readahead=0x00020000
+   INIT: 7.19
+   flags=0x00000000
+   max_readahead=0x00020000
+   max_write=0x00020000
+   max_background=0
+   congestion_threshold=0
+   unique: 2, success, outsize: 40
+unique: 4, opcode: ACCESS (34), nodeid: 1, insize: 48, pid: 2077
+   unique: 4, error: -38 (Function not implemented), outsize: 16
+unique: 6, opcode: LOOKUP (1), nodeid: 1, insize: 47, pid: 2077
+   unique: 6, error: -2 (No such file or directory), outsize: 16
+unique: 8, opcode: LOOKUP (1), nodeid: 1, insize: 52, pid: 2077
+   unique: 8, error: -2 (No such file or directory), outsize: 16
+unique: 10, opcode: LOOKUP (1), nodeid: 1, insize: 98, pid: 8641
+   unique: 10, error: -2 (No such file or directory), outsize: 16
+unique: 12, opcode: CREATE (35), nodeid: 1, insize: 114, pid: 8641
+extent_server: getattr 94373301220144
+	im: get_inode 2132308784
+	im: inum out of range

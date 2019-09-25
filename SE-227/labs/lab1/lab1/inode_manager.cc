@@ -1,5 +1,7 @@
 #include "inode_manager.h"
 #include <cstring>
+#include <iostream>
+
 // disk layer -----------------------------------------
 
 disk::disk() {
@@ -18,12 +20,25 @@ void disk::write_block( blockid_t id, const char* buf ) {
 
 // Allocate a free disk block.
 blockid_t block_manager::alloc_block() {
-    /*
-     * your code goes here.
-     * note: you should mark the corresponding bit in block bitmap when alloc.
-     * you need to think about which block you can start to be allocated.
-     */
+    for ( uint32_t i = IBLOCK( 0, sb.nblocks ); i < BLOCK_SIZE; ++i ) {
+        auto found_iter = using_blocks.find( i );
+        if ( found_iter == using_blocks.end() ) {
+            // Unoccupied here
+            using_blocks.insert( { i, 1 } );
 
+            char buf[ BLOCK_SIZE ];
+            read_block( BBLOCK( i ), buf );
+
+            uint32_t block_inner_id = i % BPB;
+            short    block_offset   = ( short )block_inner_id % 8;
+            buf[ block_inner_id ] |= ( short( 1 ) << ( 7 - block_offset ) );
+
+            write_block( BBLOCK( i ), buf );
+            return i;
+        }
+    }
+    std::cerr << "failed to alloc more blocks" << std::endl;
+    assert( false );
     return 0;
 }
 
@@ -32,8 +47,21 @@ void block_manager::free_block( uint32_t id ) {
      * your code goes here.
      * note: you should unmark the corresponding bit in the block bitmap when free.
      */
+    auto remove_iter = using_blocks.find( id );
+    if ( remove_iter != using_blocks.end() ) {
+        using_blocks.erase( remove_iter );
 
-    return;
+        char buf[ BLOCK_SIZE ];
+        read_block( BBLOCK( id ), buf );
+
+        uint32_t block_inner_id = id % BPB;
+        short    block_offset   = ( short )block_inner_id % 8;
+        buf[ block_inner_id ] &= ~( short( 1 ) << ( 7 - block_offset ) );
+
+        write_block( BBLOCK( id ), buf );
+
+        return;
+    }
 }
 
 // The layout of disk should be like this:
@@ -66,11 +94,33 @@ inode_manager::inode_manager() {
     }
 }
 
+inode_manager::~inode_manager() {
+    delete bm;
+}
+
 /* Create a new file.
  * Return its inum. */
 uint32_t inode_manager::alloc_inode( uint32_t type ) {
+    inode pinode;
+    pinode.type        = type;
+    pinode.size        = 0;
+    pinode.ctime       = ( unsigned int )time( NULL );
+    pinode.mtime       = ( unsigned int )time( NULL );
+    pinode.atime       = ( unsigned int )time( NULL );
+    pinode.blocks[ 0 ] = 0;
 
-    return 1;
+    // Finding a block to put inode in
+
+    for ( uint32_t inum = 1; inum < INODE_NUM; ++inum ) {
+        if ( get_inode( inum ) == NULL ) {
+            // gotcha!
+            put_inode( inum, &pinode );
+            return inum;
+        }
+    }
+    std::cerr << "failed to alloc inode." << std::endl;
+    assert( false );
+    return -1;
 }
 
 void inode_manager::free_inode( uint32_t inum ) {
@@ -152,12 +202,14 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
 }
 
 void inode_manager::getattr( uint32_t inum, extent_protocol::attr& a ) {
-    /*
-     * your code goes here.
-     * note: get the attributes of inode inum.
-     * you can refer to "struct attr" in extent_protocol.h
-     */
 
+    auto pnode = get_inode( inum );
+    // pnode->atime = ( uint32_t )time( NULL );
+    a.type  = ( uint32_t )pnode->type;
+    a.atime = pnode->atime;
+    a.ctime = pnode->ctime;
+    a.mtime = pnode->mtime;
+    a.size  = pnode->size;
     return;
 }
 

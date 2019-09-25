@@ -85,6 +85,7 @@ private:
 
 public:
     inode_manager();
+    ~inode_manager();
     uint32_t alloc_inode( uint32_t type );
     void     free_inode( uint32_t inum );
     void     read_file( uint32_t inum, char** buf, int* size );
