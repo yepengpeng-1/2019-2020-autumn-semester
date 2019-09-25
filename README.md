@@ -49,7 +49,7 @@ done        09/17 12:00 编译原理          lab #1
 
 ### 选修课
 
-#### PO-903
+#### [PO-903](https://github.com/yuetsin/2019-2020-autumn-semester/tree/master/PO-903)
 
 清洁能源技术：原理与应用，闵行东下院212，房建华
 
