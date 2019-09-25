@@ -10,6 +10,13 @@
 #define BLOCK_SIZE 512
 #define BLOCK_NUM ( DISK_SIZE / BLOCK_SIZE )
 
+#define DEBUG
+
+#ifdef DEBUG
+#define printlog printf
+#else
+#define printlog( ... )
+#endif
 typedef uint32_t blockid_t;
 
 // disk layer -----------------------------------------

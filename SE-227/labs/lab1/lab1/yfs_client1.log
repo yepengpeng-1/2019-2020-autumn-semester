@@ -19,9 +19,9 @@ unique: 6, opcode: LOOKUP (1), nodeid: 1, insize: 47, pid: 2077
    unique: 6, error: -2 (No such file or directory), outsize: 16
 unique: 8, opcode: LOOKUP (1), nodeid: 1, insize: 52, pid: 2077
    unique: 8, error: -2 (No such file or directory), outsize: 16
-unique: 10, opcode: LOOKUP (1), nodeid: 1, insize: 98, pid: 8641
+unique: 10, opcode: LOOKUP (1), nodeid: 1, insize: 99, pid: 10931
    unique: 10, error: -2 (No such file or directory), outsize: 16
-unique: 12, opcode: CREATE (35), nodeid: 1, insize: 114, pid: 8641
-extent_server: getattr 94373301220144
-	im: get_inode 2132308784
+unique: 12, opcode: CREATE (35), nodeid: 1, insize: 115, pid: 10931
+extent_server: getattr 94457020732208
+	im: get_inode 2099958576
 	im: inum out of range
