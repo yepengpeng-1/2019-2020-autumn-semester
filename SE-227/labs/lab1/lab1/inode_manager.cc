@@ -49,6 +49,8 @@ void block_manager::free_block( uint32_t id ) {
      * your code goes here.
      * note: you should unmark the corresponding bit in the block bitmap when free.
      */
+
+    printlog( "trying to free block #%u\n", id );
     auto remove_iter = using_blocks.find( id );
     if ( remove_iter != using_blocks.end() ) {
         using_blocks.erase( remove_iter );
@@ -61,7 +63,7 @@ void block_manager::free_block( uint32_t id ) {
         buf[ block_inner_id ] &= ~( short( 1 ) << ( 7 - block_offset ) );
 
         write_block( BBLOCK( id ), buf );
-
+        printlog( "freed block #%d\n", id );
         return;
     }
 }
@@ -137,8 +139,13 @@ void inode_manager::free_inode( uint32_t inum ) {
      * note: you need to check if the inode is already a freed one;
      * if not, clear it, and remember to write back to disk.
      */
-
-    return;
+    auto pinode = get_inode( inum );
+    if ( pinode != NULL ) {
+        char blushbits[ sizeof( inode ) ];
+        memset( blushbits, 0, sizeof( inode ) );
+        put_inode( inum, ( inode* )blushbits );
+    }
+    delete pinode;
 }
 
 /* Return an inode structure by inum, NULL otherwise.
@@ -202,6 +209,7 @@ void inode_manager::read_file( uint32_t inum, char** buf_out, int* size ) {
     auto pinode = get_inode( inum );
     if ( pinode == NULL ) {
         std::cerr << "bad inode num" << std::endl;
+        delete pinode;
         return;
     }
 
@@ -228,6 +236,7 @@ void inode_manager::read_file( uint32_t inum, char** buf_out, int* size ) {
             ++counter;
         }
         put_inode( inum, pinode );
+        delete pinode;
         return;
     }
 
@@ -259,6 +268,7 @@ void inode_manager::read_file( uint32_t inum, char** buf_out, int* size ) {
         ++counter;
     }
     put_inode( inum, pinode );
+    delete pinode;
     return;
 }
 
@@ -425,6 +435,38 @@ void inode_manager::remove_file( uint32_t inum ) {
      * your code goes here
      * note: you need to consider about both the data block and inode of the file
      */
+    printlog( "oh... you wanna remove file #%d?\n", inum );
+    auto pinode = get_inode( inum );
+    if ( pinode == NULL ) {
+        std::cerr << "no inode found" << std::endl;
+        return;
+    }
+    auto block_array = pinode->blocks;
 
-    return;
+    size_t freed_bytes = 0;
+    for ( size_t i = 0; i < NDIRECT + 1; ++i ) {
+        if ( freed_bytes >= pinode->size ) {
+            break;
+        }
+        else if ( i == NDIRECT ) {
+            // free indirect blocks
+            char buf[ BLOCK_SIZE ];
+            bm->read_block( block_array[ i ], buf );
+            bm->free_block( block_array[ i ] );
+            auto indirect_blocks = ( blockid_t* )buf;
+            for ( size_t j = 0; j < BLOCK_SIZE / sizeof( blockid_t ); j++ ) {
+                if ( indirect_blocks[ j ] == 0 ) {
+                    break;
+                }
+                bm->free_block( indirect_blocks[ j ] );
+                freed_bytes += BLOCK_SIZE;
+            }
+        }
+        bm->free_block( block_array[ i ] );
+        freed_bytes += BLOCK_SIZE;
+    }
+    // take myself away
+    bm->free_block( IBLOCK( inum, bm->sb.nblocks ) );
+    free_inode( inum );
+    delete pinode;
 }
