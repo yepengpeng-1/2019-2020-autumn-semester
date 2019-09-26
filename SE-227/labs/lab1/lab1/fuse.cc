@@ -339,7 +339,7 @@ void fuseserver_readdir( fuse_req_t req, fuse_ino_t ino, size_t size, off_t off,
     std::list< yfs_client::dirent > entries;
     yfs->readdir( inum, entries );
     for ( std::list< yfs_client::dirent >::iterator it = entries.begin(); it != entries.end(); ++it ) {
-        dirbuf_add( &b, it->name, ( fuse_ino_t )it->inum );
+        dirbuf_add( &b, it->name.c_str(), ( fuse_ino_t )it->inum );
     }
 
     reply_buf_limited( req, b.p, b.size, off, size );

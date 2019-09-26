@@ -25,18 +25,7 @@ blockid_t block_manager::alloc_block() {
     for ( uint32_t i = IBLOCK( INODE_NUM, sb.nblocks ) + 1; i < BLOCK_NUM; ++i ) {
         auto found_iter = using_blocks.find( i );
         if ( found_iter == using_blocks.end() ) {
-            // printlog( "block check matched #%d\n", i );
-            // Unoccupied here
             using_blocks.insert( { i, 1 } );
-
-            // char buf[ BLOCK_SIZE ];
-            // read_block( BBLOCK( i ), buf );
-
-            // uint32_t block_inner_id = i % BPB;
-            // short    block_offset   = ( short )block_inner_id % 8;
-            // buf[ block_inner_id ] |= ( short( 1 ) << ( 7 - block_offset ) );
-
-            // write_block( BBLOCK( i ), buf );
             return i;
         }
     }
@@ -55,16 +44,6 @@ void block_manager::free_block( uint32_t id ) {
     auto remove_iter = using_blocks.find( id );
     if ( remove_iter != using_blocks.end() ) {
         using_blocks.erase( remove_iter );
-
-        // char buf[ BLOCK_SIZE ];
-        // read_block( BBLOCK( id ), buf );
-
-        // uint32_t block_inner_id = id % BPB;
-        // short    block_offset   = ( short )block_inner_id % 8;
-        // buf[ block_inner_id ] &= ~( short( 1 ) << ( 7 - block_offset ) );
-
-        // write_block( BBLOCK( id ), buf );
-        // // printlog( "freed block #%d\n", id );
         return;
     }
 }
@@ -259,15 +238,17 @@ void freeLastBlock( inode_t* pinode, block_manager* bm, unsigned int currentBloc
     // auto lastItem   = usedBlock[ usedBlock.size() - 1 ];
     if ( blockCount <= NDIRECT ) {
         bm->free_block( pinode->blocks[ blockCount - 1 ] );
+        pinode->blocks[ blockCount - 1 ] = 0;
     }
     else if ( blockCount > NDIRECT ) {
         char buffer[ BLOCK_SIZE ];
         bm->read_block( pinode->blocks[ NDIRECT ], buffer );
         auto toremove_block_id = ( ( blockid_t* )buffer )[ blockCount - NDIRECT - 1 ];
         bm->free_block( toremove_block_id );
-
+        pinode->blocks[ toremove_block_id ] = 0;
         if ( blockCount == NDIRECT + 1 ) {
             bm->free_block( pinode->blocks[ NDIRECT ] );
+            pinode->blocks[ NDIRECT ] = 0;
         }
     }
 }
@@ -322,15 +303,15 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
         // needless to do anything
     }
     else if ( current_block_count > new_block_count ) {
-        for ( size_t i = current_block_count; i < new_block_count; i++ ) {
-            printlog( "inode_manager::write_file: freed one block\n" );
-            freeLastBlock( pinode, bm, current_block_count + i );
+        for ( size_t i = current_block_count; i > new_block_count; i-- ) {
+            printlog( "inode_manager::write_file: going to free one block with current: %u\n", i );
+            freeLastBlock( pinode, bm, i );
         }
     }
     else if ( current_block_count < new_block_count ) {
         for ( size_t i = current_block_count; i < new_block_count; i++ ) {
-            printlog( "inode_manager::write_file: allocated one block\n" );
-            to_write_blocks.push_back( addOneBlock( pinode, bm, current_block_count + i ) );
+            printlog( "inode_manager::write_file: going to allocate one block with current: %u\n", i );
+            to_write_blocks.push_back( addOneBlock( pinode, bm, i ) );
         }
     }
     unsigned long written_bytes = 0;
@@ -357,7 +338,8 @@ void inode_manager::getattr( uint32_t inum, extent_protocol::attr& a ) {
     a.ctime = pnode->ctime;
     a.mtime = pnode->mtime;
     a.size  = pnode->size;
-    printlog( "\n=== getattr ===\n\n\tinode: %d\n\ttype: %d\n\tatime: %u\n\tctime: %u\n\tmtime: %u\n\tsize: %u\n\n", inum, a.type, a.atime, a.ctime, a.mtime, a.size );
+
+    // printlog( "\n=== getattr ===\n\n\tinode: %d\n\ttype: %d\n\tatime: %u\n\tctime: %u\n\tmtime: %u\n\tsize: %u\n\n", inum, a.type, a.atime, a.ctime, a.mtime, a.size );
 
     // printlog( "blocks: \n" );
     for ( size_t i = 0; i < 100; i++ ) {

@@ -3,60 +3,42 @@
 #include "extent_client.h"
 #include <fcntl.h>
 #include <iostream>
-#include <list>
 #include <sstream>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#if 1
-#define log printf
-#else
-#define log( ... )
-#endif
+int yfs_client::dir_app( inum parent, const char* name, inum ino ) {
+    int r = OK;
+
+    struct c_dirent c_ent;
+    std::string     dir_buf;
+    if ( ec->get( parent, dir_buf ) != extent_protocol::OK ) {
+        r = IOERR;
+        goto release;
+    }
+
+    c_ent.inum = ino;
+    memcpy( c_ent.name, name, FILENAME_SIZE );
+    dir_buf.append( ( const char* )( &c_ent ), sizeof( struct c_dirent ) );
+
+    if ( ec->put( parent, dir_buf ) != extent_protocol::OK ) {
+        r = IOERR;
+        goto release;
+    }
+
+release:
+    return r;
+}
 
 yfs_client::yfs_client() {
-    log( "yfs::preparing init\n" );
-    inum eid = 1;
-    ec       = new extent_client();
-    // ec->create( extent_protocol::T_DIR, eid );
-
-    fdObject root;
-    root.iNum = eid;
-    // root.literal_name           = "";
-    root.metaData.dirInfo.atime = ( unsigned long )time( NULL );
-    root.metaData.dirInfo.ctime = ( unsigned long )time( NULL );
-    root.metaData.dirInfo.mtime = ( unsigned long )time( NULL );
-    root.type                   = extent_protocol::T_DIR;
-    memset( root.contentData.dirEnts, 0, sizeof( root.contentData.dirEnts ) );
-
-    std::string buf;
-    buf.resize( sizeof( fdObject ) );
-    buf.assign( ( char* )&root, sizeof( fdObject ) );
-    if ( ec->put( eid, buf ) != extent_protocol::OK )
-        printf( "error init root dir\n" );  // XYB: init root dir
+    ec = new extent_client();
 }
 
 yfs_client::yfs_client( std::string extent_dst, std::string lock_dst ) {
-    log( "yfs::preparing init\n" );
-    inum eid = 1;
-    ec       = new extent_client();
-    // ec->create( extent_protocol::T_DIR, eid );
-
-    fdObject root;
-    root.iNum = eid;
-    // root.literal_name           = "";
-    root.metaData.dirInfo.atime = ( unsigned long )time( NULL );
-    root.metaData.dirInfo.ctime = ( unsigned long )time( NULL );
-    root.metaData.dirInfo.mtime = ( unsigned long )time( NULL );
-    root.type                   = extent_protocol::T_DIR;
-    memset( root.contentData.dirEnts, 0, sizeof( root.contentData.dirEnts ) );
-
-    std::string buf;
-    buf.resize( sizeof( fdObject ) );
-    buf.assign( ( char* )&root, sizeof( fdObject ) );
-    if ( ec->put( eid, buf ) != extent_protocol::OK )
+    ec = new extent_client();
+    if ( ec->put( 1, "" ) != extent_protocol::OK )
         printf( "error init root dir\n" );  // XYB: init root dir
 }
 
@@ -96,7 +78,20 @@ bool yfs_client::isfile( inum inum ) {
 
 bool yfs_client::isdir( inum inum ) {
     // Oops! is this still correct when you implement symlink?
-    return !isfile( inum );
+
+    // return !isfile(inum);
+    extent_protocol::attr a;
+    if ( ec->getattr( inum, a ) != extent_protocol::OK ) {
+        printf( "error getting attr\n" );
+        return false;
+    }
+
+    if ( a.type == extent_protocol::T_DIR ) {
+        printf( "isfile: %lld is a dir\n", inum );
+        return true;
+    }
+    printf( "isfile: %lld is not a dir\n", inum );
+    return false;
 }
 
 int yfs_client::getfile( inum inum, fileinfo& fin ) {
@@ -106,7 +101,7 @@ int yfs_client::getfile( inum inum, fileinfo& fin ) {
     extent_protocol::attr a;
     if ( ec->getattr( inum, a ) != extent_protocol::OK ) {
         r = IOERR;
-        goto gelfile_release;
+        goto release;
     }
 
     fin.atime = a.atime;
@@ -115,7 +110,7 @@ int yfs_client::getfile( inum inum, fileinfo& fin ) {
     fin.size  = a.size;
     printf( "getfile %016llx -> sz %llu\n", inum, fin.size );
 
-gelfile_release:
+release:
     return r;
 }
 
@@ -126,13 +121,13 @@ int yfs_client::getdir( inum inum, dirinfo& din ) {
     extent_protocol::attr a;
     if ( ec->getattr( inum, a ) != extent_protocol::OK ) {
         r = IOERR;
-        goto getdir_release;
+        goto release;
     }
     din.atime = a.atime;
     din.mtime = a.mtime;
     din.ctime = a.ctime;
 
-getdir_release:
+release:
     return r;
 }
 
@@ -154,211 +149,152 @@ int yfs_client::setattr( inum ino, size_t size ) {
      * note: get the content of inode ino, and modify its content
      * according to the size (<, =, or >) content length.
      */
+    assert( size >= 0 );
+    std::string buf;
 
+    if ( ec->get( ino, buf ) != extent_protocol::OK ) {
+        // r = IOERR;
+        goto release;
+    }
+
+    buf.resize( size );
+
+    if ( ec->put( ino, buf ) != extent_protocol::OK ) {
+        // r = IOERR;
+        goto release;
+    }
+
+release:
     return r;
 }
 
 int yfs_client::create( inum parent, const char* name, mode_t mode, inum& ino_out ) {
-    if ( strlen( name ) >= FILE_NAME_MAX ) {
-        return IOERR;
+    int r = OK;
+
+    /*
+     * your code goes here.
+     * note: lookup is what you need to check if file exist;
+     * after create file or dir, you must remember to modify the parent
+     * infomation.
+     */
+    assert( sizeof( name ) < FILENAME_SIZE );
+
+    bool found_lookup;
+    if ( ( lookup( parent, name, found_lookup, ino_out ) != extent_protocol::OK ) || found_lookup ) {
+        r = IOERR;
+        goto release;
     }
 
-    log( "\n\nyfs::create called. \n\tparent: %llu\n\tname: %s\n", parent, name );
-    int         r = OK;
-    std::string strbuf;
-    bool        found = false;
-    char*       namebuf;
-
-    r = lookup( parent, name, found, ino_out );
-    if ( found ) {
-        r = EXIST;
+    if ( ec->create( extent_protocol::T_FILE, ino_out ) != extent_protocol::OK ) {
+        r = IOERR;
+        goto release;
     }
 
-    if ( r != OK ) {
-        goto create_release;
+    if ( dir_app( parent, name, ino_out ) != extent_protocol::OK ) {
+        r = IOERR;
+        goto release;
     }
 
-    unsigned long long gotten_eid;
-    r = ec->create( extent_protocol::T_FILE, gotten_eid );
-    if ( r != OK ) {
-        goto create_release;
-    }
-    // inum     iNum = findNextUsableInum();
-    fdObject fd;
-    // fd.eId  = gotten_eid;
-    fd.iNum = gotten_eid;
-    ino_out = gotten_eid;
-    strncpy( fd.literal_name, name, FILE_NAME_MAX );
-    fd.type                    = extent_protocol::T_FILE;
-    fd.metaData.fileInfo.atime = ( unsigned long )time( NULL );
-    fd.metaData.fileInfo.ctime = ( unsigned long )time( NULL );
-    fd.metaData.fileInfo.mtime = ( unsigned long )time( NULL );
-    fd.metaData.fileInfo.size  = sizeof( fdObject );
-
-    strbuf.resize( sizeof( fd ) );
-    strbuf.assign( ( const char* )&fd, sizeof( fd ) );
-
-    r = ec->put( fd.iNum, strbuf );
-    // TODO: add file to its parent directory's dirent
-    namebuf = ( char* )malloc( FILE_NAME_MAX );
-    strncpy( namebuf, name, FILE_NAME_MAX );
-
-    log( "yfs::create going to call add child. \n\tparent: %llu\n\tname_buf: %s\n", parent, name );
-    add_child( parent, gotten_eid, namebuf );
-create_release:
+release:
     return r;
 }
 
 int yfs_client::mkdir( inum parent, const char* name, mode_t mode, inum& ino_out ) {
-    if ( strlen( name ) >= FILE_NAME_MAX ) {
-        return IOERR;
+    int r = OK;
+
+    /*
+     * your code goes here.
+     * note: lookup is what you need to check if directory exist;
+     * after create file or dir, you must remember to modify the parent
+     * infomation.
+     */
+    assert( sizeof( name ) < FILENAME_SIZE );
+
+    bool found_lookup;
+    if ( lookup( parent, name, found_lookup, ino_out ) != extent_protocol::OK ) {
+        r = IOERR;
+        goto release;
     }
-    log( "\n\nyfs::mkdir called. \n\tparent: %llu\n\tname: %s\n", parent, name );
-    int         r = OK;
-    std::string strbuf;
-    bool        found = false;
-    char*       namebuf;
-    r = lookup( parent, name, found, ino_out );
-    if ( found ) {
+
+    if ( found_lookup ) {
         r = EXIST;
+        goto release;
     }
 
-    if ( r != OK ) {
-        goto mkdir_release;
+    if ( ec->create( extent_protocol::T_DIR, ino_out ) != extent_protocol::OK ) {
+        r = IOERR;
+        goto release;
     }
 
-    unsigned long long gotten_eid;
-    r = ec->create( extent_protocol::T_DIR, gotten_eid );
-    if ( r != OK ) {
-        goto mkdir_release;
-    }
-    // inum     iNum = findNextUsableInum();
-    fdObject fd;
-    // fd.eId  = gotten_eid;
-    fd.iNum = gotten_eid;
-    ino_out = gotten_eid;
-    strncpy( fd.literal_name, name, FILE_NAME_MAX );
-    fd.type = extent_protocol::T_DIR;
-    memset( fd.contentData.dirEnts, 0, sizeof( fd.contentData.dirEnts ) );
-
-    fd.metaData.dirInfo.atime = ( unsigned long )time( NULL );
-    fd.metaData.dirInfo.ctime = ( unsigned long )time( NULL );
-    fd.metaData.dirInfo.mtime = ( unsigned long )time( NULL );
-
-    strbuf.resize( sizeof( fd ) );
-    strbuf.assign( ( const char* )&fd, sizeof( fd ) );
-    log( "yfs::mkdir going to ec->put\n" );
-    r = ec->put( fd.iNum, strbuf );
-    log( "yfs::mkdir completed ec->put. rc: %d\n", r );
-    // TODO: add file to its parent directory's dirent
-
-    namebuf = ( char* )malloc( FILE_NAME_MAX );
-    strncpy( namebuf, name, FILE_NAME_MAX );
-    add_child( parent, gotten_eid, namebuf );
-
-mkdir_release:
-    return r;
-}
-
-int yfs_client::add_child( inum parent, inum child, const char* child_name ) {
-
-    log( "yfs::add_child called. \n\tparent: %llu\n\tchild: %llu\n\tchild_name: %s\n", parent, child, child_name );
-    int         r = OK;
-    std::string strbuf;
-    size_t      counter = 0;
-    strbuf.resize( sizeof( fdObject ) );
-
-    char objbuf[ sizeof( fdObject ) ];
-
-    r = ec->get( parent, strbuf );
-    log( "yfs::add_child: ec->get, result: %d\n", r );
-
-    if ( r != OK ) {
-        return r;
-    }
-    memcpy( objbuf, strbuf.c_str(), sizeof( fdObject ) );
-
-    auto pfdObject = ( fdObject* )objbuf;
-    auto entry     = pfdObject->contentData.dirEnts;
-
-    while ( strlen( entry->name ) > 0 && counter < MAX_FILE_COUNT ) {
-        log( "non-empty entry #%llu name: %s\n", entry->inum, entry->name );
-        ++entry;
-        ++counter;
-    }
-    if ( counter == MAX_FILE_COUNT ) {
-        log( "yfs::add_child: file count limit exceeded\n" );
-        return IOERR;
+    if ( dir_app( parent, name, ino_out ) != extent_protocol::OK ) {
+        r = IOERR;
+        goto release;
     }
 
-    entry->inum = child;
-    strncpy( entry->name, child_name, FILE_NAME_MAX );
-    strbuf.assign( objbuf, sizeof( fdObject ) );
-
-    log( "there ok\n" );
-    r = ec->put( parent, strbuf );
-    log( "yfs::add_child: ec->put, result: %d\n", r );
+release:
     return r;
 }
 
 int yfs_client::lookup( inum parent, const char* name, bool& found, inum& ino_out ) {
-    log( "yfs::lookup called. \n\tparent: %llu\n\tname: %s\n", parent, name );
     int r = OK;
 
-    std::string strbuf;
-    strbuf.resize( sizeof( fdObject ) );
-    r = ec->get( parent, strbuf );
-    if ( r != OK ) {
-        return r;
+    /*
+     * your code goes here.
+     * note: lookup file from parent dir according to name;
+     * you should design the format of directory content.
+     */
+    assert( name );
+
+    std::list< dirent > ent_list;
+    if ( readdir( parent, ent_list ) != extent_protocol::OK ) {
+        r = IOERR;
+        goto release;
     }
 
-    auto pdir = ( fdObject* )strbuf.c_str();
-    if ( pdir->type != extent_protocol::T_DIR ) {
-        return IOERR;
-    }
-
-    auto entries   = pdir->contentData.dirEnts;
-    found          = false;
-    size_t counter = 0;
-    while ( strlen( entries->name ) > 0 && counter < MAX_FILE_COUNT ) {
-
-        log( "yfs::lookup comparing %s and %s...\n", entries->name, name );
-        if ( strncmp( name, entries->name, FILE_NAME_MAX ) == 0 ) {
-            found = true;
-            r     = OK;
-            log( "yfs::lookup: found.\n" );
-            return r;
+    found = false;
+    for ( std::list< dirent >::iterator it = ent_list.begin(); it != ent_list.end(); ++it ) {
+        if ( strcmp( it->name.c_str(), name ) == 0 ) {
+            found   = true;
+            ino_out = it->inum;
+            break;
         }
-        ++entries;
-        ++counter;
     }
-    log( "yfs::lookup: not found.\n" );
+
+release:
     return r;
 }
 
 int yfs_client::readdir( inum dir, std::list< dirent >& list ) {
-    log( "yfs::readdir called. \n\tdir: %llu\n", dir );
     int r = OK;
 
-    std::string strbuf;
-    strbuf.resize( sizeof( fdObject ) );
+    /*
+     * your code goes here.
+     * note: you should parse the dirctory content using your defined format,
+     * and push the dirents to the list.
+     */
+    struct c_dirent* c_entp;
+    struct dirent    ent;
+    std::string      dir_buf;
+    int              cnt;
 
-    r = ec->get( dir, strbuf );
-
-    if ( r != OK ) {
-        return r;
+    if ( ec->get( dir, dir_buf ) != extent_protocol::OK ) {
+        r = IOERR;
+        goto release;
     }
 
-    auto pfdObject = ( fdObject* )strbuf.c_str();
-    auto entry     = pfdObject->contentData.dirEnts;
+    assert( ( dir_buf.size() % sizeof( struct c_dirent ) ) == 0 );
+    cnt    = dir_buf.size() / sizeof( struct c_dirent );
+    c_entp = ( struct c_dirent* )( dir_buf.c_str() );
 
-    size_t counter = 0;
-    while ( entry->name != NULL && counter < MAX_FILE_COUNT ) {
-        list.push_back( *entry );
-        ++entry;
-        ++counter;
+    while ( cnt > 0 ) {
+        ent.inum = c_entp->inum;
+        ent.name.assign( c_entp->name );
+        list.push_back( ent );
+        cnt--;
+        c_entp++;
     }
 
+release:
     return r;
 }
 
@@ -369,7 +305,19 @@ int yfs_client::read( inum ino, size_t size, off_t off, std::string& data ) {
      * your code goes here.
      * note: read using ec->get().
      */
+    assert( size >= 0 );
+    std::string buf;
 
+    ec->get( ino, buf );
+
+    if ( ( unsigned int )off >= buf.size() ) {
+        data.assign( "" );
+        goto release;
+    }
+
+    data = buf.substr( off, size );
+
+release:
     return r;
 }
 
@@ -381,6 +329,25 @@ int yfs_client::write( inum ino, size_t size, off_t off, const char* data, size_
      * note: write using ec->put().
      * when off > length of original file, fill the holes with '\0'.
      */
+    std::string buf;
+    std::string content;
+
+    ec->get( ino, buf );
+
+    content.assign( data, size );
+
+    if ( ( unsigned int )off <= buf.size() ) {
+        buf.replace( off, size, content );
+        bytes_written = size;
+    }
+    else {
+        size_t old_size = buf.size();
+        buf.resize( size + off, '\0' );
+        buf.replace( off, size, content );
+        bytes_written = size + off - old_size;
+    }
+
+    ec->put( ino, buf );
 
     return r;
 }
@@ -393,6 +360,49 @@ int yfs_client::unlink( inum parent, const char* name ) {
      * note: you should remove the file using ec->remove,
      * and update the parent directory content.
      */
+    assert( name );
 
+    std::list< dirent >   ent_list;
+    bool                  found = false;
+    inum                  ino;
+    std::string           dir_buf;
+    int                   idx;
+    std::string::iterator it;
+    // find entry
+    if ( readdir( parent, ent_list ) != extent_protocol::OK ) {
+        r = IOERR;
+        goto release;
+    }
+
+    idx = 0;
+    for ( std::list< dirent >::iterator it = ent_list.begin(); it != ent_list.end(); ++it ) {
+        if ( strcmp( it->name.c_str(), name ) == 0 ) {
+            found = true;
+            ino   = it->inum;
+            break;
+        }
+        idx++;
+    }
+
+    if ( !found ) {
+        r = NOENT;
+        goto release;
+    }
+
+    // update directory
+    if ( ec->get( parent, dir_buf ) != extent_protocol::OK ) {
+        r = IOERR;
+        goto release;
+    }
+
+    it = dir_buf.begin() + idx * sizeof( struct c_dirent );
+    dir_buf.erase( it, it + sizeof( struct c_dirent ) );
+
+    if ( ( ec->remove( ino ) != extent_protocol::OK ) || ( ec->put( parent, dir_buf ) != extent_protocol::OK ) ) {
+        r = IOERR;
+        goto release;
+    }
+
+release:
     return r;
 }

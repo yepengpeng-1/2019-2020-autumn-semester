@@ -4,11 +4,9 @@
 #include <string>
 //#include "yfs_protocol.h"
 #include "extent_client.h"
-#include <climits>
 #include <vector>
 
-#define MAX_FILE_COUNT 256
-#define FILE_NAME_MAX 160
+#define FILENAME_SIZE 128
 
 class yfs_client {
     extent_client* ec;
@@ -25,34 +23,23 @@ public:
         unsigned long      ctime;
     };
     struct dirinfo {
-        unsigned long long __alignment__;
-        unsigned long      atime;
-        unsigned long      mtime;
-        unsigned long      ctime;
+        unsigned long atime;
+        unsigned long mtime;
+        unsigned long ctime;
     };
     struct dirent {
-        char             name[ FILE_NAME_MAX ];
+        std::string      name;
         yfs_client::inum inum;
     };
-
-    struct fdObject {
-        unsigned long long iNum;
-        // unsigned long long     eId;
-        char                   literal_name[ FILE_NAME_MAX ];
-        extent_protocol::types type;
-        union metadata {
-            yfs_client::fileinfo fileInfo;
-            yfs_client::dirinfo  dirInfo;
-        } metaData;
-        union contentdata {
-            yfs_client::dirent dirEnts[ MAX_FILE_COUNT ];
-            char               data[ sizeof( yfs_client::dirent ) * MAX_FILE_COUNT ];
-        } contentData;
+    struct c_dirent {
+        char             name[ FILENAME_SIZE ];
+        yfs_client::inum inum;
     };
 
 private:
     static std::string filename( inum );
     static inum        n2i( std::string );
+    int                dir_app( inum, const char*, inum );
 
 public:
     yfs_client();
@@ -72,8 +59,10 @@ public:
     int read( inum, size_t, off_t, std::string& );
     int unlink( inum, const char* );
     int mkdir( inum, const char*, mode_t, inum& );
-    int add_child( inum, inum, const char* );
+
     /** you may need to add symbolic link related methods here.*/
+    int symlink( inum parent, const char* name, const char* link, inum& ino_out );
+    int readlink( inum ino, std::string& data );
 };
 
 #endif
