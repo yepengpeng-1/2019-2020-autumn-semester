@@ -10,11 +10,11 @@ disk::disk() {
 }
 
 void disk::read_block( blockid_t id, char* buf ) {
-    std::memcpy( buf, blocks[ id ], BLOCK_SIZE );
+    memcpy( buf, blocks[ id ], BLOCK_SIZE );
 }
 
 void disk::write_block( blockid_t id, const char* buf ) {
-    std::memcpy( blocks[ id ], buf, BLOCK_SIZE );
+    memcpy( blocks[ id ], buf, BLOCK_SIZE );
 }
 
 // block layer -----------------------------------------
@@ -80,10 +80,12 @@ block_manager::block_manager() {
 }
 
 void block_manager::read_block( uint32_t id, char* buf ) {
+    printf( "\t\tbm::read block %u\n", id );
     d->read_block( id, buf );
 }
 
 void block_manager::write_block( uint32_t id, const char* buf ) {
+    printf( "\t\tbm::write block %u\n", id );
     d->write_block( id, buf );
 }
 
@@ -164,7 +166,7 @@ struct inode* inode_manager::get_inode( uint32_t inum ) {
     bm->read_block( IBLOCK( inum, bm->sb.nblocks ), buf );
     // printf("%s:%d\n", __FILE__, __LINE__);
 
-    ino_disk = ( struct inode* )buf + inum % IPB;
+    ino_disk = ( struct inode* )buf;
     if ( ino_disk->type == 0 ) {
         printf( "\tim: inode not exist\n" );
         return NULL;
@@ -184,9 +186,12 @@ void inode_manager::put_inode( uint32_t inum, struct inode* ino ) {
     if ( ino == NULL )
         return;
 
+    printf( "\tput_inode::read_block %d\n", IBLOCK( inum, bm->sb.nblocks ) );
     bm->read_block( IBLOCK( inum, bm->sb.nblocks ), buf );
-    ino_disk  = ( struct inode* )buf + inum % IPB;
+    ino_disk  = ( struct inode* )buf;
     *ino_disk = *ino;
+
+    printf( "\tput_inode::write_block %d\n", IBLOCK( inum, bm->sb.nblocks ) );
     bm->write_block( IBLOCK( inum, bm->sb.nblocks ), buf );
 }
 
@@ -254,7 +259,7 @@ void inode_manager::read_file( uint32_t inum, char** buf_out, int* size ) {
     // indirect block here
 
     char mother_block_buf[ BLOCK_SIZE ];
-    bm->read_block( pinode->blocks[ NDIRECT + 1 ], mother_block_buf );
+    bm->read_block( pinode->blocks[ NDIRECT ], mother_block_buf );
 
     auto block_cast_ptr = ( blockid_t* )mother_block_buf;
 
@@ -286,7 +291,7 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
         return;
     }
     else if ( ( unsigned )size >= MAXFILE * BLOCK_SIZE ) {
-        std::cerr << "file size limit exceed" << std::endl;
+        std::cerr << "file size : {" << ( unsigned )size << "} exceed limit " << MAXFILE * BLOCK_SIZE << std::endl;
         return;
     }
     auto pinode = get_inode( inum );
@@ -294,8 +299,10 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
         std::cerr << "bad inode num" << std::endl;
         return;
     }
+
     pinode->mtime = ( unsigned int )time( NULL );
     pinode->size  = ( unsigned int )size;
+    memset( pinode->blocks, 0, sizeof( blockid_t ) * 101 );
 
     if ( size <= NDIRECT * BLOCK_SIZE ) {
         // can be put all in direct blocks. let's do it!
@@ -324,9 +331,9 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
             pinode->blocks[ counter ] = block_id;
             ++counter;
         }
-        printlog( "=== pinode info === \n\tsize = %d\n\ttype = %d\n", pinode->size, pinode->size );
+        printlog( "=== pinode info === \n\tsize = %d\n\ttype = %d\n", pinode->size, pinode->type );
         printlog( "blocks: \n" );
-        for ( size_t i = 0; i < int( ceil( double( pinode->size ) / BLOCK_SIZE ) ); i++ ) {
+        for ( size_t i = 0; i < 100; i++ ) {
             if ( pinode->blocks[ i ] == 0 ) {
                 break;
             }
@@ -334,8 +341,6 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
         }
         printlog( ".\n" );
         put_inode( inum, pinode );
-        put_inode( inum, pinode );
-        free( pinode );
         return;
     }
     printlog( "\n\t\thave to use indirect blocks. let's do it!\n" );
@@ -357,15 +362,15 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
             std::memcpy( ins_buf, buf + written_bytes, size - written_bytes );
             bm->write_block( block_id, ins_buf );
         }
-        printlog( "\n\t\t\tgoing to write %d bytes in direct block #%u\n", to_write_bytes, block_id );
+        printlog( "\n\t\t\twritten %d bytes in direct block #%u\n", to_write_bytes, block_id );
         written_bytes += to_write_bytes;
         pinode->blocks[ counter ] = block_id;
         ++counter;
     }
 
     // indirect block here
-    auto master_block             = bm->alloc_block();
-    pinode->blocks[ NDIRECT + 1 ] = master_block;
+    auto master_block         = bm->alloc_block();
+    pinode->blocks[ NDIRECT ] = master_block;
 
     char mother_block_buf[ BLOCK_SIZE ];
     // bm->read_block( master_block, mother_block_buf );
@@ -396,7 +401,7 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
     printlog( "=== pinode info === \n\tsize = %d\n\ttype = %d\n", pinode->size, pinode->size );
 
     printlog( "blocks: \n" );
-    for ( size_t i = 0; i < int( ceil( double( pinode->size ) / BLOCK_SIZE ) ); i++ ) {
+    for ( size_t i = 0; i < 100; i++ ) {
         if ( pinode->blocks[ i ] == 0 ) {
             break;
         }
@@ -404,7 +409,7 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
     }
     printlog( ".\n" );
     put_inode( inum, pinode );
-    free( pinode );
+    // free( pinode );
 }
 
 void inode_manager::getattr( uint32_t inum, extent_protocol::attr& a ) {
@@ -421,7 +426,7 @@ void inode_manager::getattr( uint32_t inum, extent_protocol::attr& a ) {
     printlog( "\n=== getattr ===\n\n\tinode: %d\n\ttype: %d\n\tatime: %u\n\tctime: %u\n\tmtime: %u\n\tsize: %u\n\n", inum, a.type, a.atime, a.ctime, a.mtime, a.size );
 
     printlog( "blocks: \n" );
-    for ( size_t i = 0; i < int( ceil( double( pnode->size ) / BLOCK_SIZE ) ); i++ ) {
+    for ( size_t i = 0; i < 100; i++ ) {
         if ( pnode->blocks[ i ] == 0 ) {
             break;
         }
@@ -444,7 +449,7 @@ void inode_manager::remove_file( uint32_t inum ) {
     auto block_array = pinode->blocks;
 
     size_t freed_bytes = 0;
-    for ( size_t i = 0; i < NDIRECT + 1; ++i ) {
+    for ( size_t i = 0; i < NDIRECT; ++i ) {
         if ( freed_bytes >= pinode->size ) {
             break;
         }
