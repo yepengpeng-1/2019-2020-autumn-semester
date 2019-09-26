@@ -29,14 +29,14 @@ blockid_t block_manager::alloc_block() {
             // Unoccupied here
             using_blocks.insert( { i, 1 } );
 
-            char buf[ BLOCK_SIZE ];
-            read_block( BBLOCK( i ), buf );
+            // char buf[ BLOCK_SIZE ];
+            // read_block( BBLOCK( i ), buf );
 
-            uint32_t block_inner_id = i % BPB;
-            short    block_offset   = ( short )block_inner_id % 8;
-            buf[ block_inner_id ] |= ( short( 1 ) << ( 7 - block_offset ) );
+            // uint32_t block_inner_id = i % BPB;
+            // short    block_offset   = ( short )block_inner_id % 8;
+            // buf[ block_inner_id ] |= ( short( 1 ) << ( 7 - block_offset ) );
 
-            write_block( BBLOCK( i ), buf );
+            // write_block( BBLOCK( i ), buf );
             return i;
         }
     }
@@ -56,15 +56,15 @@ void block_manager::free_block( uint32_t id ) {
     if ( remove_iter != using_blocks.end() ) {
         using_blocks.erase( remove_iter );
 
-        char buf[ BLOCK_SIZE ];
-        read_block( BBLOCK( id ), buf );
+        // char buf[ BLOCK_SIZE ];
+        // read_block( BBLOCK( id ), buf );
 
-        uint32_t block_inner_id = id % BPB;
-        short    block_offset   = ( short )block_inner_id % 8;
-        buf[ block_inner_id ] &= ~( short( 1 ) << ( 7 - block_offset ) );
+        // uint32_t block_inner_id = id % BPB;
+        // short    block_offset   = ( short )block_inner_id % 8;
+        // buf[ block_inner_id ] &= ~( short( 1 ) << ( 7 - block_offset ) );
 
-        write_block( BBLOCK( id ), buf );
-        // printlog( "freed block #%d\n", id );
+        // write_block( BBLOCK( id ), buf );
+        // // printlog( "freed block #%d\n", id );
         return;
     }
 }
@@ -110,12 +110,13 @@ inode_manager::~inode_manager() {
 uint32_t inode_manager::alloc_inode( uint32_t type ) {
     // printlog( "!! prepared to alloc an inode which has a %u type\n", type );
     inode pinode;
-    pinode.type        = type;
-    pinode.size        = 0;
-    pinode.ctime       = ( unsigned int )time( NULL );
-    pinode.mtime       = ( unsigned int )time( NULL );
-    pinode.atime       = ( unsigned int )time( NULL );
-    pinode.blocks[ 0 ] = 0;
+    pinode.type  = type;
+    pinode.size  = 0;
+    pinode.ctime = ( unsigned int )time( NULL );
+    pinode.mtime = ( unsigned int )time( NULL );
+    pinode.atime = ( unsigned int )time( NULL );
+
+    memset( pinode.blocks, 0, sizeof( pinode.blocks ) );
 
     // Finding a block to put inode in
 
@@ -180,8 +181,7 @@ struct inode* inode_manager::get_inode( uint32_t inum ) {
 }
 
 void inode_manager::put_inode( uint32_t inum, struct inode* ino ) {
-    char          buf[ BLOCK_SIZE ];
-    struct inode* ino_disk;
+    char buf[ BLOCK_SIZE ];
 
     // printf( "\tim: put_inode %d\n", inum );
     if ( ino == NULL )
@@ -189,8 +189,8 @@ void inode_manager::put_inode( uint32_t inum, struct inode* ino ) {
 
     // printf( "\tput_inode::read_block %d\n", IBLOCK( inum, bm->sb.nblocks ) );
     bm->read_block( IBLOCK( inum, bm->sb.nblocks ), buf );
-    ino_disk  = ( struct inode* )buf;
-    *ino_disk = *ino;
+
+    memcpy( buf, ino, sizeof( inode ) );
 
     // printf( "\tput_inode::write_block %d\n", IBLOCK( inum, bm->sb.nblocks ) );
     bm->write_block( IBLOCK( inum, bm->sb.nblocks ), buf );
@@ -207,14 +207,16 @@ std::vector< blockid_t > getUsedBlocks( const inode_t* pinode, block_manager* bm
     printlog( "inode_manager::getUsedBlocks called!\n" );
     std::vector< blockid_t > block_id_vector;
     for ( size_t i = 0; i < NDIRECT; i++ ) {
-        if ( pinode->blocks[ i ] < 2 || pinode->blocks[ i ] > BLOCK_NUM ) {
+        if ( pinode->blocks[ i ] < 2 || pinode->blocks[ i ] > BLOCK_NUM - 1 ) {
+            printlog( "\tinvalid block_id %u. stopped.\n", pinode->blocks[ i ] );
             return block_id_vector;
         }
         printlog( "\tuse block %u\n", pinode->blocks[ i ] );
         block_id_vector.push_back( pinode->blocks[ i ] );
     }
     auto mother_block = pinode->blocks[ NDIRECT ];
-    if ( mother_block < 2 ) {
+    if ( mother_block < 2 || mother_block > BLOCK_NUM - 1 ) {
+        printlog( "\tinvalid mother_block_id %u. stopped.\n", mother_block );
         return block_id_vector;
     }
     char buffer[ BLOCK_SIZE ];
@@ -230,11 +232,14 @@ std::vector< blockid_t > getUsedBlocks( const inode_t* pinode, block_manager* bm
     return block_id_vector;
 }
 
-blockid_t addOneBlock( inode_t* pinode, block_manager* bm ) {
-    auto blockCount = getBlockCount( pinode->size );
-    auto blockid    = bm->alloc_block();
+blockid_t addOneBlock( inode_t* pinode, block_manager* bm, unsigned int currentBlockCount ) {
+
+    auto blockCount = currentBlockCount;
+    printlog( "addOneBlock called!\ncurrent block count is: %u", blockCount );
+    auto blockid = bm->alloc_block();
     if ( blockCount < NDIRECT ) {
         pinode->blocks[ blockCount ] = blockid;
+        printlog( "\tadd one block #%d at blocks[%d]\n", blockid, blockCount );
         return blockid;
     }
     else if ( blockCount == NDIRECT ) {
@@ -243,12 +248,13 @@ blockid_t addOneBlock( inode_t* pinode, block_manager* bm ) {
     char buffer[ BLOCK_SIZE ];
     bm->read_block( pinode->blocks[ NDIRECT ], buffer );
     ( ( blockid_t* )buffer )[ blockCount - NDIRECT ] = blockid;
+    printlog( "\tadd one block #%d at blocks[100][%d]\n", blockid, blockCount - NDIRECT );
     bm->write_block( pinode->blocks[ NDIRECT ], buffer );
     return blockid;
 }
 
-void freeLastBlock( inode_t* pinode, block_manager* bm ) {
-    auto blockCount = getBlockCount( pinode->size );
+void freeLastBlock( inode_t* pinode, block_manager* bm, unsigned int currentBlockCount ) {
+    auto blockCount = currentBlockCount;
     // auto usedBlock  = getUsedBlocks( pinode, bm );
     // auto lastItem   = usedBlock[ usedBlock.size() - 1 ];
     if ( blockCount <= NDIRECT ) {
@@ -301,12 +307,12 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
     auto current_size = pinode->size;
     auto new_size     = ( unsigned int )size;
 
-    pinode->size  = new_size;
-    pinode->mtime = ( unsigned )time( NULL );
-    pinode->ctime = ( unsigned )time( NULL );
-
     auto current_block_count = getBlockCount( current_size );
     auto new_block_count     = getBlockCount( new_size );
+    pinode->size             = new_size;
+    pinode->mtime            = ( unsigned )time( NULL );
+    pinode->ctime            = ( unsigned )time( NULL );
+
     printlog( "\torigin bytes:  %u new bytes:  %u\n", current_size, new_size );
     printlog( "\torigin blocks: %u new blocks: %u\n", current_block_count, new_block_count );
 
@@ -318,13 +324,13 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
     else if ( current_block_count > new_block_count ) {
         for ( size_t i = current_block_count; i < new_block_count; i++ ) {
             printlog( "inode_manager::write_file: freed one block\n" );
-            freeLastBlock( pinode, bm );
+            freeLastBlock( pinode, bm, current_block_count + i );
         }
     }
     else if ( current_block_count < new_block_count ) {
         for ( size_t i = current_block_count; i < new_block_count; i++ ) {
             printlog( "inode_manager::write_file: allocated one block\n" );
-            to_write_blocks.push_back( addOneBlock( pinode, bm ) );
+            to_write_blocks.push_back( addOneBlock( pinode, bm, current_block_count + i ) );
         }
     }
     unsigned long written_bytes = 0;
@@ -337,7 +343,6 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
         bm->write_block( written_block_id, tmpbuf );
         written_bytes += to_write_bytes;
     }
-
     put_inode( inum, pinode );
 }
 
