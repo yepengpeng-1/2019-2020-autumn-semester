@@ -8,4 +8,4 @@ make;
 
 sudo ./start.sh
 
-sudo ./test-lab1-part2-a.pl ./yfs1
+sudo ./test-lab1-part2-b.pl ./yfs1

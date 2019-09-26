@@ -6,6 +6,14 @@
 #include "extent_client.h"
 #include <vector>
 
+#define DEBUG
+
+#ifdef DEBUG
+#define nslog printf
+#else
+#define nslog( ... )
+#endif
+
 #define FILENAME_SIZE 128
 
 class yfs_client {
@@ -31,7 +39,7 @@ public:
         std::string      name;
         yfs_client::inum inum;
     };
-    struct c_dirent {
+    struct dirent_flat {
         char             name[ FILENAME_SIZE ];
         yfs_client::inum inum;
     };
@@ -39,7 +47,7 @@ public:
 private:
     static std::string filename( inum );
     static inum        n2i( std::string );
-    int                dir_app( inum, const char*, inum );
+    int                add_child( inum, const char*, inum );
 
 public:
     yfs_client();

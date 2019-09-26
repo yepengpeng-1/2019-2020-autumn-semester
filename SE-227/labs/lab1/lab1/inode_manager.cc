@@ -304,13 +304,13 @@ void inode_manager::write_file( uint32_t inum, const char* buf, int size ) {
     }
     else if ( current_block_count > new_block_count ) {
         for ( size_t i = current_block_count; i > new_block_count; i-- ) {
-            printlog( "inode_manager::write_file: going to free one block with current: %u\n", i );
+            printlog( "inode_manager::write_file: going to free one block with current: %lu\n", i );
             freeLastBlock( pinode, bm, i );
         }
     }
     else if ( current_block_count < new_block_count ) {
         for ( size_t i = current_block_count; i < new_block_count; i++ ) {
-            printlog( "inode_manager::write_file: going to allocate one block with current: %u\n", i );
+            printlog( "inode_manager::write_file: going to allocate one block with current: %lu\n", i );
             to_write_blocks.push_back( addOneBlock( pinode, bm, i ) );
         }
     }
