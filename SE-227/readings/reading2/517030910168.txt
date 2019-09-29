@@ -1,0 +1,107 @@
+# SE-227           Reading Submission
+
+
+  1# Quick-Scan Reading
+     The main idea of this article is trying to propose a faster file system’s design
+     strategy and made several comparison on it with the origin 512-byte UNIX file system,
+     which is notably slow and short-throughput, and spend pages proving it’s a better
+     implementation.
+  2# 
+
+
+Answer Questions:
+
+Q1:  What is the problem this paper tried to solve? 
+     (Hint: please state the problem using data)
+A1:  This paper indicates to solve the major problem about the 512-byte UNIX “Traditional”
+     file system. 
+
+     The major problem is its throughput is way too low-efficiency. Since #1 it uses small
+     block size (512 bytes per block) and #2 complicated block-seeking rule which requires 
+     many random disk accesses in even one single file access. At that time when the
+     Solid-state disk haven’t been invented, the traditional Hard disk drive has poor
+     random-access performance, which means if you consecutively try to access addresses
+     in distance, you would get severe lagging. 
+
+     Fact #1 means you have to use many blocks to save one single file; and fact #2 means
+     accessing non-consecutive blocks would waste much lagging time, most of them were used
+     in moving the hard disk heads between different cylinders. That’s why the old file
+     system can only provide 2% of the real hard-disk throughput. And even later the OS team 
+     doubled the block size to 1 KiB, the throughput is still merely 4%, and causes more
+     fragmentation space waste.
+
+     So we noticed that we can’t make this file system acceptable only by making minor fixes.
+     Great changes needs to be done. So the paper author put out such an idea refactoring the
+     “Old file system“.
+
+Q2:  What is the root cause of the problem? In one sentence.
+A2:  One sentence: “The ‘old file system’ uses small block size and complicated block-seeking
+     rules bringing many random disk accesses in even one single file access.“
+
+Q3:  For each optimization, how does the author get the idea? 
+     (Hint: just imagine you’re the author. Given the problem, 
+      what experiment would you do to get more info?)
+A3:  Let’s separate them into pieces and analyze then.
+
+     Opt #1: Optimizing Storage Utilization
+     This optimization aims at improving the disk utilization rate. Because we can see as we 
+     add up the block size in the legacy file system, the more fragmentation waste we generate in 
+     the disk. That means, the % Waste ratio is increasing badly, too.
+     
+     The author probably made an experiment, trying to figure out how the Data / Waste ratio
+     would change as we changed the block size in the file system. And then he concluded with the 
+     Table I. Amount of Wasted Space as a Function of Block Space. Then he understood that it’s the
+     segmented small files that occupies too much meta data blocks, which deteriorates the % waste.
+     So the idea that putting more than one files in one single block naturally came out.
+
+     Opt #2: File System Parameterization
+     Author might get this idea from the implementation of the old file system, knowing that the old
+     file system didn’t give any targeting optimization for various kinds of disks. That means it could
+     not work out the best performance for disks that has different structures, implementations and
+     even different parameters.
+
+     Opt #3: Layout Policies
+     The author might have noticed that the main reason why the old system were slow is it has to
+     access blocks that varies between the whole disk to combine with a complete file. However the 
+     HDD couldn’t provide reasonable random access speed and would cause great lagging. So he thought
+     if it’s possible to put those blocks that belongs to the same file altogether, or at least 
+     in one cylinder… I guess that’s his main idea.
+
+Q4:  For each optimization, does it always work? In which case it cannot work?
+A4:  Let’s separate them into pieces and analyze then.
+
+     Opt #1: Optimizing Storage Utilization
+     It won’t work when all segmented files are exactly sized at 2 ** n + 1. That means there
+     would still be approximately 50% space wasted.
+
+     Opt #2: File System Parameterization
+     It won’t work when there are new kind of disks that came out. That means the File System
+     won't be able to know its parameters, and couldn’t give any optimization for this target and
+     have to fallback to the default profile. For example, as the Solid-state disk came out and
+     could provide amazing random-access performance, the file system have to be updated to make the 
+     system works well on new devices, and that lessens the generalization and opts to create more
+     bugs.
+
+     Opt #3: Layout Policies
+     Similarly, it’s unsuitable using the idea of “cylinders” with the Solid-state disk, which has
+     totally different techniques saving data. Plus the “same-folder same-cylinder” rule won’t be
+     so right when the user isn’t a good file organizer.
+
+Q5:  Do you have some better ideas to implement a faster FS?
+A5:  Here are some simple ideas.
+
+     Idea #1: In order to support the new Solid-state disk, we might need to introduce some changes.
+     The main problem coming with SSD is not the speed of R/W because it’s already fast enough.
+     However the main problem is how can we make best use of an SSD and optimizing its lifetime.
+     That means we should may make the following optimizations:
+     1. Keeping files into blocks that near each other. There’s no need to worry about the disk head
+        lagging, so we can reduce unnecessary indirect addressing to improve our performance.
+     2. Use every piece in the SSD averagely. By doing so we can make sure every part of the SSD
+        basically under same pressure, and won’t cause SSD partially dead early.
+     3. Moving data regularly. That could help ensuring the data’s complementary.
+
+     Idea #2: Go back into the HDD context. We already know even we tried to put 2 or 4 files in one
+     single big block, the area would still be wasted if we have irregular file size (for example, 
+     129 bytes or 257 bytes) and extremely small sized file (like 1 byte files). 
+     So we may say stop dividing blocks into certain block size but make it dynamically sized, 
+     saving merely the meta data of one file and its size. That could minimize the waste of space.
