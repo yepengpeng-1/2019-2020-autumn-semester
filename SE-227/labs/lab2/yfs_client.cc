@@ -54,8 +54,20 @@ bool yfs_client::isfile( inum inum ) {
 }
 
 bool yfs_client::isdir( inum inum ) {
-    // Oops! is this still correct when you implement symlink?
-    return !isfile( inum );
+    int                   r = OK;
+    extent_protocol::attr a;
+    r = ec->getattr( inum, a ) != extent_protocol::OK );
+    if ( r != OK ) {
+        printf( "error getting attr\n" );
+        return false;
+    }
+
+    if ( a.type == extent_protocol::T_DIR ) {
+        printf( "isfile: %lld is a dir\n", inum );
+        return true;
+    }
+    printf( "isfile: %lld is not a dir\n", inum );
+    return false;
 }
 
 int yfs_client::getfile( inum inum, fileinfo& fin ) {
@@ -213,7 +225,7 @@ int yfs_client::lookup( inum parent, const char* name, bool& found, inum& ino_ou
 
     found = false;
 
-    for ( auto it = entries.begin(); it != entries.end(); ++it ) {
+    for ( list< dirent >::iterator it = entries.begin(); it != entries.end(); ++it ) {
         if ( strcmp( it->name.c_str(), name ) == 0 ) {
             nslog( "\tyfs::lookup - found it!\n" );
             found   = true;
@@ -238,8 +250,8 @@ int yfs_client::readdir( inum dir, std::list< dirent >& list ) {
 
     dirent entry;
 
-    auto count   = dir_buf.size() / sizeof( dirent_flat );
-    auto entries = ( dirent_flat* )( dir_buf.c_str() );
+    unsigned long count   = dir_buf.size() / sizeof( dirent_flat );
+    dirent_flat*  entries = ( dirent_flat* )( dir_buf.c_str() );
 
     while ( count > 0 ) {
         entry.inum = entries->inum;
@@ -323,7 +335,7 @@ int yfs_client::unlink( inum parent, const char* name ) {
     }
 
     int counter = 0;
-    for ( auto it = ent_list.begin(); it != ent_list.end(); ++it ) {
+    for ( list< dirent >::iterator it = ent_list.begin(); it != ent_list.end(); ++it ) {
         if ( strcmp( it->name.c_str(), name ) == 0 ) {
             found = true;
             ino   = it->inum;
@@ -341,7 +353,7 @@ int yfs_client::unlink( inum parent, const char* name ) {
         return r;
     }
 
-    auto it = dir_buf.begin() + counter * sizeof( struct dirent_flat );
+    string::iterator it = dir_buf.begin() + counter * sizeof( struct dirent_flat );
     dir_buf.erase( it, it + sizeof( struct dirent_flat ) );
 
     r = ec->remove( ino );
@@ -375,4 +387,36 @@ int yfs_client::add_child( inum parent, const char* child_name, inum ino ) {
     r = ec->put( parent, dir_buf, whatever );
 
     return r;
+}
+
+int yfs_client::readlink( inum ino, std::string& data ) {
+    int         r = OK;
+    std::string buf;
+    r = ec->get( ino, buf );
+    data.assign( buf );
+
+    return r;
+}
+
+int yfs_client::symlink( inum parent, const char* name, const char* link, inum& ino_out ) {
+    int whatever;
+
+    bool found_lookup;
+    if ( lookup( parent, name, found_lookup, ino_out ) != extent_protocol::OK ) {
+        return IOERR;
+    }
+
+    if ( found_lookup ) {
+        return EXIST;
+    }
+
+    if ( ( ec->create( extent_protocol::T_LINK, ino_out ) != extent_protocol::OK ) || ec->put( ino_out, std::string( link ), whatever ) != extent_protocol::OK ) {
+        return IOERR;
+    }
+
+    if ( add_child( parent, name, ino_out ) != extent_protocol::OK ) {
+        return IOERR;
+    }
+
+    return OK;
 }
