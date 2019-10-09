@@ -10,7 +10,7 @@
 #define BLOCK_SIZE 512
 #define BLOCK_NUM ( DISK_SIZE / BLOCK_SIZE )
 
-#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 #define printlog printf

@@ -43,7 +43,6 @@ yfs_client::status getattr( yfs_client::inum inum, struct stat& st ) {
     bzero( &st, sizeof( st ) );
 
     st.st_ino = inum;
-    printf( "getattr %016llx %d\n", inum, yfs->isfile( inum ) );
     if ( yfs->isfile( inum ) ) {
         yfs_client::fileinfo info;
         ret = yfs->getfile( inum, info );
@@ -55,9 +54,8 @@ yfs_client::status getattr( yfs_client::inum inum, struct stat& st ) {
         st.st_mtime = info.mtime;
         st.st_ctime = info.ctime;
         st.st_size  = info.size;
-        printf( "   getattr -> %llu\n", info.size );
     }
-    else {
+    else if ( yfs->isdir( inum ) ) {
         yfs_client::dirinfo info;
         ret = yfs->getdir( inum, info );
         if ( ret != yfs_client::OK )
@@ -67,7 +65,18 @@ yfs_client::status getattr( yfs_client::inum inum, struct stat& st ) {
         st.st_atime = info.atime;
         st.st_mtime = info.mtime;
         st.st_ctime = info.ctime;
-        printf( "   getattr -> %lu %lu %lu\n", info.atime, info.mtime, info.ctime );
+    }
+    else {
+        yfs_client::fileinfo info;
+        ret = yfs->getfile( inum, info );
+        if ( ret != yfs_client::OK )
+            return ret;
+        st.st_mode  = S_IFLNK | 0777;
+        st.st_nlink = 1;
+        st.st_atime = info.atime;
+        st.st_mtime = info.mtime;
+        st.st_ctime = info.ctime;
+        st.st_size  = info.size;
     }
     return yfs_client::OK;
 }
@@ -423,6 +432,54 @@ void fuseserver_statfs( fuse_req_t req ) {
     fuse_reply_statfs( req, &buf );
 }
 
+void fuseserver_readlink( fuse_req_t req, fuse_ino_t ino ) {
+    yfs_client::inum inum = ino;
+    std::string      buf;
+
+    if ( yfs->readlink( inum, buf ) != yfs_client::OK ) {
+        fuse_reply_err( req, ENOENT );
+    }
+    else {
+        fuse_reply_readlink( req, buf.c_str() );
+    }
+
+    return;
+}
+
+void fuseserver_symlink( fuse_req_t req, const char* link, fuse_ino_t parent, const char* name ) {
+    fprintf( stderr, "fuse::symlink entered\n" );
+    yfs_client::inum        inum = parent;
+    yfs_client::inum        id;
+    yfs_client::status      ret;
+    struct fuse_entry_param e;
+
+    ret = yfs->symlink( inum, name, link, id );
+    fprintf( stderr, "fuse::symlink called yfs->symlink. result: %d\n", ret );
+    if ( ret != yfs_client::OK ) {
+        if ( ret == yfs_client::EXIST ) {
+            fuse_reply_err( req, EEXIST );
+        }
+        else {
+            fuse_reply_err( req, ENOENT );
+        }
+        return;
+    }
+
+    e.ino           = id;
+    e.attr_timeout  = 0.0;
+    e.entry_timeout = 0.0;
+    e.generation    = 0;
+
+    if ( getattr( id, e.attr ) != yfs_client::OK ) {
+        fuse_reply_err( req, ENOENT );
+    }
+    else {
+        fuse_reply_entry( req, &e );
+    }
+    fprintf( stderr, "fuse::symlink successfully ended.\n" );
+    return;
+}
+
 struct fuse_lowlevel_ops fuseserver_oper;
 
 int main( int argc, char* argv[] ) {
@@ -452,18 +509,20 @@ int main( int argc, char* argv[] ) {
     yfs = new yfs_client( argv[ 2 ], argv[ 3 ] );
     // yfs = new yfs_client();
 
-    fuseserver_oper.getattr = fuseserver_getattr;
-    fuseserver_oper.statfs  = fuseserver_statfs;
-    fuseserver_oper.readdir = fuseserver_readdir;
-    fuseserver_oper.lookup  = fuseserver_lookup;
-    fuseserver_oper.create  = fuseserver_create;
-    fuseserver_oper.mknod   = fuseserver_mknod;
-    fuseserver_oper.open    = fuseserver_open;
-    fuseserver_oper.read    = fuseserver_read;
-    fuseserver_oper.write   = fuseserver_write;
-    fuseserver_oper.setattr = fuseserver_setattr;
-    fuseserver_oper.unlink  = fuseserver_unlink;
-    fuseserver_oper.mkdir   = fuseserver_mkdir;
+    fuseserver_oper.getattr  = fuseserver_getattr;
+    fuseserver_oper.statfs   = fuseserver_statfs;
+    fuseserver_oper.readdir  = fuseserver_readdir;
+    fuseserver_oper.lookup   = fuseserver_lookup;
+    fuseserver_oper.create   = fuseserver_create;
+    fuseserver_oper.mknod    = fuseserver_mknod;
+    fuseserver_oper.open     = fuseserver_open;
+    fuseserver_oper.read     = fuseserver_read;
+    fuseserver_oper.write    = fuseserver_write;
+    fuseserver_oper.setattr  = fuseserver_setattr;
+    fuseserver_oper.unlink   = fuseserver_unlink;
+    fuseserver_oper.mkdir    = fuseserver_mkdir;
+    fuseserver_oper.readlink = fuseserver_readlink;
+    fuseserver_oper.symlink  = fuseserver_symlink;
     /** Your code here for Lab.
      * you may want to add
      * routines here to implement symbolic link,

@@ -40,8 +40,8 @@ extent_protocol::status extent_client::put( extent_protocol::extentid_t eid, std
     return 0;
 }
 
-extent_protocol::status extent_client::remove( extent_protocol::extentid_t eid ) {
+extent_protocol::status extent_client::remove( extent_protocol::extentid_t eid, int& i ) {
     printf( "going to call remove\n" );
-    return cl->call( extent_protocol::remove, eid );
+    return cl->call( extent_protocol::remove, eid, i );
     // printf( "ok called remove\n" );
 }

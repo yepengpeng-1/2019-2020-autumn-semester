@@ -70,8 +70,6 @@ public:
     int read( inum, size_t, off_t, std::string& );
     int unlink( inum, const char* );
     int mkdir( inum, const char*, mode_t, inum& );
-
-    /** you may need to add symbolic link related methods here.*/
     int symlink( inum parent, const char* name, const char* link, inum& ino_out );
     int readlink( inum ino, std::string& data );
 };
