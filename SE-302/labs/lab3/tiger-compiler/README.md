@@ -77,8 +77,8 @@ We provide you a Docker image which has already installed all the dependencies. 
 3. Run a docker container and mount the lab directory on it. You should replace `/path/to/tiger-compiler-2019-fall` to the path where you clone the lab repository on your computer.
 
     ```bash
-    docker run -it --privileged -v /path/to/tiger-compiler-2019-fall:/home/stu/tiger-compiler-2019-fall se302/tigerlabs_env:latest /bin/bash
-    cd tiger-compiler-2019-fall
+    docker run -it --privileged -v /path/to/tiger-compiler:/home/stu/tiger-compiler se302/tigerlabs_env:latest /bin/bash
+    cd tiger-compiler
     ```
 
 **Notice:** Please do not use Docker Toolbox. For those who Windows Home, you still use virtual machine instead and install a Ubuntu18.04 image.
