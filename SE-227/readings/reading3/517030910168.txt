@@ -1,0 +1,21 @@
+====== Reading Assignment #3 ======
+
+=== FFS: Fast File System's OCC ===
+
+Q1: What problem does this paper want to solve? In one sentence.
+
+A1: This paper indicates to improve the performance of the current file system and keep the crash consistency feature by adding two primitive method calls into the file system called "OptFS" altogether with other practical techniques.
+
+Q2: What is Asynchronous Durability Notification? Why is it useful for implementing optimistic crash consistency?
+
+A2: Asynchronous Durability Notification is an abstraction constructed by the so-called `OptFS` to ensure the consistency. It indicates a fact that every disk write operation has a timeout, after which would be surely consistent and solidified in the hard drive. With that promise the OptFS could make every modifying operation in order (approximately estimated, though), without having to make a large-cost flush operation. And that's the key idea that `OptFS` optimizes the performance without losing the consistency guarantee.
+
+Q3: Why does this paper propose two sync-related calls (osync and dsync)? Please give some examples where osync or dsync is suitable, respectively.
+
+A3: `osync()` is a function that could ensure all operations executed in specific order but won't flush it into the disk or ensure it's durability. However the `dsync()` basically works like executing write-operation in order, but immediately uses `flush()` to make it durable every time. 
+
+They both have their own suitable scenes. 
+
+For example, when you need to put some large unimportant data and they could only make sense when they're complete, we may use the `osync()` method to save that. The best example might be the Internet data block exchange. First it's not extremely important - if we fail to receive this package, we may always retry and wait for the next response. And blocks written in bad orders makes no sense, and that might even ruin the "断点续传" operation.
+
+However the `dsync()` function could be used in the logging or debugging methods. Since these situations often comes with crash and panic, we must try our best to make sure writing logs as much as possible. And for the logging stuff, the order is also very important. No one wants to see the logs unordered.

@@ -1,0 +1,12 @@
+FFS: Fast File System
+Please read Optimistic Crash Consistency (PDF), and answer following questions:
+
+What problem does this paper want to solve? In one sentence.
+What is Asynchronous Durability Notification? Why is it useful for implementing optimistic crash consistency?
+Why does this paper propose two sync-related calls (osync and dsync)? Please give some examples where osync or dsync is suitable, respectively.
+The deadline is Oct 22 23:59.
+
+Please write your answer into a text file and upload it to ftp://public.sjtu.edu.cn/upload/reading3/[your-student-id].txt, like 517021910000.txt
+
+Ftp username: followmoon
+Ftp password: public
