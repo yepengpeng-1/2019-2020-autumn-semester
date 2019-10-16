@@ -152,6 +152,15 @@ exp: lvalue {
     $$ = new A::AssignExp(errormsg.tokPos, $1, $3);
     std::cout << "[yacc] exp: exp ASSIGN exp." << std::endl;
 }
+| var ASSIGN exp {
+    $$ = new A::AssignExp(errormsg.tokPos, new A::SimpleVar(errormsg.tokPos, $1.sym), $3);
+    std::cout << "[yacc] exp: var ASSIGN exp." << std::endl;
+}
+| ID subscriber ASSIGN exp {
+    auto lvalue = new A::SubscriptVar(errormsg.tokPos, new A::SimpleVar(errormsg.tokPos, $1), $2);
+    $$ = new A::AssignExp(errormsg.tokPos, lvalue, $4);
+    std::cout << "[yacc] exp: ID subscriber ASSIGN exp." << std::endl;
+}
 | IF exp THEN exp {
     $$ = new A::IfExp(errormsg.tokPos, $2, $4, new A::VoidExp(errormsg.tokPos));
     std::cout << "[yacc] exp: IF exp THEN exp." << std::endl;
@@ -188,12 +197,16 @@ exp: lvalue {
     $$ = new A::RecordExp(errormsg.tokPos, $1, $3.efieldlist);
     std::cout << "[yacc] exp: RecordExp." << std::endl;
 }
-| ID LBRACK exp RBRACK OF exp {
-    $$ = new A::ArrayExp(errormsg.tokPos, $1, $3, $6);
+| ID subscriber OF exp {
+    $$ = new A::ArrayExp(errormsg.tokPos, $1, $2, $4);
     std::cout << "[yacc] exp: ArrayExp." << std::endl;
 }
 | lvalue subscriber {
     $$ = new A::VarExp(errormsg.tokPos, new A::SubscriptVar(errormsg.tokPos, $1, $2));
+    std::cout << "[yacc] exp: Subscript." << std::endl;
+}
+| ID subscriber {
+    $$ = new A::VarExp(errormsg.tokPos, new A::SubscriptVar(errormsg.tokPos, new A::SimpleVar(errormsg.tokPos, $1), $2));
     std::cout << "[yacc] exp: Subscript." << std::endl;
 };
 
