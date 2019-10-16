@@ -75,8 +75,14 @@ program: exp {
     
 };
 
-exp: SEMICOLON {
+exp: lvalue {
+    $$ = new A::VarExp(errormsg.tokPos, $1);
+}
+| SEMICOLON {
     $$ = new A::VoidExp(errormsg.tokPos);
+}
+| LPAREN expseq RPAREN {
+    $$ = new A::SeqExp(errormsg.tokPos, ((A::SeqExp *)$2)->seq);
 }
 | INT {
     $$ = new A::IntExp(errormsg.tokPos, $1);
@@ -126,6 +132,10 @@ exp: SEMICOLON {
     $$ = new A::OpExp(errormsg.tokPos, A::MINUS_OP, $1, $3);
     std::cout << "[yacc] exp: exp MINUS exp. " << std::endl;
 }
+| MINUS exp {
+    $$ = new A::OpExp(errormsg.tokPos, A::MINUS_OP, 0, $2);
+    std::cout << "[yacc] exp: exp MINUS exp. " << std::endl;
+}
 | exp AND exp {
     $$ = new A::IfExp(errormsg.tokPos, $1, $3, $1);
     std::cout << "[yacc] exp: exp1 AND exp2 => IF exp1 THEN exp2 ELSE exp1." << std::endl;
@@ -167,8 +177,31 @@ exp: SEMICOLON {
     std::cout << "[yacc] exp: NIL." << std::endl;
 }
 | ID LPAREN explist RPAREN {
-    $$ = new A::CallExp(errormsg.tokPos, $2);
+    $$ = new A::CallExp(errormsg.tokPos, $1, $2.explist);
+    std::cout << "[yacc] exp: CALLEXP." << std::endl;
+}
+| ID LBRACE efieldlist RBRACE {
+    $$ = new A::RecordExp(errormsg.tokPos, $1, $3.efieldlist);
+    std::cout << "[yacc] exp: RecordExp." << std::endl;
 };
+
+explist: explist COMMA exp {
+    $$.explist = new A::ExpList($3, $1.explist);
+}
+| exp {
+    $$.explist = new A::ExpList($1, nullptr);
+}
+| {
+    $$.explist = new A::ExpList(new A::VoidExp(errormsg.tokPos), nullptr);
+};
+
+expseq: exp SEMICOLON expseq {
+    $$ = new A::SeqExp(errormsg.tokPos, new A::ExpList($1, ((A::SeqExp *)$3)->seq));
+}
+| exp {
+    $$ = new A::SeqExp(errormsg.tokPos, new A::ExpList($1, nullptr));
+};
+
 
 var: ID {
     $$.var = new A::SimpleVar(errormsg.tokPos, $1);
@@ -176,10 +209,7 @@ var: ID {
 };
 
 
-ty: ID {
-    $$ = new A::NameTy(errormsg.tokPos, $1);
-}
-| LBRACE tyfields RBRACE {
+ty: LBRACE tyfields RBRACE {
     $$ = new A::RecordTy(errormsg.tokPos, $2);
 }
 | ARRAY OF ID {
@@ -203,6 +233,19 @@ tyfields: ID COLON ID COMMA tyfields {
     $$ = new A::FieldList(nullptr, nullptr);
 };
 
+efield: ID EQ exp {
+    $$.efield = new A::EField($1, $3);
+};
+
+efieldlist: efield COMMA efieldlist {
+    $$.efieldlist = new A::EFieldList($1.efield, $3.efieldlist);
+}
+| efield {
+    $$.efieldlist = new A::EFieldList($1.efield, nullptr);
+}
+| {
+    $$.efieldlist = new A::EFieldList(nullptr, nullptr);
+};
 
 dec: vardec {
     $$.dec = $1;
@@ -219,24 +262,25 @@ decs: declist {
 };
 
 declist: declist dec {
-    $$.declist = new A::DecList($1.dec, $2.declist);
-} | dec {
+    $$.declist = new A::DecList($2.dec, $1.declist);
+}
+| dec {
     $$.declist = new A::DecList($1.dec, nullptr);
 };
 
-lvalue: ID {
-    $$ = new A::SimpleVar(errormsg.tokPos, $1);
+lvalue: var {
+    $$ = new A::SimpleVar(errormsg.tokPos, $1.sym);
 } | var DOT ID {
     $$ = new A::FieldVar(errormsg.tokPos, $1.var, $3);
 } | var LBRACK exp RBRACK {
     $$ = new A::SubscriptVar(errormsg.tokPos, $1.var, $3);
 };
 
-fundec_one: FUNCTION ID LPAREN tyfields RPAREN ASSIGN exp {
+fundec_one: FUNCTION ID LPAREN tyfields RPAREN EQ exp {
     $$ = new A::FunDec(errormsg.tokPos, $2, $4, nullptr, $7);
     std::cout << "[yacc] fundec: FUNCTION ID LPAREN tyfields RPAREN ASSIGN exp." << std::endl;
 }
-| FUNCTION ID LPAREN tyfields RPAREN COLON ID ASSIGN exp {
+| FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp {
     $$ = new A::FunDec(errormsg.tokPos, $2, $4, $7, $9);
     std::cout << "[yacc] fundec: FUNCTION ID LPAREN tyfields RPAREN ASSIGN exp." << std::endl;
 };
