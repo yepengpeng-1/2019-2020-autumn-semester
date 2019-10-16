@@ -2,4 +2,4 @@
 
 echo -e "\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
 
-bisonc++ ./src/tiger/parse/tiger.y
+bisonc++ ./src/tiger/parse/tiger.y --debug
