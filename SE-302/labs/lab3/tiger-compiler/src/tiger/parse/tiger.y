@@ -41,7 +41,7 @@
   BREAK NIL
   FUNCTION VAR TYPE
 
-%type <exp> exp expseq
+%type <exp> exp expseq subscriber
 %type <explist> actuals nonemptyactuals sequencing sequencing_exps
 %type <var>  lvalue one oneormore
 %type <declist> decs decs_nonempty
@@ -94,6 +94,10 @@ exp: lvalue {
 }
 | exp EQ exp {
     $$ = new A::OpExp(errormsg.tokPos, A::EQ_OP, $1, $3);
+    std::cout << "[yacc] exp: exp EQ exp." << std::endl;
+}
+| lvalue EQ exp {
+    $$ = new A::OpExp(errormsg.tokPos, A::EQ_OP, new A::VarExp(errormsg.tokPos, $1), $3);
     std::cout << "[yacc] exp: exp EQ exp." << std::endl;
 }
 | exp NEQ exp {
@@ -183,6 +187,29 @@ exp: lvalue {
 | ID LBRACE efieldlist RBRACE {
     $$ = new A::RecordExp(errormsg.tokPos, $1, $3.efieldlist);
     std::cout << "[yacc] exp: RecordExp." << std::endl;
+}
+| ID LBRACK exp RBRACK OF exp {
+    $$ = new A::ArrayExp(errormsg.tokPos, $1, $3, $6);
+    std::cout << "[yacc] exp: ArrayExp." << std::endl;
+}
+| lvalue subscriber {
+    $$ = new A::VarExp(errormsg.tokPos, new A::SubscriptVar(errormsg.tokPos, $1, $2));
+    std::cout << "[yacc] exp: Subscript." << std::endl;
+};
+
+lvalue: var {
+    $$ = new A::SimpleVar(errormsg.tokPos, $1.sym);
+} | var DOT ID {
+    std::cout << "var DOT ID => lvalue! " << std::endl;
+    $$ = new A::FieldVar(errormsg.tokPos, $1.var, $3);
+} | var subscriber {
+    std::cout << "var subscriber => lvalue! " << std::endl;
+    $$ = new A::SubscriptVar(errormsg.tokPos, $1.var, $2);
+};
+
+subscriber: LBRACK exp RBRACK {
+    std::cout << "gotta subscriber! " << std::endl;
+    $$ = $2;
 };
 
 explist: explist COMMA exp {
@@ -230,7 +257,7 @@ tyfields: ID COLON ID COMMA tyfields {
     $$ = new A::FieldList(new A::Field(errormsg.tokPos, $1, $3), nullptr);
 }
 | {
-    $$ = new A::FieldList(nullptr, nullptr);
+    $$ = nullptr;
 };
 
 efield: ID EQ exp {
@@ -244,17 +271,17 @@ efieldlist: efield COMMA efieldlist {
     $$.efieldlist = new A::EFieldList($1.efield, nullptr);
 }
 | {
-    $$.efieldlist = new A::EFieldList(nullptr, nullptr);
+    $$.efieldlist = nullptr;
 };
 
 dec: vardec {
     $$.dec = $1;
 }
 | tydec {
-    $$.tydeclist = $1;
+    $$.dec = new A::TypeDec(errormsg.tokPos, $1);
 }
 | fundec {
-    $$.fundeclist = $1;
+    $$.dec = new A::FunctionDec(errormsg.tokPos, $1);
 };
 
 decs: declist {
@@ -266,14 +293,6 @@ declist: declist dec {
 }
 | dec {
     $$.declist = new A::DecList($1.dec, nullptr);
-};
-
-lvalue: var {
-    $$ = new A::SimpleVar(errormsg.tokPos, $1.sym);
-} | var DOT ID {
-    $$ = new A::FieldVar(errormsg.tokPos, $1.var, $3);
-} | var LBRACK exp RBRACK {
-    $$ = new A::SubscriptVar(errormsg.tokPos, $1.var, $3);
 };
 
 fundec_one: FUNCTION ID LPAREN tyfields RPAREN EQ exp {

@@ -138,7 +138,7 @@ else
 
 fi
 
-rm -f testcases refs _tmp.txt .tmp.txt
+# rm -f testcases refs _tmp.txt .tmp.txt
 if [[ $1 == "syntax" ]]; then
   echo -e "${GREEN_COLOR}[^_^]$ite: Pass Part A${RES}"
 else
