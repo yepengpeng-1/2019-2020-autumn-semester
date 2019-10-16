@@ -36,87 +36,65 @@ class NameAndTyList;
 class DecList;
 class EFieldList;
 
-enum Oper : unsigned int {
-  PLUS_OP,
-  MINUS_OP,
-  TIMES_OP,
-  DIVIDE_OP,
-  EQ_OP,
-  NEQ_OP,
-  LT_OP,
-  LE_OP,
-  GT_OP,
-  GE_OP
-};
+enum Oper : unsigned int { PLUS_OP, MINUS_OP, TIMES_OP, DIVIDE_OP, EQ_OP, NEQ_OP, LT_OP, LE_OP, GT_OP, GE_OP };
 
 /*
  * Variables
  */
 
 class Var {
- public:
-  enum Kind { SIMPLE, FIELD, SUBSCRIPT };
+public:
+    enum Kind { SIMPLE, FIELD, SUBSCRIPT };
 
-  Kind kind;
-  int pos;
+    Kind kind;
+    int  pos;
 
-  Var(Kind kind, int pos) : kind(kind), pos(pos) {}
-  virtual void Print(FILE *out, int d) const = 0;
+    Var( Kind kind, int pos ) : kind( kind ), pos( pos ) {}
+    virtual void Print( FILE* out, int d ) const = 0;
 
-  // Hint: This function will be used in lab4
-  virtual TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv,
-                             S::Table<TY::Ty> *tenv, int labelcount) const = 0;
+    // Hint: This function will be used in lab4
+    virtual TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const = 0;
 
-  // Hint: This function will be used in lab5
-  virtual TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv,
-                                 S::Table<TY::Ty> *tenv, TR::Level *level,
-                                 TEMP::Label *label) const = 0;
+    // Hint: This function will be used in lab5
+    virtual TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const = 0;
 };
 
 class SimpleVar : public Var {
- public:
-  S::Symbol *sym;
+public:
+    S::Symbol* sym;
 
-  SimpleVar(int pos, S::Symbol *sym) : Var(SIMPLE, pos), sym(sym) {}
-  void Print(FILE *out, int d) const override;
+    SimpleVar( int pos, S::Symbol* sym ) : Var( SIMPLE, pos ), sym( sym ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class FieldVar : public Var {
- public:
-  Var *var;
-  S::Symbol *sym;
+public:
+    Var*       var;
+    S::Symbol* sym;
 
-  FieldVar(int pos, Var *var, S::Symbol *sym)
-      : Var(FIELD, pos), var(var), sym(sym) {}
-  void Print(FILE *out, int d) const override;
+    FieldVar( int pos, Var* var, S::Symbol* sym ) : Var( FIELD, pos ), var( var ), sym( sym ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class SubscriptVar : public Var {
- public:
-  Var *var;
-  Exp *subscript;
+public:
+    Var* var;
+    Exp* subscript;
 
-  SubscriptVar(int pos, Var *var, Exp *exp)
-      : Var(SUBSCRIPT, pos), var(var), subscript(exp) {}
-  void Print(FILE *out, int d) const override;
+    SubscriptVar( int pos, Var* var, Exp* exp ) : Var( SUBSCRIPT, pos ), var( var ), subscript( exp ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 /*
@@ -124,279 +102,218 @@ class SubscriptVar : public Var {
  */
 
 class Exp {
- public:
-  enum Kind {
-    VAR,
-    NIL,
-    INT,
-    STRING,
-    CALL,
-    OP,
-    RECORD,
-    SEQ,
-    ASSIGN,
-    IF,
-    WHILE,
-    FOR,
-    BREAK,
-    LET,
-    ARRAY,
-    VOID
-  };
+public:
+    enum Kind { VAR, NIL, INT, STRING, CALL, OP, RECORD, SEQ, ASSIGN, IF, WHILE, FOR, BREAK, LET, ARRAY, VOID };
 
-  Kind kind;
-  int pos;
+    Kind kind;
+    int  pos;
 
-  Exp(Kind kind, int pos) : kind(kind), pos(pos) {}
-  virtual void Print(FILE *out, int d) const = 0;
+    Exp( Kind kind, int pos ) : kind( kind ), pos( pos ) {}
+    virtual void Print( FILE* out, int d ) const = 0;
 
-  // Hint: This function will be used in lab4
-  virtual TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv,
-                             S::Table<TY::Ty> *tenv, int labelcount) const = 0;
+    // Hint: This function will be used in lab4
+    virtual TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const = 0;
 
-  // Hint: This function will be used in lab5
-  virtual TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv,
-                                 S::Table<TY::Ty> *tenv, TR::Level *level,
-                                 TEMP::Label *label) const = 0;
+    // Hint: This function will be used in lab5
+    virtual TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const = 0;
 };
 
 class VarExp : public Exp {
- public:
-  Var *var;
+public:
+    Var* var;
 
-  VarExp(int pos, Var *var) : Exp(VAR, pos), var(var) {}
-  void Print(FILE *out, int d) const override;
+    VarExp( int pos, Var* var ) : Exp( VAR, pos ), var( var ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class NilExp : public Exp {
- public:
-  NilExp(int pos) : Exp(NIL, pos) {}
+public:
+    NilExp( int pos ) : Exp( NIL, pos ) {}
 
-  void Print(FILE *out, int d) const override;
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class IntExp : public Exp {
- public:
-  int i;
+public:
+    int i;
 
-  IntExp(int pos, int i) : Exp(INT, pos), i(i) {}
-  void Print(FILE *out, int d) const override;
+    IntExp( int pos, int i ) : Exp( INT, pos ), i( i ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class StringExp : public Exp {
- public:
-  std::string s;
+public:
+    std::string s;
 
-  StringExp(int pos, std::string *s) : Exp(STRING, pos), s(*s) {}
-  void Print(FILE *out, int d) const override;
+    StringExp( int pos, std::string* s ) : Exp( STRING, pos ), s( *s ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class CallExp : public Exp {
- public:
-  S::Symbol *func;
-  ExpList *args;
+public:
+    S::Symbol* func;
+    ExpList*   args;
 
-  CallExp(int pos, S::Symbol *func, ExpList *args)
-      : Exp(CALL, pos), func(func), args(args) {}
+    CallExp( int pos, S::Symbol* func, ExpList* args ) : Exp( CALL, pos ), func( func ), args( args ) {}
 
-  void Print(FILE *out, int d) const override;
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    void    Print( FILE* out, int d ) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class OpExp : public Exp {
- public:
-  Oper oper;
-  Exp *left, *right;
+public:
+    Oper oper;
+    Exp *left, *right;
 
-  OpExp(int pos, Oper oper, Exp *left, Exp *right)
-      : Exp(OP, pos), oper(oper), left(left), right(right) {}
+    OpExp( int pos, Oper oper, Exp* left, Exp* right ) : Exp( OP, pos ), oper( oper ), left( left ), right( right ) {}
 
-  void Print(FILE *out, int d) const override;
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    void    Print( FILE* out, int d ) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class RecordExp : public Exp {
- public:
-  S::Symbol *typ;
-  EFieldList *fields;
+public:
+    S::Symbol*  typ;
+    EFieldList* fields;
 
-  RecordExp(int pos, S::Symbol *typ, EFieldList *fields)
-      : Exp(RECORD, pos), typ(typ), fields(fields) {}
-  void Print(FILE *out, int d) const override;
+    RecordExp( int pos, S::Symbol* typ, EFieldList* fields ) : Exp( RECORD, pos ), typ( typ ), fields( fields ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class SeqExp : public Exp {
- public:
-  ExpList *seq;
+public:
+    ExpList* seq;
 
-  SeqExp(int pos, ExpList *seq) : Exp(SEQ, pos), seq(seq) {}
-  void Print(FILE *out, int d) const override;
+    SeqExp( int pos, ExpList* seq ) : Exp( SEQ, pos ), seq( seq ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class AssignExp : public Exp {
- public:
-  Var *var;
-  Exp *exp;
+public:
+    Var* var;
+    Exp* exp;
 
-  AssignExp(int pos, Var *var, Exp *exp)
-      : Exp(ASSIGN, pos), var(var), exp(exp) {}
+    AssignExp( int pos, Var* var, Exp* exp ) : Exp( ASSIGN, pos ), var( var ), exp( exp ) {}
 
-  void Print(FILE *out, int d) const override;
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    void    Print( FILE* out, int d ) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class IfExp : public Exp {
- public:
-  Exp *test, *then, *elsee;
+public:
+    Exp *test, *then, *elsee;
 
-  IfExp(int pos, Exp *test, Exp *then, Exp *elsee)
-      : Exp(IF, pos), test(test), then(then), elsee(elsee) {}
+    IfExp( int pos, Exp* test, Exp* then, Exp* elsee ) : Exp( IF, pos ), test( test ), then( then ), elsee( elsee ) {}
 
-  void Print(FILE *out, int d) const override;
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class WhileExp : public Exp {
- public:
-  Exp *test, *body;
+public:
+    Exp *test, *body;
 
-  WhileExp(int pos, Exp *test, Exp *body)
-      : Exp(WHILE, pos), test(test), body(body) {}
+    WhileExp( int pos, Exp* test, Exp* body ) : Exp( WHILE, pos ), test( test ), body( body ) {}
 
-  void Print(FILE *out, int d) const override;
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class ForExp : public Exp {
- public:
-  S::Symbol *var;
-  Exp *lo, *hi, *body;
-  bool escape;
+public:
+    S::Symbol* var;
+    Exp *      lo, *hi, *body;
+    bool       escape;
 
-  ForExp(int pos, S::Symbol *var, Exp *lo, Exp *hi, Exp *body)
-      : Exp(FOR, pos), var(var), lo(lo), hi(hi), body(body), escape(true) {}
+    ForExp( int pos, S::Symbol* var, Exp* lo, Exp* hi, Exp* body ) : Exp( FOR, pos ), var( var ), lo( lo ), hi( hi ), body( body ), escape( true ) {}
 
-  void Print(FILE *out, int d) const override;
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class BreakExp : public Exp {
- public:
-  BreakExp(int pos) : Exp(BREAK, pos) {}
-  void Print(FILE *out, int d) const override;
+public:
+    BreakExp( int pos ) : Exp( BREAK, pos ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class LetExp : public Exp {
- public:
-  DecList *decs;
-  Exp *body;
+public:
+    DecList* decs;
+    Exp*     body;
 
-  LetExp(int pos, DecList *decs, Exp *body)
-      : Exp(LET, pos), decs(decs), body(body) {}
-  void Print(FILE *out, int d) const override;
+    LetExp( int pos, DecList* decs, Exp* body ) : Exp( LET, pos ), decs( decs ), body( body ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class ArrayExp : public Exp {
- public:
-  S::Symbol *typ;
-  Exp *size, *init;
+public:
+    S::Symbol* typ;
+    Exp *      size, *init;
 
-  ArrayExp(int pos, S::Symbol *typ, Exp *size, Exp *init)
-      : Exp(ARRAY, pos), typ(typ), size(size), init(init) {}
-  void Print(FILE *out, int d) const override;
+    ArrayExp( int pos, S::Symbol* typ, Exp* size, Exp* init ) : Exp( ARRAY, pos ), typ( typ ), size( size ), init( init ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class VoidExp : public Exp {
- public:
-  VoidExp(int pos) : Exp(VOID, pos) {}
-  void Print(FILE *out, int d) const override;
+public:
+    VoidExp( int pos ) : Exp( VOID, pos ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     int labelcount) const override;
+    TY::Ty* SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::ExpAndTy Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                         TR::Level *level, TEMP::Label *label) const override;
+    TR::ExpAndTy Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 /*
@@ -404,70 +321,59 @@ class VoidExp : public Exp {
  */
 
 class Dec {
- public:
-  enum Kind { FUNCTION, VAR, TYPE };
+public:
+    enum Kind { FUNCTION, VAR, TYPE };
 
-  Kind kind;
-  int pos;
+    Kind kind;
+    int  pos;
 
-  Dec(Kind kind, int pos) : kind(kind), pos(pos) {}
-  virtual void Print(FILE *out, int d) const = 0;
+    Dec( Kind kind, int pos ) : kind( kind ), pos( pos ) {}
+    virtual void Print( FILE* out, int d ) const = 0;
 
-  // Hint: This function will be used in lab4
-  virtual void SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                          int labelcount) const = 0;
+    // Hint: This function will be used in lab4
+    virtual void SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const = 0;
 
-  // Hint: This function will be used in lab5
-  virtual TR::Exp *Translate(S::Table<E::EnvEntry> *venv,
-                             S::Table<TY::Ty> *tenv, TR::Level *level,
-                             TEMP::Label *label) const = 0;
+    // Hint: This function will be used in lab5
+    virtual TR::Exp* Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const = 0;
 };
 
 class FunctionDec : public Dec {
- public:
-  FunDecList *functions;
+public:
+    FunDecList* functions;
 
-  FunctionDec(int pos, FunDecList *functions)
-      : Dec(FUNCTION, pos), functions(functions) {}
-  void Print(FILE *out, int d) const override;
+    FunctionDec( int pos, FunDecList* functions ) : Dec( FUNCTION, pos ), functions( functions ) {}
+    void Print( FILE* out, int d ) const override;
 
-  void SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                  int labelcount) const override;
+    void SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::Exp *Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     TR::Level *level, TEMP::Label *label) const override;
+    TR::Exp* Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class VarDec : public Dec {
- public:
-  S::Symbol *var;
-  S::Symbol *typ;
-  Exp *init;
-  bool escape;
+public:
+    S::Symbol* var;
+    S::Symbol* typ;
+    Exp*       init;
+    bool       escape;
 
-  VarDec(int pos, S::Symbol *var, S::Symbol *typ, Exp *init)
-      : Dec(VAR, pos), var(var), typ(typ), init(init), escape(true) {}
-  void Print(FILE *out, int d) const override;
+    VarDec( int pos, S::Symbol* var, S::Symbol* typ, Exp* init ) : Dec( VAR, pos ), var( var ), typ( typ ), init( init ), escape( true ) {}
+    void Print( FILE* out, int d ) const override;
 
-  void SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                  int labelcount) const override;
+    void SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::Exp *Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     TR::Level *level, TEMP::Label *label) const override;
+    TR::Exp* Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 class TypeDec : public Dec {
- public:
-  NameAndTyList *types;
+public:
+    NameAndTyList* types;
 
-  TypeDec(int pos, NameAndTyList *types) : Dec(TYPE, pos), types(types) {}
-  void Print(FILE *out, int d) const override;
+    TypeDec( int pos, NameAndTyList* types ) : Dec( TYPE, pos ), types( types ) {}
+    void Print( FILE* out, int d ) const override;
 
-  void SemAnalyze(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                  int labelcount) const override;
+    void SemAnalyze( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, int labelcount ) const override;
 
-  TR::Exp *Translate(S::Table<E::EnvEntry> *venv, S::Table<TY::Ty> *tenv,
-                     TR::Level *level, TEMP::Label *label) const override;
+    TR::Exp* Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const override;
 };
 
 /*
@@ -475,54 +381,54 @@ class TypeDec : public Dec {
  */
 
 class Ty {
- public:
-  enum Kind { NAME, RECORD, ARRAY };
+public:
+    enum Kind { NAME, RECORD, ARRAY };
 
-  Kind kind;
-  int pos;
+    Kind kind;
+    int  pos;
 
-  Ty(Kind kind, int pos) : kind(kind), pos(pos) {}
-  virtual void Print(FILE *out, int d) const = 0;
+    Ty( Kind kind, int pos ) : kind( kind ), pos( pos ) {}
+    virtual void Print( FILE* out, int d ) const = 0;
 
-  virtual TY::Ty *SemAnalyze(S::Table<TY::Ty> *tenv) const = 0;
+    virtual TY::Ty* SemAnalyze( S::Table< TY::Ty >* tenv ) const = 0;
 
-  virtual TY::Ty *Translate(S::Table<TY::Ty> *tenv) const = 0;
+    virtual TY::Ty* Translate( S::Table< TY::Ty >* tenv ) const = 0;
 };
 
 class NameTy : public Ty {
- public:
-  S::Symbol *name;
+public:
+    S::Symbol* name;
 
-  NameTy(int pos, S::Symbol *name) : Ty(NAME, pos), name(name) {}
-  void Print(FILE *out, int d) const override;
+    NameTy( int pos, S::Symbol* name ) : Ty( NAME, pos ), name( name ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<TY::Ty> *tenv) const override;
+    TY::Ty* SemAnalyze( S::Table< TY::Ty >* tenv ) const override;
 
-  TY::Ty *Translate(S::Table<TY::Ty> *tenv) const override;
+    TY::Ty* Translate( S::Table< TY::Ty >* tenv ) const override;
 };
 
 class RecordTy : public Ty {
- public:
-  FieldList *record;
+public:
+    FieldList* record;
 
-  RecordTy(int pos, FieldList *record) : Ty(RECORD, pos), record(record) {}
-  void Print(FILE *out, int d) const override;
+    RecordTy( int pos, FieldList* record ) : Ty( RECORD, pos ), record( record ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<TY::Ty> *tenv) const override;
+    TY::Ty* SemAnalyze( S::Table< TY::Ty >* tenv ) const override;
 
-  TY::Ty *Translate(S::Table<TY::Ty> *tenv) const override;
+    TY::Ty* Translate( S::Table< TY::Ty >* tenv ) const override;
 };
 
 class ArrayTy : public Ty {
- public:
-  S::Symbol *array;
+public:
+    S::Symbol* array;
 
-  ArrayTy(int pos, S::Symbol *array) : Ty(ARRAY, pos), array(array) {}
-  void Print(FILE *out, int d) const override;
+    ArrayTy( int pos, S::Symbol* array ) : Ty( ARRAY, pos ), array( array ) {}
+    void Print( FILE* out, int d ) const override;
 
-  TY::Ty *SemAnalyze(S::Table<TY::Ty> *tenv) const override;
+    TY::Ty* SemAnalyze( S::Table< TY::Ty >* tenv ) const override;
 
-  TY::Ty *Translate(S::Table<TY::Ty> *tenv) const override;
+    TY::Ty* Translate( S::Table< TY::Ty >* tenv ) const override;
 };
 
 /*
@@ -530,112 +436,110 @@ class ArrayTy : public Ty {
  */
 
 class Field {
- public:
-  int pos;
-  S::Symbol *name, *typ;
-  bool escape;
+public:
+    int        pos;
+    S::Symbol *name, *typ;
+    bool       escape;
 
-  Field(int pos, S::Symbol *name, S::Symbol *typ)
-      : pos(pos), name(name), typ(typ), escape(true) {}
+    Field( int pos, S::Symbol* name, S::Symbol* typ ) : pos( pos ), name( name ), typ( typ ), escape( true ) {}
 
-  void Print(FILE *out, int d) const;
+    void Print( FILE* out, int d ) const;
 };
 
 class FieldList {
- public:
-  Field *head;
-  FieldList *tail;
+public:
+    Field*     head;
+    FieldList* tail;
 
-  FieldList(Field *head, FieldList *tail) : head(head), tail(tail) {}
+    FieldList( Field* head, FieldList* tail ) : head( head ), tail( tail ) {}
 
-  static void Print(FILE *out, FieldList *v, int d);
-  ;
+    static void Print( FILE* out, FieldList* v, int d );
+    ;
 };
 
 class ExpList {
- public:
-  Exp *head;
-  ExpList *tail;
+public:
+    Exp*     head;
+    ExpList* tail;
 
-  ExpList(Exp *head, ExpList *tail) : head(head), tail(tail) { assert(head); }
+    ExpList( Exp* head, ExpList* tail ) : head( head ), tail( tail ) {
+        assert( head );
+    }
 
-  static void Print(FILE *out, ExpList *v, int d);
+    static void Print( FILE* out, ExpList* v, int d );
 };
 
 class FunDec {
- public:
-  int pos;
-  S::Symbol *name;
-  FieldList *params;
-  S::Symbol *result;
-  Exp *body;
+public:
+    int        pos;
+    S::Symbol* name;
+    FieldList* params;
+    S::Symbol* result;
+    Exp*       body;
 
-  FunDec(int pos, S::Symbol *name, FieldList *params, S::Symbol *result,
-         Exp *body)
-      : pos(pos), name(name), params(params), result(result), body(body) {}
+    FunDec( int pos, S::Symbol* name, FieldList* params, S::Symbol* result, Exp* body ) : pos( pos ), name( name ), params( params ), result( result ), body( body ) {}
 
-  void Print(FILE *out, int d) const;
+    void Print( FILE* out, int d ) const;
 };
 
 class FunDecList {
- public:
-  FunDec *head;
-  FunDecList *tail;
+public:
+    FunDec*     head;
+    FunDecList* tail;
 
-  FunDecList(FunDec *head, FunDecList *tail) : head(head), tail(tail) {}
+    FunDecList( FunDec* head, FunDecList* tail ) : head( head ), tail( tail ) {}
 
-  static void Print(FILE *out, FunDecList *v, int d);
+    static void Print( FILE* out, FunDecList* v, int d );
 };
 
 class DecList {
- public:
-  Dec *head;
-  DecList *tail;
+public:
+    Dec*     head;
+    DecList* tail;
 
-  DecList(Dec *head, DecList *tail) : head(head), tail(tail) {}
+    DecList( Dec* head, DecList* tail ) : head( head ), tail( tail ) {}
 
-  static void Print(FILE *out, DecList *v, int d);
+    static void Print( FILE* out, DecList* v, int d );
 };
 
 class NameAndTy {
- public:
-  S::Symbol *name;
-  Ty *ty;
+public:
+    S::Symbol* name;
+    Ty*        ty;
 
-  NameAndTy(S::Symbol *name, Ty *ty) : name(name), ty(ty) {}
+    NameAndTy( S::Symbol* name, Ty* ty ) : name( name ), ty( ty ) {}
 
-  void Print(FILE *out, int d) const;
+    void Print( FILE* out, int d ) const;
 };
 
 class NameAndTyList {
- public:
-  NameAndTy *head;
-  NameAndTyList *tail;
+public:
+    NameAndTy*     head;
+    NameAndTyList* tail;
 
-  NameAndTyList(NameAndTy *head, NameAndTyList *tail)
-      : head(head), tail(tail) {}
+    NameAndTyList( NameAndTy* head, NameAndTyList* tail ) : head( head ), tail( tail ) {}
 
-  static void Print(FILE *out, NameAndTyList *v, int d);
+    static void Print( FILE* out, NameAndTyList* v, int d );
 };
 
 class EField {
- public:
-  S::Symbol *name;
-  Exp *exp;
+public:
+    S::Symbol* name;
+    Exp*       exp;
 
-  EField(S::Symbol *name, Exp *exp) : name(name), exp(exp) {}
+    EField( S::Symbol* name, Exp* exp ) : name( name ), exp( exp ) {}
 
-  static void Print(FILE *out, EField *v, int d);
+    static void Print( FILE* out, EField* v, int d );
 };
 
 class EFieldList {
- public:
-  EField *head;
-  EFieldList *tail;
+public:
+    EField*     head;
+    EFieldList* tail;
 
-  EFieldList(EField *head, EFieldList *tail) : head(head), tail(tail) {}
+    EFieldList( EField* head, EFieldList* tail ) : head( head ), tail( tail ) {}
 
-  static void Print(FILE *out, EFieldList *v, int d);
+    static void Print( FILE* out, EFieldList* v, int d );
 };
 
 };  // namespace A
