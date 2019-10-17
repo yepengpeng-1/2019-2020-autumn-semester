@@ -95,7 +95,12 @@ exp: lvalue {
     // $$ = nullptr;
 }
 | LPAREN expseq RPAREN {
-    $$ = new A::SeqExp(errormsg.tokPos, ((A::SeqExp *)$2)->seq);
+    auto expseq = (A::SeqExp *) $2;
+    if (expseq->seq->tail) {
+        $$ = expseq;
+    } else {
+        $$ = expseq->seq->head;
+    }
 }
 | LPAREN RPAREN {
     $$ = new A::VoidExp(errormsg.tokPos);
@@ -195,7 +200,7 @@ exp: lvalue {
     // std::cout << "[yacc] exp: LET." << std::endl;
 }
 | FOR var ASSIGN exp TO exp DO exp {
-    $$ = new A::ForExp(errormsg.tokPos, $2.sym, $4, $6, $8);
+    $$ = new A::ForExp(errormsg.tokPos, ((A::SimpleVar *)$2.var)->sym, $4, $6, $8);
     // std::cout << "[yacc] exp: FOR." << std::endl;
 }
 | WHILE exp DO exp {
