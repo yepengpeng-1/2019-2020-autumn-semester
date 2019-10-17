@@ -39,7 +39,7 @@
   ASSIGN
   ARRAY /* IF THEN ELSE */ WHILE FOR TO DO LET IN END OF 
   BREAK NIL
-  FUNCTION VAR TYPE
+  /* FUNCTION */ VAR TYPE
 
 %type <exp> exp expseq subscriber
 %type <explist> actuals nonemptyactuals sequencing sequencing_exps
@@ -59,7 +59,7 @@
  /*
   * Put your codes here (lab3).
   */
-
+%right FUNCTION
 %right IF THEN ELSE
 %left AND OR
 %right EQ NEQ LT LE GT GE
@@ -91,7 +91,8 @@ exp: lvalue {
     $$ = new A::VarExp(errormsg.tokPos, $1);
 }
 | SEMICOLON {
-    $$ = new A::VoidExp(errormsg.tokPos);
+    // $$ = new A::VoidExp(errormsg.tokPos);
+    // $$ = nullptr;
 }
 | LPAREN expseq RPAREN {
     $$ = new A::SeqExp(errormsg.tokPos, ((A::SeqExp *)$2)->seq);
@@ -152,11 +153,11 @@ exp: lvalue {
     // std::cout << "[yacc] exp: nobody MINUS exp. " << std::endl;
 }
 | exp AND exp {
-    $$ = new A::IfExp(errormsg.tokPos, $1, $3, $1);
+    $$ = new A::IfExp(errormsg.tokPos, $1, $3, new A::IntExp(errormsg.tokPos, 0));
     // std::cout << "[yacc] exp: exp1 AND exp2 => IF exp1 THEN exp2 ELSE exp1." << std::endl;
 }
 | exp OR exp {
-    $$ = new A::IfExp(errormsg.tokPos, $1, $1, $3);
+    $$ = new A::IfExp(errormsg.tokPos, $1, new A::IntExp(errormsg.tokPos, 1), $3);
     // std::cout << "[yacc] exp: exp1 OR exp2 => IF exp1 THEN exp1 ELSE exp2." << std::endl;
 }
 | lvalue ASSIGN exp {
@@ -178,7 +179,7 @@ exp: lvalue {
     // std::cout << "[yacc] exp: ID subscriber DOT ID ASSIGN exp." << std::endl;
 }
 | IF exp THEN exp {
-    $$ = new A::IfExp(errormsg.tokPos, $2, $4, new A::VoidExp(errormsg.tokPos));
+    $$ = new A::IfExp(errormsg.tokPos, $2, $4, nullptr);
     // std::cout << "[yacc] exp: IF exp THEN exp." << std::endl;
 }
 | IF exp THEN exp ELSE exp {
@@ -332,16 +333,16 @@ fundec_one: FUNCTION ID LPAREN tyfields RPAREN EQ exp {
     // std::cout << "[yacc] fundec: FUNCTION ID LPAREN tyfields RPAREN ASSIGN exp." << std::endl;
 };
 
-fundeclist: fundeclist fundec_one {
-    $$.fundeclist = new A::FunDecList($2, $1.fundeclist);
+fundeclist: fundec_one fundeclist {
+    $$.fundeclist = new A::FunDecList($1, $2.fundeclist);
     // std::cout << "[yacc] fundeclist: fundec FUNCTION ID LPAREN tyfields RPAREN ASSIGN exp." << std::endl;
+}
+| fundec_one {
+    $$.fundeclist = new A::FunDecList($1, nullptr);
 };
 
 fundec: fundeclist {
     $$ = $1.fundeclist;
-}
-| fundec_one {
-    $$ = new A::FunDecList($1, nullptr);
 };
 
 vardec: VAR ID ASSIGN exp {
