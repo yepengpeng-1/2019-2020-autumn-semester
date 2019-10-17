@@ -370,6 +370,4 @@ tydeclist: tydec_one tydeclist {
 
 tydec: tydeclist {
     $$ = $1.tydeclist;
-} | tydec_one {
-    $$ = new A::NameAndTyList($1, nullptr);
 };
