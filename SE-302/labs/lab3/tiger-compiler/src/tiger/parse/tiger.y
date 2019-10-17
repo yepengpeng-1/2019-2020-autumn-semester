@@ -77,7 +77,8 @@ program: exp {
 
 
 lvalue: var {
-    $$ = new A::SimpleVar(errormsg.tokPos, $1.sym);
+    $$ = (A::SimpleVar *)$1.var;
+    // std::cout << "lvalue: var, its actual content is " << ((A::SimpleVar *)$1.var)->sym->Name() << std::endl;
 } | lvalue DOT ID {
     // std::cout << "var DOT ID => lvalue! " << std::endl;
     $$ = new A::FieldVar(errormsg.tokPos, $1, $3);
@@ -147,7 +148,7 @@ exp: lvalue {
     // std::cout << "[yacc] exp: exp MINUS exp. " << std::endl;
 }
 | MINUS exp {
-    $$ = new A::OpExp(errormsg.tokPos, A::MINUS_OP, new A::NilExp(errormsg.tokPos), $2);
+    $$ = new A::OpExp(errormsg.tokPos, A::MINUS_OP, new A::IntExp(errormsg.tokPos, 0), $2);
     // std::cout << "[yacc] exp: nobody MINUS exp. " << std::endl;
 }
 | exp AND exp {
@@ -163,7 +164,7 @@ exp: lvalue {
     // std::cout << "[yacc] exp: exp ASSIGN exp." << std::endl;
 }
 | var ASSIGN exp {
-    $$ = new A::AssignExp(errormsg.tokPos, new A::SimpleVar(errormsg.tokPos, $1.sym), $3);
+    $$ = new A::AssignExp(errormsg.tokPos, (A::SimpleVar *)$1.var, $3);
     // std::cout << "[yacc] exp: var ASSIGN exp." << std::endl;
 }
 | ID subscriber ASSIGN exp {
@@ -220,10 +221,10 @@ exp: lvalue {
     $$ = new A::ArrayExp(errormsg.tokPos, $1, $2, $4);
     // std::cout << "[yacc] exp: ArrayExp." << std::endl;
 }
-| lvalue subscriber {
-    $$ = new A::VarExp(errormsg.tokPos, new A::SubscriptVar(errormsg.tokPos, $1, $2));
-    // std::cout << "[yacc] exp: Subscript." << std::endl;
-}
+// | lvalue subscriber {
+//     $$ = new A::VarExp(errormsg.tokPos, new A::SubscriptVar(errormsg.tokPos, $1, $2));
+//     // std::cout << "[yacc] exp: Subscript." << std::endl;
+// }
 | ID subscriber {
     $$ = new A::VarExp(errormsg.tokPos, new A::SubscriptVar(errormsg.tokPos, new A::SimpleVar(errormsg.tokPos, $1), $2));
     // std::cout << "[yacc] exp: Subscript." << std::endl;
