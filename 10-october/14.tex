@@ -1,0 +1,328 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Oct 14 Mon}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-342::Computer Vision}\label{header-n2}}
+
+今天的主要内容是：卷积、Noise Reduction、Smoothing。
+
+\hypertarget{header-n4}{%
+\subsubsection{噪音抑制}\label{header-n4}}
+
+事实上去噪的方法我们之前讲过。目前有两类常用的方法：
+
+\hypertarget{header-n6}{%
+\paragraph{Morphology Based}\label{header-n6}}
+
+基于数学形态学的滤波。
+
+下周我们会讲到这部分。
+
+\hypertarget{header-n9}{%
+\paragraph{Convolution Based}\label{header-n9}}
+
+卷积法降噪。如高斯滤波、中值滤波都归于卷积降噪。
+
+这周我们来讲 Conv Based 噪音抑制。
+
+给定一个图像 \(f(x, y)\) 和卷积核 \(w(a, b)\)，可以用
+Convolution，Correlation 两种方式进行降噪。
+
+\hypertarget{header-n13}{%
+\paragraph{Convolution Kernel}\label{header-n13}}
+
+啥是卷积核啊？
+
+\begin{quote}
+\textbf{卷积核}就是图像处理时，给定输入图像，输入图像中一个小区域中像素加权平均后成为输出图像中的每个对应像素，其中权值由一个函数定义，这个函数称为\textbf{卷积核}。
+
+均值滤波是一种特别的卷积，其卷积核为\( \left[ \begin{matrix}   \dfrac 1 9 & \dfrac 1 9 & \dfrac 1 9 \\   \dfrac 1 9 & \dfrac 1 9 & \dfrac 1 9 \\   \dfrac 1 9 & \dfrac 1 9 & \dfrac 1 9\end{matrix}  \right]  \)。
+\end{quote}
+
+举例：我们给一个形如\( \left[ \begin{matrix}   -1 & 0 & 1 \\   -2 & 0 & 2 \\   -1 & 0 & 1\end{matrix}  \right]  \)的算子作为卷积核，就会明显体现出形状的纵向边缘。
+
+又比如我们给出一个全部为 \(\dfrac 1 9\)
+的卷积核，就会实现一个简单模糊的效果。
+
+\begin{quote}
+雨露均沾算子（×）
+\end{quote}
+
+\hypertarget{header-n22}{%
+\paragraph{Corner Cases}\label{header-n22}}
+
+真·Corner Case，因为这个 Case 真的出现在 Corner（×）
+
+Corner 上滤波时，滤波窗口在边缘位置的时候是没办法取完整的。如何是好？
+
+\begin{itemize}
+\item
+  Sol \#1: 边缘补 0
+\item
+  Sol \#2: 镜像对称弥补缺失
+\item
+  Sol \#3: 裁剪尺寸（×，不太好）
+\end{itemize}
+
+不过也都无所谓了。毕竟重要信息并不会出现在边缘上。
+
+\hypertarget{header-n33}{%
+\paragraph{Convolution Application}\label{header-n33}}
+
+有哪些应用场景呢？太多了。
+
+\hypertarget{header-n35}{%
+\paragraph{Special Kernels（掩模）}\label{header-n35}}
+
+特别的一些 Kernel：
+
+\hypertarget{header-n37}{%
+\subparagraph{Gaussian Kernel}\label{header-n37}}
+
+\hypertarget{header-n38}{%
+\subparagraph{Average Kernel}\label{header-n38}}
+
+\hypertarget{header-n39}{%
+\subparagraph{Median Kernel}\label{header-n39}}
+
+中值滤波没那么简单，他有一个「排序」操作在里头。但总归因为操作过程类似，也把他归在里面。
+
+\hypertarget{header-n41}{%
+\subparagraph{Max/Min Kernel}\label{header-n41}}
+
+最大值／最小值滤波，他们会有不同的亮度偏向。
+
+\hypertarget{header-n43}{%
+\subsubsection{边缘强化}\label{header-n43}}
+
+\hypertarget{header-n44}{%
+\paragraph{Definition}\label{header-n44}}
+
+怎么定义边缘（Edge）呢？
+
+\begin{itemize}
+\item
+  对图像来讲，「边缘」是一组点的集合。
+\item
+  这些边缘点位于两个「Region」的边界上。
+\item
+  在边缘点上，灰度级别剧烈地改变。
+\end{itemize}
+
+广义一点说，以下内容都会产生 Edge：
+
+\begin{itemize}
+\item
+  Different Colors, Brightness, Textures, Materials, Tissues, ...
+\item
+  Different Normal Directions of Surfaces, ...
+\item
+  Different Illuminance, ...
+\end{itemize}
+
+\hypertarget{header-n61}{%
+\paragraph{Edge Category}\label{header-n61}}
+
+三类边缘。
+
+\begin{itemize}
+\item
+  Step Edge
+\end{itemize}
+
+简单突变。
+
+\begin{itemize}
+\item
+  Ramp Edge
+\end{itemize}
+
+有一个平滑上升的过程。
+
+\begin{itemize}
+\item
+  Peak Edge
+\end{itemize}
+
+一上一下，像是块砖头。
+
+\hypertarget{header-n75}{%
+\paragraph{Edge Detection}\label{header-n75}}
+
+那么我们该如何检测边缘呢？
+
+基本的思路：观察一个点跟他的邻居们，如果有比较明显的灰度级别的差异就说明，这里可能是一个\textbf{边缘}。
+
+同时要考虑：噪音可能会影响我们的检测。因此我们还会加一个
+Threshold（阈值），超过这个范围的才把它加入边缘检测算法内。
+
+\hypertarget{header-n79}{%
+\subsubsection{二值化}\label{header-n79}}
+
+\hypertarget{header-n80}{%
+\paragraph{Fixed Threshold / Global Threshold}\label{header-n80}}
+
+基于阈值的分割：固定阈值处理法。对整个图像来说，采用一致的阈值进行计算，此之谓
+Fixed/Global Threshold。
+
+\hypertarget{header-n82}{%
+\paragraph{``Otsu'' 大津算法}\label{header-n82}}
+
+\hypertarget{header-n83}{%
+\subparagraph{简介}\label{header-n83}}
+
+大津法（Otsu）是一种确定图像二值化分割阈值的算法，由日本学者大津于1979年提出。从大津法的原理上来讲，该方法又称作最大类间方差法，因为按照大津法求得的阈值进行图像二值化分割后，前景与背景图像的类间方差最大。
+
+\hypertarget{header-n85}{%
+\subparagraph{算法}\label{header-n85}}
+
+Otsu
+算法也称最大类间差法，有时也称之为大津算法，由大津于1979年提出，被认为是图像分割中阈值选取的最佳算法，计算简单，不受图像亮度和对比度的影响，因此在数字图像处理上得到了广泛的应用。它是按图像的灰度特性，将图像分成背景和前景两部分。因方差是灰度分布均匀性的一种度量，背景和前景之间的类间方差越大，说明构成图像的两部分的差别越大，当部分前景错分为背景或部分背景错分为前景都会导致两部分差别变小。因此，使类间方差最大的分割意味着错分概率最小。
+
+非常常用的「大津」算法。效果也不错。总归大津先试一试准没错。
+
+\hypertarget{header-n88}{%
+\subsubsection{数学形态学}\label{header-n88}}
+
+Mathematical
+Morphology\ldots 用来分析形状是非常常用的工具。应用也是很广泛的。
+
+\begin{quote}
+Extremely Useful.
+\end{quote}
+
+\hypertarget{header-n92}{%
+\paragraph{Technical Base}\label{header-n92}}
+
+\hypertarget{header-n93}{%
+\subparagraph{集合论}\label{header-n93}}
+
+\hypertarget{header-n94}{%
+\subparagraph{拓扑数学}\label{header-n94}}
+
+\hypertarget{header-n95}{%
+\paragraph{Basic Operations}\label{header-n95}}
+
+只有两个操作。
+
+膨胀和腐蚀。以及一些衍生出来的操作。
+
+\begin{quote}
+注意：下面的说法都仅限于二值化的黑白图像。
+\end{quote}
+
+\hypertarget{header-n100}{%
+\subparagraph{Dilation}\label{header-n100}}
+
+膨胀。给定一个区域，回馈一个比原来更大的区域。
+
+\begin{itemize}
+\item
+  Growing Features
+\end{itemize}
+
+可以被用来扩大区域。
+
+\begin{itemize}
+\item
+  Filling Holes and Gaps
+\end{itemize}
+
+可以用来填充孔洞和沟渠。
+
+\hypertarget{header-n110}{%
+\subparagraph{Erosion}\label{header-n110}}
+
+腐蚀。给定一个区域，回馈一个比原来更小的区域，
+
+\begin{itemize}
+\item
+  Shrinking Features
+\item
+  Removing Bridges
+\item
+  Removing Branches
+\item
+  Remove Small Protrusions
+\end{itemize}
+
+移除小凸起。
+
+\hypertarget{header-n122}{%
+\subparagraph{Opening}\label{header-n122}}
+
+开操作。
+
+\hypertarget{header-n124}{%
+\subparagraph{Closing}\label{header-n124}}
+
+闭操作。
+
+\hypertarget{header-n126}{%
+\subparagraph{Conditional Dilation}\label{header-n126}}
+
+条件膨胀。
+
+\hypertarget{header-n128}{%
+\subparagraph{Structure Elements}\label{header-n128}}
+
+类似于卷积核，这个 Structure Element 决定了我们如何进行膨胀和腐蚀。
+
+\hypertarget{header-n130}{%
+\subsubsection{Homework Question}\label{header-n130}}
+
+卷积得到的 GrayScale 超界了，如何解决这个问题？
+
+Answer: 先保留超界的值，再去做归一化。
+
+\end{document}

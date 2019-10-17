@@ -1,0 +1,632 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\usepackage[normalem]{ulem}
+% Avoid problems with \sout in headers with hyperref
+\pdfstringdefDisableCommands{\renewcommand{\sout}{}}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Oct 15 Tue}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-302::Compilers}\label{header-n2}}
+
+今天我们要讲的是 Type Checking。
+
+回忆一下我们上回讲的 Symbol Table。这个过程会生成两张符号表：venv
+(variable environment) 和 tenv (type environment)。
+
+Type Checking
+要做的就是：检查表达式中出现的操作符能否结合，并计算出整个表达式的类型。（为了进行下一步计算。）
+
+\hypertarget{header-n6}{%
+\subsubsection{Tiger 里的类型}\label{header-n6}}
+
+\begin{itemize}
+\item
+  \texttt{Ty\_record}
+\end{itemize}
+
+类似于 \texttt{struct}。
+
+\begin{itemize}
+\item
+  \texttt{Ty\_nil}
+\item
+  \texttt{Ty\_int}
+\end{itemize}
+
+整型！
+
+\begin{itemize}
+\item
+  \texttt{Ty\_string}
+\end{itemize}
+
+字符串！
+
+\begin{itemize}
+\item
+  \texttt{Ty\_array}
+\end{itemize}
+
+数组！（P.S. Array
+可能会装填着不同类型的元素，因此还需要一个额外参数来指定 Element
+Type。）
+
+\begin{itemize}
+\item
+  \texttt{Ty\_name}
+\end{itemize}
+
+Name 就是 Symbol 的名字。
+
+\begin{itemize}
+\item
+  \texttt{Ty\_void}
+\end{itemize}
+
+大概只会在函数返回值里用。
+
+\hypertarget{header-n33}{%
+\subsubsection{Type Checking Expressions}\label{header-n33}}
+
+Type Checking 要做的事情：
+
+\begin{itemize}
+\item
+  扫描一遍代码，得到一个 Abstract Syntax Tree。
+\end{itemize}
+
+Type Checking 用黑话来说，就叫 Translation。所以下面的缩写都是从他来的。
+
+\hypertarget{header-n39}{%
+\paragraph{检查表达式}\label{header-n39}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{struct}\NormalTok{ expty transExp(S_table venv, S_table tenv, A_exp a) \{}
+    \ControlFlowTok{switch}\NormalTok{(a->kind) \{}
+        \ControlFlowTok{case}\NormalTok{ A_opExp:}
+            \ControlFlowTok{if}\NormalTok{ (}\CommentTok{/* 合法 */}\NormalTok{) \{}
+                \CommentTok{// 合法的时候，构造出一个类型代表表达式返回的类型}
+                \ControlFlowTok{return}\NormalTok{ expTy(NULL, Ty_Int());}
+\NormalTok{            \} }\ControlFlowTok{else}\NormalTok{ \{}
+                \CommentTok{// 不合法的时候，返回错误值}
+\NormalTok{            \}}
+            \ControlFlowTok{break}\NormalTok{;}
+        \ControlFlowTok{case}\NormalTok{ A_letExp:}
+            \CommentTok{// let}
+            \CommentTok{//  ... decs}
+            \CommentTok{// in}
+            \CommentTok{//  ... body}
+            \CommentTok{// end}
+            
+            \CommentTok{/* let 操作符需要做的事情是}
+\CommentTok{               创建一个新的 environment，然后用它来}
+\CommentTok{               递归地去遍历 body 内内容。}
+\CommentTok{            */}
+            \ControlFlowTok{break}\NormalTok{;}
+        \ControlFlowTok{case} \CommentTok{/* other ops */}\NormalTok{:}
+            \ControlFlowTok{break}\NormalTok{;}
+\NormalTok{    \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{header-n41}{%
+\paragraph{检查类型}\label{header-n41}}
+
+Tiger Language 里面，有三种不同的 Variable：
+
+\begin{itemize}
+\item
+  Simple Variable
+\end{itemize}
+
+简单变量就是个符号。里面又包括 varEntry（一般变量）和
+funEntry（一般函数）。
+
+\begin{itemize}
+\item
+  Field Variable
+\end{itemize}
+
+实参列表里的变量。
+
+\begin{itemize}
+\item
+  Subscript Variable
+\end{itemize}
+
+Subscript 用的 Variable，形如 \texttt{a.i} 或是 \texttt{a{[}i{]}} 的变量
+\texttt{i} 就叫做 subscript variable。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{struct}\NormalTok{ expty transVar(S_table venv, S_table tenv, A_var a) \{}
+    \ControlFlowTok{switch}\NormalTok{ (v->kind) \{}
+        \ControlFlowTok{case}\NormalTok{ A_SimpleVar : \{}
+            \CommentTok{// 简单变量，先从符号表里找这个}
+            \KeywordTok{auto}\NormalTok{ x = S_look(venv, v->u.simple);}
+            \ControlFlowTok{if}\NormalTok{ (x && x->kind == E_varEntry) \{}
+                \CommentTok{// 如果我们拿到的是个名字类型，}
+                \CommentTok{// 比如是 let type := int 这种一层包装的类型，}
+                \CommentTok{// 就追根究底找出最基本的类型。}
+                \CommentTok{// 所以有那么一句 actual_ty。}
+                \ControlFlowTok{return}\NormalTok{ ExpTy(NULL, actual_ty(x->u.var.ty));}
+\NormalTok{            \} }\ControlFlowTok{else}\NormalTok{ \{}
+\NormalTok{                EM_Error(}\StringTok{"哈哈哈哈哈哈哈哈错误消息}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{);}
+\NormalTok{            \}}
+\NormalTok{        \}}
+\NormalTok{    \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{header-n56}{%
+\paragraph{检查声明}\label{header-n56}}
+
+\hypertarget{header-n57}{%
+\subparagraph{变量声明}\label{header-n57}}
+
+处理一个无类型约束的变量声明：
+
+\begin{verbatim}
+var x := exp
+\end{verbatim}
+
+很简单，因为我们了解赋值操作右边 \texttt{exp} 的唯一类型，把它当作
+\texttt{x} 的类型就可以了。
+
+但也有这种写法：
+
+\begin{verbatim}
+var x: Type := exp
+\end{verbatim}
+
+同时给出了可用于类型推断的 \texttt{exp} 和声明好的
+\texttt{Type}。这就是说我们需要考虑推断出来的隐含 Type 跟显式说明的 Type
+是否兼容。
+
+\hypertarget{header-n64}{%
+\subparagraph{Ms.Nil}\label{header-n64}}
+
+Ty\_Nil 是空指针类型，它可同任何类型兼容。她的实例 Nil
+值为空，用于初始化各种类型的对象。
+
+\hypertarget{header-n66}{%
+\subparagraph{函数声明}\label{header-n66}}
+
+函数的声明方法\ldots\ldots{}
+
+\begin{verbatim}
+function f(a: ta, b: tb): rt = body
+\end{verbatim}
+
+我们用到 \texttt{transDec} 函数。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DataTypeTok{void}\NormalTok{ transDec(S_table venv, S_table tenv, A_dec d) \{}
+    \ControlFlowTok{switch}\NormalTok{ (d->kind) \{}
+        \CommentTok{// ...}
+        \ControlFlowTok{case}\NormalTok{ A_functionDec: \{}
+            \CommentTok{/* 啊，是个函数声明！ */}
+\NormalTok{            A_fundec f = d->u.function->head;}
+            
+\NormalTok{            Ty_ty resultTy = S_look(tenv, f->result);}
+            \CommentTok{// 确认函数的返回值。}
+            
+\NormalTok{            Ty_tyList formalTys = makeFormalTyList(tenv, f->params);}
+            \CommentTok{// 构造出形参类型列表。我们不关心他们的名字。}
+            
+            \CommentTok{// 到此为止我们有足够的信息来构造这个 funEntry 并放入值环境中 `venv` 了。}
+            \CommentTok{// 注意，到此为止我们还没有开始分析 body 的内容，}
+            \CommentTok{// 也就是说在 body 被分析之前，我们已经把函数 funEntry 放到环境里了。}
+            \CommentTok{// 这也就是为什么递归可以被实现。}
+            \CommentTok{// 因为在函数体被分析之前，函数 Entry 本身已经被放到环境里了。}
+            
+\NormalTok{            S_beginScope(venv);}
+            
+            \ControlFlowTok{for}\NormalTok{ (}\KeywordTok{auto}\NormalTok{ &i : params) \{}
+\NormalTok{                S_enter(venv, l->head->name, E_VarEntry(t->head));}
+                \CommentTok{// 把形参的名字压栈}
+\NormalTok{            \}}
+            
+            \CommentTok{// 检查 body 的类型}
+\NormalTok{            transExp(venv, tenv, d->u.function->body);}
+            
+            \CommentTok{// Scope 包裹的内容，在离开这个 Body 的时候清除形参符号。}
+            \CommentTok{// 不过注意，Function 的符号不会被清除。}
+\NormalTok{            S_endScope(venv);}
+\NormalTok{        \}}
+\NormalTok{    \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{header-n71}{%
+\paragraph{递归}\label{header-n71}}
+
+TigerLang 里面，所有的类型递归都基于
+Pointer，而非真的嵌入一份自己。否则递归定义自己也是无话可说了。
+
+因此递归定义类型这一点还是比较难办\ldots{}
+
+Tiger 里面有一个说法：只有「挨着」（Literally 挨着）的声明才可以递归。
+
+也就是说，可能需要在定义完成某条语句之后，用新的 Environment
+回溯一下上一个声明（如果上一个声明失败的话）。
+
+也算是\ldots 给了一点简化吧。
+
+\hypertarget{header-n77}{%
+\paragraph{Type Equivalent}\label{header-n77}}
+
+就是那个
+
+\begin{verbatim}
+let type x := y
+\end{verbatim}
+
+的表达式。
+
+留意到在 Tiger 里，
+
+\begin{verbatim}
+let type a = {x: int, y: int}
+let type b = {x: int, y: int}
+
+/* 这里我们说 a 跟 b 是结构等价的。 */
+\end{verbatim}
+
+a 跟 b 是不一样的两种类型。（Type Inequivalent）
+
+而
+
+\begin{verbatim}
+let type a = {x: int, y: int}
+let type b = a
+
+/* 这里 a 跟 b 是名字等价的 */
+\end{verbatim}
+
+中，a 跟 b 是同样的类型（Type Equivalent）。
+
+\hypertarget{header-n87}{%
+\subsection{\texorpdfstring{SE-227::\sout{File System}
+CSE}{SE-227::File System CSE}}\label{header-n87}}
+
+\hypertarget{header-n88}{%
+\subsubsection{Design DNS}\label{header-n88}}
+
+之前的 GFS 云云，最终都没有跳脱开 Posix 的文件系统，依然还是个 Unix-like
+文件系统。
+
+那么有什么 Unix-unlike 的系统呢？
+
+\hypertarget{header-n91}{%
+\paragraph{Unix-unlike}\label{header-n91}}
+
+我们来考虑一个 URI：
+
+\begin{verbatim}
+www.example.com/favicon.ico
+\end{verbatim}
+
+这是否也很类似于一个文件路径呢？
+
+但这个路径经历的并不简单；
+
+在这个请求被发送出去时，可能会借由 CDN
+直接抄近路，也可能前往数据中心，还可能根本拿不到结果。
+
+\hypertarget{header-n97}{%
+\paragraph{Domain Name and IP}\label{header-n97}}
+
+DNS 要做的就是把我们的一个 Domain Name 给翻译成 IP 位址。
+
+因为类似于 \texttt{www.example.com}
+的域名不是语义化的。不能直接发一个请求给「\texttt{www.foobar.com}」，而必须通过
+IP 位址来发送请求。
+
+\begin{quote}
+为啥不直接用 IP 呢？
+
+难记难用难路由。
+\end{quote}
+
+翻译有这些要求：
+
+\begin{itemize}
+\item
+  快。
+\end{itemize}
+
+浏览个网页不能太慢\ldots{}
+
+\begin{itemize}
+\item
+  动态。
+\end{itemize}
+
+随时在更新的域名\ldots{}
+
+\begin{itemize}
+\item
+  高效。
+\end{itemize}
+
+目前域名的数量过大，以至于我们必须很高效地完成翻译过程。
+
+\hypertarget{header-n116}{%
+\subparagraph{Questions}\label{header-n116}}
+
+Q: 一个 Domain Name 可以有多个 IP 位址吗？
+
+A: 是的。可以有。因此有的时候 DNS 会在一次查询中返回多个 IP 位址。
+
+Q: 一个 IP 可以有多个 Domain Name 吗？
+
+A: Rui Ren:
+可以。甚至讲过用这种方法同时接两份私活，却只花一份服务器的钱，而且两位甲方都没发现的故事。
+
+\hypertarget{header-n121}{%
+\paragraph{DNS}\label{header-n121}}
+
+如果一个 Domain Name \textless=\textgreater{} IP address
+的关系需要更新了，如何去告诉 DNS 呢？
+
+最早 DNS 是写在像是电话本的书里的。后来写在本地的 \texttt{HOSTS.TXT}
+里。但这肯定不靠谱。
+
+后来 1984 年出了个 BIND: Berkeley Internet Name Domain。一台 Name Server
+机器存不下了，我们总得分布式地存储他们。
+
+那如何分布呢？规模上去了之后就得\emph{分层 + 结构化}。
+
+首先先分成 \texttt{.com}、\texttt{.gov}、\texttt{.net} 之类的 Zone。
+
+但这还不够，还需要一个绝对 Root 来告诉这些 Zone 到底在哪。
+
+现在这个绝对 Root 是由 \textbf{ICANN} 管理的。
+
+\begin{quote}
+ICANN: 〖 Internet Corporation for Assigned Names and Numbers
+〗インターネットで使用されるドメイン名IP
+アドレスプロトコルなどの管理を行う非営利公益法人の国際機関。世界各地から集まった理事によって運営される。1998
+年に設立。本部はアメリカのカリフォルニア。
+\end{quote}
+
+\texttt{.com} 就是 for Commercial 的，一般是由 VeriSign 提供的。
+
+\texttt{.sjtu.edu.cn} 就是 for Educational 的。
+
+所以很奇怪的，在 Domain Name
+里面，底层的根节点在后头，而越是表层的越在前头。
+
+每一个节点都可以随意分配自己的子域名。但是对自己上层的结构就完全不知情。
+
+能力的划分也是责任的划分。IP 也是一层一层往里找的。
+
+\hypertarget{header-n136}{%
+\paragraph{Secret}\label{header-n136}}
+
+其实所有的 Domain Name 最后都有一个点。
+
+类似于文件系统路径开始于 \texttt{/}，域名也都结束于一个 \texttt{.}。
+
+Host Name
+事实上也跟网站本身没关系，本质上就跟文件名之于文件一样。只是锦上添花，蛋糕上的一层糖霜，奶糖外面的可食用包装纸
+
+\hypertarget{header-n140}{%
+\paragraph{Fault Tolerant}\label{header-n140}}
+
+一般来说一个节点炸了，会影响到的就是它自己对应的域名及其子域名的解析。
+
+所以为了应对 Fault，一般一个节点的解析服务器不止一台。
+
+\hypertarget{header-n143}{%
+\paragraph{Recursion}\label{header-n143}}
+
+在你想解析一个 Domain Name 的时候，可以自己来慢慢解析：
+
+以 \texttt{www.sjtu.edu.cn.} 为例：
+
+可以先自己去爬 \texttt{.} =\textgreater{} \texttt{.cn.} =\textgreater{}
+\texttt{.edu.cn.} =\textgreater{} \texttt{sjtu.edu.cn.} =\textgreater{}
+\texttt{www.sjtu.edu.cn.}。
+
+自己一个办公室一个办公室跑，
+
+也可以直接去问 \texttt{www.sjtu.edu.cn}，让服务器来帮我找这一路。
+
+\hypertarget{header-n149}{%
+\paragraph{Caching}\label{header-n149}}
+
+不光是我本地有 Cache，路上所有的服务器也都会给你做 Cache。
+
+但是 Cache 总归会遇到一个问题：Inconsistency.
+
+映射改了之后，全球的 DNS Server 并不能做到即时改动。
+
+解决方案？
+
+\hypertarget{header-n154}{%
+\paragraph{TTL}\label{header-n154}}
+
+约定俗成，一个 Cache 的寿命就是 24 小时。
+
+又约定俗成，在你改换 DN =\textgreater{} IP 对应关系的时候，会给出一个 24
+小时的 Cooldown 时间，在这段时间照顾那些还没来得及刷新的
+Cache。在那之后，就直接 Reuse 了，且不会产生问题。
+
+\hypertarget{header-n157}{%
+\paragraph{Replica}\label{header-n157}}
+
+所有的数据都应该做好
+Replica，且分散在世界各地，以防发生核战争之后大家没网上。
+
+SJTU
+也在学校各地各校区放了许多个备份，且在学校外也至少提供了一个服务器（以便提供一些公开的服务）。\sout{但总归要断网一起断}
+
+\hypertarget{header-n160}{%
+\paragraph{The Hidden Master}\label{header-n160}}
+
+\ldots 但是 DNS 总该有个头啊。是谁给的呢？
+
+在连 Wi-Fi 的时候，会使用 DHCP 技术来分配给你一套 IP、Mask、Router
+之类的数据。可选地，也会给你一个 DNS Address。
+
+\begin{verbatim}
+“Wi-Fi”已连接至“SJTU”，其 IP 地址为 10.162.204.224。
+
+已通过“EAP-PEAP”鉴定 (MSCHAPv2)
+连接时间：03:23:38
+\end{verbatim}
+
+\hypertarget{header-n164}{%
+\paragraph{Bad Points}\label{header-n164}}
+
+\hypertarget{header-n165}{%
+\subparagraph{Policy}\label{header-n165}}
+
+目前 DNS 的政策仍然由 ICANN 决定。也有一定的能力做坏事。
+
+\hypertarget{header-n167}{%
+\subparagraph{DNS as a Weapon}\label{header-n167}}
+
+如果有个网站我想灭掉它，就把 google 的 DNS 重定向给他。大家都上
+Google，上 Google 就会去查 Google 的 IP。于是这个网站服务器就爆了。
+
+\hypertarget{header-n169}{%
+\subparagraph{Cache Miss Attack}\label{header-n169}}
+
+如果所有的 Cache 都 miss，这些压力都会一直向上走，增大 Root
+根结点的压力。
+
+\hypertarget{header-n171}{%
+\subparagraph{Security}\label{header-n171}}
+
+我们可以信任 VeriSign/CNNIC 吗？
+
+2015 年，因 CNNIC 发行的一个中级CA被发现发行了 Google
+域名的假证书，许多用户选择不信任 CNNIC 颁发的数字证书。并引起对 CNNIC
+滥用证书颁发权力的担忧。
+
+2015 年 4 月 2 日，Google 宣布不再承认 CNNIC 所颁发的电子证书。4 月 4
+日，继 Google 之后，Mozilla 也宣布不再承认 CNNIC 所颁发的电子证书。2016
+年 8 月，CNNIC 官方网站已放弃自行发行的根证书，改用由 DigiCert
+颁发的证书。
+
+\hypertarget{header-n175}{%
+\subsubsection{Introduction to Network}\label{header-n175}}
+
+网络是怎么实现的？
+
+\hypertarget{header-n177}{%
+\paragraph{OSI}\label{header-n177}}
+
+\hypertarget{header-n178}{%
+\paragraph{TCP/UDP}\label{header-n178}}
+
+TCP 握手三次。UDP 不握手，上来就发。
+
+\hypertarget{header-n180}{%
+\paragraph{Protocol Stack}\label{header-n180}}
+
+\hypertarget{header-n181}{%
+\paragraph{CSE 3 Layers}\label{header-n181}}
+
+Layer 1: 两台直接相连（通过网线）的计算机可以交流信息。
+
+Layer 2: 物理上多台计算机连接在一起，任意两台相连的计算机可以交换信息。
+
+Layer 3: 性能、安全性、容错。
+
+\end{document}

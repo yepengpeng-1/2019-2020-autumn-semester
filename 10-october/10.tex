@@ -1,0 +1,635 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Oct 10 Thu}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-227}\label{header-n2}}
+
+今天我们要讲的是从头到底的一个服务器搭建。
+
+在服务器所需要提供的服务量越来越大的时候，我们该怎么应对？
+
+1) 买更强的大型机器。
+
+2) 买更多便宜的小机器。
+
+方法 1
+很好懂，总归就是烧钱。但总归技术发展是有瓶颈的，单个服务器的能力总归是有限的。
+
+便宜的小机器的限制就小很多。总归小机器很便宜，大不了多买几个就行了。
+
+但问题就来了：如何才能让这么多小机器互相协作呢？
+
+而且，最好是我们不需要改已有的现有代码。
+
+\hypertarget{header-n11}{%
+\subsubsection{RPC：Remote Procedure Call}\label{header-n11}}
+
+像读写本地文件系统一样，直接读写网络的文件，可以支持多台机器同时连接到网络，并且远程机器会自动加好锁并处理好资源竞争问题。本地只管读，好像这块盘就是本地的一样。
+
+\hypertarget{header-n13}{%
+\subsubsection{如何移植到 RPC？}\label{header-n13}}
+
+大概是这样：
+
+Client 只需要这么处理发送给 Server 的请求：
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{client->call(protocol::method_name, parameter_1, parameter_2, ...);}
+\end{Highlighting}
+\end{Shaded}
+
+等价于直接调用
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{method_name(parameter_1, parameter_2, ...);}
+\end{Highlighting}
+\end{Shaded}
+
+但如果说我们不希望修改我们原有的那些代码（也就是不想动那些祖传代码），该怎么办呢？
+
+Stub。打桩。自动生成一些无聊的代码。
+
+截获那些直接的函数调用，把 \texttt{method\_name} 内部改成
+\texttt{client-\textgreater{}call}，并且处理状态码。
+
+这样就可以保证用户态代码不做任何多余改动，直接就能实现 RPC。
+
+当然 Server 代码也需要对应地修改，只是工作量要小很多。
+
+\hypertarget{header-n24}{%
+\subsubsection{Marshalling / Unmarshalling}\label{header-n24}}
+
+Marshall 的意思：本意是马歇尔将军（\textbf{George Catlett
+Marshall}）的名字，后来被引申到将军、列队、集结、结集、编码、编组、编集、安整、数据打包、列集等稀奇古怪的意思。
+
+因为我们 Client 跟 Server
+的函数调用都是美好的、基于函数调用的抽象。然而这种抽象是没办法（直接）在网路上传输并用于
+RPC，因为 网络上传输的只能是字节流。
+
+因此为了传输，我们得把这种函数调用给他拍扁了。
+
+C++ 中的参数传递有两种方式：传值和传引用。
+
+但是呢？Client 跟 Server 根本不是一台机器。你传一个 Pointer 或者说是
+Reference（本质上也就是一个给小孩子用的 Pointer）都没有意义。
+
+因为你拿着这个 Client 给的指针去 Server，也找不到那个 Object。
+
+所以我们必须把这个 Pointer 指向的 Object 也得拷贝并发送过去。
+
+如果这个 Object 里还有 Pointer\ldots 也得一层层 Copy 过去。
+
+深深地拷贝（Deep
+Copy）这些东西，并打成一个数据包之后，才能通过网络来发送。
+
+这个过程叫做 Marshalling。
+
+反过来，在服务器端要把收到的这些数据包反过来构造成 Object
+并重建指针关系的这个过程就叫做 Unmarshalling。
+
+\begin{verbatim}
+Wikipedia
+
+Marshal 和 Serialize 的比较
+
+"marshal"一个对象意味着记录下它的状态与codebase(s)在这种方式，以便当这个marshal对象在被"unmarshalled"时，可以获得最初代码的一个副本，可能会自动装入这个对象的类定义。可以marshal任何能被序列化或远程（即实现java.rmi.Remote接口）。Marshalling类似序列化，除了marshalling也记录codebases。Marshalling不同于序列化是marshalling特别处理远程对象。
+\end{verbatim}
+
+看这种机器翻译，就跟看陈昊鹏翻的 Java 书一样。就是说还不如去看英文原版。
+
+\hypertarget{header-n39}{%
+\subsubsection{意义}\label{header-n39}}
+
+咱们费了这么大劲，把我们原有的函數調用給改成了「又是發送給遠端服務器，又是列隊又是解散」的，好不容易能用了。那你能不能告訴我這有什麼好處呢？
+
+這都是為了分佈式啊！現在所有的請求全部都變成了異步的請求。這樣就可以讓所有需要等待的事情（如
+I/O 等）都拋給服務器來處理，其他的所有東西我們都不用再關心。
+
+\hypertarget{header-n42}{%
+\subsubsection{NFS}\label{header-n42}}
+
+Network File System。那是啥？
+
+一个分布式的文件系统。
+
+\hypertarget{header-n45}{%
+\subsubsection{File Handler}\label{header-n45}}
+
+为了处理每一个文件的先后关系，我们总得给他上锁。
+
+假如说我们每次有一个读都去给整个文件系统上锁\ldots 那这个效率也太低了。
+
+我们最好单独地给文件上锁，有必要的时候锁上整个目录。
+
+仅仅使用 inode 不能完全确定这个文件。考虑这种情况：
+
+A 来读这个 inode，B 把这个 inode 对应的文件删掉了，C
+又创建了一个新文件，刚好又分配到了这个 inode。
+
+那么对于 A 来说，这就是失败了。不正确了。
+
+因此除了 inode，我们还要加一个 Generation Number（代际数），inode
+每被分配一次，都会增加一个 Generation Number。
+
+只有 inode Number + Generation Number 才能唯一确认一把锁。
+
+主要原因还是 NFS 是 Stateless
+的。无状态确定了它必须要额外的东西（就是这个 Generation
+Number）来确认状态，就像 HTTP 里的小饼干。
+
+本机是不可能出现这种问题的。 File Description 跟 iNode 是 OS
+内记住了的。OS 有记忆。
+
+Stateless NFS 没有。需要 G.N. 帮助。
+
+在我们发现 inode 一样但是 Generation Number
+不一样的时候，就返回一个错误「Stale inode Number」，就是说您的 inode
+number 不新鲜了。
+
+\hypertarget{header-n58}{%
+\subsubsection{CAP Theorem}\label{header-n58}}
+
+在理论计算机科学中，CAP定理（CAP theorem），又被称作布鲁尔定理（Brewer's
+theorem），它指出对于一个分布式计算系统来说，不可能同时满足以下三点：
+
+\begin{itemize}
+\item
+  一致性（Consistency） （等同于所有节点访问同一份最新的数据副本）
+\item
+  可用性（Availability）（每次请求都能获取到非错的响应------但是不保证获取的数据为最新数据）
+\item
+  分区容错性（Partition
+  tolerance）（以实际效果而言，分区相当于对通信的时限要求。系统如果不能在时限内达成数据一致性，就意味着发生了分区的情况，必须就当前操作在C和A之间做出选择。）
+\end{itemize}
+
+\hypertarget{header-n67}{%
+\subsubsection{幂等操作}\label{header-n67}}
+
+一定要保证幂等操作：做 0 次就是做 0 次（没做就是没做），做 N 次（N
+\textgreater= 1）等于做 1 次。
+
+因为事实上互联网的发送包是很不靠谱的。你可能会丢包。
+
+丢包了你就要重发。
+
+但是你认为丢了的包也不一定丢了。
+
+\begin{quote}
+或许是对方的 Response 包丢了。
+\end{quote}
+
+\begin{quote}
+或许是对方的 Response 来得比你的 Threshold 晚了一点。
+\end{quote}
+
+\begin{quote}
+或许是对方 Response
+要来了的时候，你的机器断电了。在重启之后包已经不在了，你以为没发到其实已经发到了。
+\end{quote}
+
+就是说你可能失手发了多个一样的包。而且对方也都收到了。
+
+如果不是幂等操作，这种事情就会导致你发出去的包意义变了。
+
+\hypertarget{header-n80}{%
+\subsubsection{Eternal Question}\label{header-n80}}
+
+永远不知道是对方没收到我的包
+
+还是对方收到了我的包但我却没收到他的回复包。
+
+\hypertarget{header-n83}{%
+\subsection{SE-344::Computer Graphics}\label{header-n83}}
+
+不论你要 Build 出如何真实、如何帅气、如何有意思的图形，
+
+最终你还是要把它给 Render, Flatten 成一个个无趣的像素点的。
+
+这个过程就叫做「光栅化技术」。
+
+\begin{center}\rule{0.5\linewidth}{\linethickness}\end{center}
+
+\hypertarget{header-n88}{%
+\subsubsection{光栅化技術}\label{header-n88}}
+
+光栅化之前所有的操作還可以包含 Vertex（頂點）、拓撲關係等等幾何信息；
+
+但光栅化操作會把這些全部拍平；
+
+光栅化之後的所有操作都只能基於 Pixels（像素點）了。
+
+\hypertarget{header-n92}{%
+\paragraph{基本圖元繪製算法}\label{header-n92}}
+
+我們要瞭解的僅僅就是基礎的算法原理而已。因為目前所有的基礎庫都很好地替我們提供了優秀的實現，我們不必要自己實現這些算法。
+
+（雖然在下次作業裡，我們還是會需要做它一次。）
+
+\hypertarget{header-n95}{%
+\paragraph{圖形的表示}\label{header-n95}}
+
+\begin{itemize}
+\item
+  WireFrame，線框模型
+\end{itemize}
+
+僅僅採用頂點和鄰邊來表示模型。
+
+如果只有三維的線框模型的話，這種表示是存在二義性的。由於不存在遮擋關係，沒辦法唯一地表現出空間的。
+
+只是快速表示一下空間而已。
+
+\begin{itemize}
+\item
+  Surface，表面模型
+\end{itemize}
+
+這種表示方法相較於 WireFrame，是由很多個
+Surface（面片）搭建成的。由於面片之間存在遮擋關係，因此就表示精確度而言高於
+WireFrame 模型。
+
+但他沒有說明這圖形是由表面的哪一邊組成的。
+
+\begin{itemize}
+\item
+  Solid，實體模型
+\end{itemize}
+
+這種模型表示方法是可以定義形體處於表面的哪一側的。
+
+還有很多種圖形的表示方法：
+
+\begin{itemize}
+\item
+  表面多邊形法（B-rep）
+\item
+  解析法、微分法
+\item
+  掃描表示法
+\item
+  四叉樹、八叉樹表示法
+\item
+  分形幾何法
+\item
+  粒子系統（Particle System）
+\end{itemize}
+
+\hypertarget{header-n125}{%
+\paragraph{圖形的顯示}\label{header-n125}}
+
+顯示跟表示是不一樣的。
+
+顯示文件僅僅是整個圖形表示的一部分。
+
+\begin{center}\rule{0.5\linewidth}{\linethickness}\end{center}
+
+取景窗口也决定了显示的内容。这个取景窗口的决定叫做 Clipping。
+
+\begin{itemize}
+\item
+  每一个可以独立显示的点叫做像素点「Pixel Points」。
+\item
+  一行像素构成一条光栅（Raster），也叫做扫描线（Scanline）。
+\end{itemize}
+
+确定屏幕上像素点的集合和颜色，叫做光栅化（Rasterization），也叫做扫描线算法（Scanline
+Algorithms）。
+
+多年以前的 CRT 显示器需要扫描显示。因此它就有两种不同的扫描方法：
+
+\begin{itemize}
+\item
+  奇数场优先；
+\end{itemize}
+
+奇数场优先就是优先画出奇数场的扫描线，然后回扫；（回到第一个地方）而偶数场的扫描线就先暂且留在上一帧的位置。
+
+\begin{itemize}
+\item
+  偶数场优先；
+\end{itemize}
+
+和奇数场优先相反。
+
+\begin{itemize}
+\item
+  逐行显示
+\end{itemize}
+
+不区分上下／奇偶场。
+
+\hypertarget{header-n149}{%
+\paragraph{帧缓冲存储器}\label{header-n149}}
+
+存储器中包含了每个像素的信息。
+
+拿出对应像素点的信息，放到对应的寄存器（Register）之中，然后送给显示控制器来干活；最终显示出来。
+
+彩色的呢复杂一点。
+
+有三个独立的显示控制器（R/G/B）共同显示彩色。
+
+因此就需要三重显示控制器。
+
+\begin{quote}
+P.S. 部分的显示系统还包括了 Alpha
+通道（也就是不透明度的控制）。但是并不存在一种「Alpha
+显示控制器」。在此之前他就已经被平摊到 R/G/B 通道上了。
+\end{quote}
+
+\hypertarget{header-n157}{%
+\subsubsection{OpenGL 的基本图元绘制}\label{header-n157}}
+
+\hypertarget{header-n158}{%
+\paragraph{定义顶点}\label{header-n158}}
+
+顶点是一切东西的开始和基础。
+
+由它才产生出了点、线、多边形，等等。
+
+\hypertarget{header-n161}{%
+\subparagraph{\texorpdfstring{\texttt{glVertex*}}{glVertex*}}\label{header-n161}}
+
+\begin{quote}
+\texttt{*} 代表这个函数有后缀。合理的后缀形似：
+\end{quote}
+
+\begin{itemize}
+\item
+  glVertex2i
+\end{itemize}
+
+2 代表这个顶点在二维空间之中。
+
+i 代表这个点的坐标值为整数。
+
+s 代表这个点的坐标值为段整数。
+
+\begin{itemize}
+\item
+  glVertex3f
+\end{itemize}
+
+3 代表这个顶点在三维空间之中。
+
+f 代表这个点的坐标值为单精度浮点数。
+
+d 代表这个点的坐标值为双精度浮点数。
+
+以此类推。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{glBegin(GL_POINTS);}
+
+\NormalTok{...}
+
+\NormalTok{glEnd();}
+\end{Highlighting}
+\end{Shaded}
+
+\texttt{glBegin} 和 \texttt{glEnd} 之间的部分就是我们定义的顶点们。
+
+glBegin 中有一些参数，决定了怎么处理 glBegin 和 glEnd 之间定义的图元。
+
+参数去看 PPT。这里记不下来。
+
+\hypertarget{header-n181}{%
+\paragraph{Example}\label{header-n181}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\NormalTok{glClear(GL_COLOR_BUFFER_BIT);}
+
+\NormalTok{glColor3f(}\FloatTok{0.2}\NormalTok{, }\FloatTok{0.7}\NormalTok{, }\FloatTok{0.7}\NormalTok{);}
+
+\NormalTok{glPointSize(}\FloatTok{5.0}\NormalTok{);}
+
+\NormalTok{glBegin(GL_POINTS);}
+
+\NormalTok{glVertex2f(}\FloatTok{0.0}\NormalTok{, }\FloatTok{2.0}\NormalTok{);}
+
+\NormalTok{...}
+
+\NormalTok{glEnd();}
+
+\NormalTok{glFlush();}
+\end{Highlighting}
+\end{Shaded}
+
+P.S. 可以在 \texttt{glBegin()} 和 \texttt{glEnd()} 之间通过
+\texttt{glColor3f} 来修改顶点的颜色。
+
+不同的顶点颜色组装在一起会产生渐变颜色效果。这是双线性插值的结果。以后会讲到。
+
+\hypertarget{header-n185}{%
+\subsubsection{基本图元光栅化算法}\label{header-n185}}
+
+最基本的事情。我们都很关心。
+
+\hypertarget{header-n187}{%
+\paragraph{啥是基本图元啊？}\label{header-n187}}
+
+Primitive Symbols。什么算基本？
+
+点、线、圆、一般函数曲线、字符。
+
+\hypertarget{header-n190}{%
+\paragraph{光栅化／扫描线算法}\label{header-n190}}
+
+把原来的一个美好的几何图形给拍扁成一堆像素点。
+
+这个过程就是光栅化／扫描线算法。
+
+\hypertarget{header-n193}{%
+\paragraph{Fragment：片元}\label{header-n193}}
+
+光栅化完成之后，原来那个图元对应的像素点集合就叫片元区域。
+
+\hypertarget{header-n195}{%
+\paragraph{光栅化}\label{header-n195}}
+
+\hypertarget{header-n196}{%
+\subparagraph{点的光栅化}\label{header-n196}}
+
+P(x0, y0) 怎么变呢？
+
+\begin{quote}
+法一：直接取整数部分。
+\end{quote}
+
+\begin{quote}
+法二：四舍五入。
+\end{quote}
+
+这两者区别不太大，但是总的来说四舍五入的像素点偏移会更少。
+
+如果说直接取整数部分，有可能会产生整体像左下角（0, 0 位置）的偏移。
+
+但总归，点的光栅化都是容易的。
+
+\hypertarget{header-n205}{%
+\subparagraph{直线的光栅化}\label{header-n205}}
+
+在数学中，直线的斜截式方程为 \(y = k x + b\)。
+
+但事实上计算机不会处理无限长的直线。它只会处理有限的线段。
+
+因此我们一般会提供起点和终点 P1(x1, y1) - P2(x2,
+y2)。只画这两点构成的线段。
+
+平凡的四种线段：\(y = k\)，\(x = k\)，\(x = y\)，\(x = -y\)。这个光栅化过于简单，不多谈。
+
+我们可以直接把它简化为点的光栅化问题。把这个线段给切分成一些点的集合（按照一定的切分粒度），然后对每一个点进行光栅化。
+
+在斜率 k 绝对值小于 1 的时候就用变化的 x 来求 y。
+
+在 k 绝对值大于 1 的时候就用变化的 y 来求 x。
+
+但这个算法非常之慢。正常人类不会用的。
+
+\hypertarget{header-n214}{%
+\subparagraph{直线的光栅化（人类的方法）}\label{header-n214}}
+
+DDA 算法：Digital Difference Algorithm。
+
+这是一个增量计算法；也就是每一步计算都跟上一步的计算结果有关系。
+
+我们知道起点和终点；先把起点给光栅化掉再说。
+
+然后我们就有了另一个参量：当前绘制的点。
+
+我们判断这个当前点是偏向了 y 轴（向上偏了）还是偏向了 x 轴（向下偏了）。
+
+如果斜率偏小，那下一步就往右走；如果斜率偏大，那下一步就往上走。
+
+如果不偏不倚；刚好一样，那就往右上方走。
+
+这么办可以保证比较高的效率，同时 trivial 的四种情况也可以直接处理掉。
+
+当然这种方法就仅仅适用于直线而已。其他的曲线是不可以用的。
+
+附注：一般来说结尾点我们是不画的。因为经常会画连续的方法；
+
+\hypertarget{header-n225}{%
+\subparagraph{直线的光栅化（Bresenham 算法）}\label{header-n225}}
+
+这个方法太快啦！所以它也被叫做「快速增量算法」。
+
+基本思想是根据一个决策项 p 的正负，来选择像素点的位置。
+
+本质上，需要在 x 方向上移动 A 格，同时在 y 方向上移动 B 格。
+
+那么我们只需要决定在什么时候往右走，在什么时候往上走，就好了。
+
+不需要进行那么多次的除法运算（说的就是 DDA），
+
+思路是绝对的简单：我可以选择的像素点位置谁离真实值比较近，我就选谁走。
+
+本算法所需要进行的计算仅仅包括「×2」和「-」。对应到位运算就是仅仅包括左移一位和减法器。
+
+比起那些动不动要乘要除的浪费 CPU Cycle 的那些算法，这个算法简直太快了！
+
+\hypertarget{header-n234}{%
+\subparagraph{圆的光栅化}\label{header-n234}}
+
+圆有二次多项式表示。
+
+圆也有极坐标表示。
+
+圆也有 Brosenham 栅格化算法。
+
+看书 P110.
+
+\end{document}

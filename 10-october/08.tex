@@ -1,0 +1,740 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Oct 8 2019}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-302}\label{header-n2}}
+
+Error Recovery\ldots 今天要讲的是错误恢复。
+
+在我们 Parsing 的时候遇到看起来不对的情况的时候，该怎么办呢？
+
+\begin{itemize}
+\item
+  直接停下来，爆出错误
+\item
+  记录一个错误，但还是试着向下做 Parse
+\end{itemize}
+
+方法 II
+有什么好处呢？可以尽量一次性发现更多的错误，减少编译次数，提高编译效率。
+
+几乎所有的 Parser 方式（无论是 LL、LR 还是其他的）都可以适用。
+
+不光是对 Parser 是这样，Lex 跟 Semantic Check 也差不多是这么回事。
+
+\hypertarget{header-n13}{%
+\subsubsection{如何做 Recovery？}\label{header-n13}}
+
+我们有两种还不错的策略：局部的，全局的。
+
+\hypertarget{header-n15}{%
+\paragraph{Local Strategy}\label{header-n15}}
+
+本地策略，即直接在语法规则里面加入一些跟「ERROR」有关的规则，使得在一些语句块里面的
+ERROR 不会影响到全局的 Parsing。
+
+举例：
+
+\texttt{;}之后，以及\texttt{(}、\texttt{)}之间是可以看成一个相对独立的
+Scope 的（不会对全局造成影响）。
+
+因此如果我们在 \texttt{;} 之前和 \texttt{()} 之间发现了一个
+ERROR，就直接把这一块抛掉，但不影响后续的 Parsing。
+
+表达式写作 \texttt{exp\ -\textgreater{}\ (ERROR)}，即括号中包含一个
+ERROR 时会被直接忽略掉，并继续分析后续的内容。
+
+这个唤作 Local Strategy。
+
+不过在语法规则比较复杂时，ERROR 规则可能有点复杂。
+
+\hypertarget{header-n23}{%
+\paragraph{Global Strategy}\label{header-n23}}
+
+全局策略？那是啥？
+
+Global
+会提前扫描一遍整个程序并发现问题，并且决定对程序如何做出\textbf{最小改动}来使得程序变得无误。
+
+这个好处是什么呢？相比 Local Strategy，GS 可以尽量保留程序原意，而不是像
+LS 直接抛弃掉了有问题的这一块。
+
+但是，如何决定作出那个「最小改动」，也是 GS 的难点了。
+
+\hypertarget{header-n28}{%
+\paragraph{Burke-Fisher Error Repair}\label{header-n28}}
+
+BF 错误修复法：简单暴力（x）
+
+对一段程序中的 k 长度的 Token
+序列在每一个位置都尝试一次插入、删除、替换不同 Token 的操作。
+
+并每次都做一次 Parsing 尝试，哪一种能够进行最长时间的 Parsing
+（能走到最远的地方）就选择哪一种。
+
+\begin{quote}
+随便想一下都知道这种方法的效率有多低了\ldots 但凡 k 稍微取大一点，Token
+的数量稍微多一点就爆炸了。
+\end{quote}
+
+\begin{quote}
+作者也说了：Use this merely in uncommon case.
+\end{quote}
+
+\hypertarget{header-n36}{%
+\subsubsection{Examples}\label{header-n36}}
+
+像是 \texttt{C++} 这样的语言，在发现缺少类型标识符的时候，会默认将其定为
+\texttt{int} （\texttt{C} 的历史遗留）来分析后面的词法。
+
+（当然 \texttt{C++} 在这里是会报告错误的）
+
+\hypertarget{header-n39}{%
+\subsubsection{Parser Generator}\label{header-n39}}
+
+生成分析器，咱们得用 \texttt{Yacc}。
+
+这位爷的名字意思是 Yet Another Compiler Compiler。哈。
+
+\hypertarget{header-n42}{%
+\subsubsection{Yacc Syntax}\label{header-n42}}
+
+\hypertarget{header-n43}{%
+\paragraph{Example}\label{header-n43}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BaseNTok{%\{}\NormalTok{Supplementary Code%\}}
+
+\NormalTok{%definition}
+\NormalTok{……}
+\NormalTok{%definition}
+
+\NormalTok{%%}
+
+\NormalTok{Rules}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{header-n45}{%
+\paragraph{Supplementary Code}\label{header-n45}}
+
+绝类 Lex，这么写：
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BaseNTok{%\{}
+ \DataTypeTok{int}\NormalTok{ yylex(}\DataTypeTok{void}\NormalTok{);}
+ \DataTypeTok{void}\NormalTok{ yyerror(}\DataTypeTok{char}\NormalTok{ *s) \{ EM_error(EM_tokPos, “%s”, s)\}  }
+\BaseNTok{%\}}
+\end{Highlighting}
+\end{Shaded}
+
+声明一些常用的 Helper 函数。
+
+\hypertarget{header-n49}{%
+\paragraph{\texorpdfstring{\texttt{\%definition}}{\%definition}}\label{header-n49}}
+
+\begin{itemize}
+\item
+  \texttt{\%token}
+\end{itemize}
+
+这是 Terminal。
+
+\begin{itemize}
+\item
+  \texttt{\%start}
+\end{itemize}
+
+这是 Non-Terminal。
+
+\begin{itemize}
+\item
+  \texttt{\%left} / \texttt{\%right} / \texttt{\%nonassoc}
+\end{itemize}
+
+分别指左结合、右结合、不结合。
+
+用它们可以声明运算符的优先级、结合律。如：
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{%left}\NormalTok{ PLUS MINUS}
+\KeywordTok{%left}\NormalTok{ TIMES}
+\KeywordTok{%left}\NormalTok{ UMINUS}
+\end{Highlighting}
+\end{Shaded}
+
+说明了 PLUS、MINUS、TIMES 和 UMINUS 都是左结合的；而且，UMINUS
+的优先级高于 TIMES，TIMES 的优先级又高于 PLUS 和 MINUS。
+
+\hypertarget{header-n65}{%
+\paragraph{\texorpdfstring{\texttt{\%union}}{\%union}}\label{header-n65}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{%union}\NormalTok{ \{}
+	\DataTypeTok{int}\NormalTok{ num;}
+\NormalTok{	string id;}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+生命了一个联合，于是我们就可以在 \texttt{\%token} 和 \texttt{\%type}
+的时候使用 \textless\textgreater{} 来取用 Union 中的其中一枚。
+
+语法写作 \texttt{\%token\textless{}num\textgreater{}} 或是
+\texttt{\%type\textless{}int\textgreater{}}。
+
+\hypertarget{header-n69}{%
+\paragraph{Rules}\label{header-n69}}
+
+\texttt{\%\%} 后面的就是规则了。咋写？
+
+\begin{Shaded}
+\begin{Highlighting}[]
+
+\BaseNTok{%%}
+\StringTok{stm}\NormalTok{:	ID ASSIGN ae}
+\NormalTok{	  |	ID ASSIGN be}
+
+\StringTok{be}\NormalTok{:	be OR be}
+\NormalTok{	|	be AND be}
+\NormalTok{	|	ae EQUAL ae}
+\NormalTok{    |	ID}
+
+\StringTok{ae}\NormalTok{:	ae PLUS ae}
+\NormalTok{    |	ID}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{header-n72}{%
+\paragraph{操作}\label{header-n72}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{exp	:	INT			\{$$ = $1;\}}
+\end{Highlighting}
+\end{Shaded}
+
+从上向下优先级从高到低；最左边的代名词为 \texttt{\$\$}，:
+右边的符号一个个命名为 \texttt{\$1、\$2、\$3...}。
+
+\{\} 里面是在条件满足的时候执行的代码。你可以嵌入各种 \texttt{C++}
+代码。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{exp	:	UMINUS exp	  	}\KeywordTok{%prec}\NormalTok{ UMINUS  \{$$ = -$2; \}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{quote}
+\texttt{\%prec} 代表这条规则的优先级和 \texttt{UMINUS} 一样。
+\end{quote}
+
+\begin{quote}
+这就属于手动指定优先级。
+\end{quote}
+
+\hypertarget{header-n81}{%
+\paragraph{Burke-Fisher 法支持}\label{header-n81}}
+
+在我们插入的时候，当然不可能随便找 token 或者是 int 去插入。
+
+（token 那么多\ldots\ldots）
+
+我们通过
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{%value}\NormalTok{ INT\{0\}}
+
+\KeywordTok{%value}\NormalTok{ STRING \{}\StringTok{""}\NormalTok{\}}
+
+\KeywordTok{%value}\NormalTok{ ID \{make_id }\StringTok{"bogus"}\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+来提供一些各种 Token 类型的默认值供 Burke-Fisher 法使用。
+
+\hypertarget{header-n87}{%
+\subsubsection{不只是 True / False}\label{header-n87}}
+
+在 Parsing 步骤结束之后，我们还需要进行后续的 Semantic
+Check。因此如果我们在 Parse 的时候仅仅告诉结果 True /
+False，那是不够的。（你这样后面的各位怎么开展工作）
+
+我们需要把我们 Parse
+出来的结果变成一些有效的数据，提供给后面的工位让他们干活。
+
+这个唤作「模块化」。
+
+\hypertarget{header-n91}{%
+\subsubsection{Intermediate Representation}\label{header-n91}}
+
+中间表达式是用来在 Compiler 内部各个模块之间的通信交流所用到的数据格式。
+
+主要由下面两部分构成：
+
+\hypertarget{header-n94}{%
+\paragraph{抽象语法树}\label{header-n94}}
+
+Abstract Syntax Tree.
+
+\hypertarget{header-n96}{%
+\paragraph{符号表（环境相关）}\label{header-n96}}
+
+Environment Table.
+
+主要包含 Variables, Functions, User-defined Types 等基础信息。
+
+\hypertarget{header-n99}{%
+\subsubsection{注意}\label{header-n99}}
+
+有三个事实需要您注意。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  存在递归定义的 Type。
+\item
+  CFG, Control Flow Graph，控制流图用来定义程序的构成。
+\item
+  Parse tree can be used to represent the internal structures of the
+  program.
+\end{enumerate}
+
+所以说了这些，树用来表示这种内部语法是非常合适的。因此我们就选用了 Tree
+这种数据结构来记录我们的抽象语法。
+
+\hypertarget{header-n109}{%
+\subsubsection{Semantic Rules}\label{header-n109}}
+
+事实上满足一个语义规则时我们所做的事情可以是：
+
+给一棵树添枝加叶；
+
+更新一个全局值；
+
+打印一个值，等等。
+
+\begin{quote}
+Warning: 更新全局值、打印值等等这些操作都是有「Side
+Effect」的。如在遇到错误、需要回滚时，或是做 Burke-Fisher
+暴力法时，可能会多次分析同一段
+Token。如果说没有处理好，可能会导致全局变量混乱，或者重复打印值。
+\end{quote}
+
+\hypertarget{header-n116}{%
+\subsubsection{Syntax Tree Structures}\label{header-n116}}
+
+事实上这棵语法树和我们在 \texttt{Lab\ 1} 中做的 Straightline 很类似啊。
+
+这里有一些我们可以 call 的函数：
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{// Define operations on the data structures}
+
+\NormalTok{mknode(op, left, right);}
+
+\NormalTok{mkleaf(id, entry);}
+
+\NormalTok{mkleaf(num, val);}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{header-n120}{%
+\subsubsection{Tiger 的语法树结构}\label{header-n120}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+ \KeywordTok{typedef} \KeywordTok{struct}\NormalTok{ A_var_ *A_var ;}
+ \KeywordTok{struct}\NormalTok{ A_var_ \{}
+	\KeywordTok{enum}\NormalTok{ \{ A_simpleVar, A_fieldVar, A_subscriptVar \} kind ;}
+\NormalTok{	A_pos pos ;}
+	\KeywordTok{union}\NormalTok{ \{}
+\NormalTok{		S_symbol simple ;}
+		\KeywordTok{struct}\NormalTok{ \{ A_var var ; S_symbol sym ; \} field ;}
+		\KeywordTok{struct}\NormalTok{ \{ A_var var ; A_exp exp ; \} subscript ;}
+\NormalTok{	\} u ;}
+\NormalTok{ \}}
+ 
+\NormalTok{A_var A_SimpleVar(A_pos, S_symbol);}
+\NormalTok{A_var A_FieldVar(A_pos, A_var, S_symbol);}
+\NormalTok{A_var A_SubscriptVar(A_pos, A_var, A_exp);}
+
+\NormalTok{A_exp A_VarExp(A_pos, A_var);}
+\NormalTok{A_exp A_NilExp(A_pos);}
+\NormalTok{A_exp A_IntExp(A_pos, }\DataTypeTok{int}\NormalTok{);}
+\NormalTok{A_exp A_StringExp(A_pos, string);}
+\NormalTok{A_exp A_CallExp(A_pos, S_symbol, A_expList);}
+\NormalTok{A_exp A_OpExp(A_pos, A_oper, A_exp, A_exp);}
+\NormalTok{A_exp A_RecordExp(A_pos, S_symbol, A_efieldlist);}
+\NormalTok{A_exp A_SeqExp(A_pos, A_expList);}
+
+\NormalTok{A_exp A_AssignExp(A_pos, A_var, A_exp);}
+\NormalTok{A_exp A_IfExp(A_pos, A_exp, A_exp, A_exp);}
+\NormalTok{A_exp A_WhileExp(A_pos, A_exp, A_exp);}
+\NormalTok{A_exp A_BreakExp(A_pos);}
+\NormalTok{A_exp A_ForExp(A_pos, S_symbol, A_exp, A_exp, A_exp);}
+\NormalTok{A_exp A_LetExp(A_pos, A_decList, A_exp);}
+\NormalTok{A_exp A_ArrayExp(A_pos, S_symbol, A_exp, A_exp);}
+
+\NormalTok{A_SeqExp ( A_pos pos, A_expList exp ) ; }
+
+\NormalTok{A_dec A_FunctionDec(A_pos, A_funcdecList);}
+\NormalTok{A_dec A_VarDec(A_pos, S_symbol, S_symbol, A_exp);}
+\NormalTok{A_dec A_TypeDec(A_pos, A_nametyList);}
+
+\NormalTok{A_ty A_NameTy(A_pos, S_symbol);}
+\NormalTok{A_ty A_RecordTy(A_pos, A_fieldList);}
+\NormalTok{A_ty A_ArrayTy(A_pos, S_symbol);}
+
+\NormalTok{A_field A_Field(A_pos, S_symbol, S_symbol);}
+\NormalTok{A_fieldList A_FieldList(A_field, A_fieldList);}
+\NormalTok{A_expList A_ExpList(A_exp, A_expList);}
+\NormalTok{A_fundec A_Fundec(A_pos, S_symbol, A_fieldList, S_symbol, A_exp);}
+\NormalTok{A_fundecList A_FundecList(A_fundec, A_fundecList);}
+\NormalTok{A_decList A_DecList(A_dec, A_decList);}
+\NormalTok{A_namety A_Namety(S_symbol, A_ty ty);}
+\NormalTok{A_nametyList A_NametyList(A_namety, A_nametyList);}
+\NormalTok{A_efield A_Field(S_symbol, A_exp);}
+\NormalTok{A_efieldList A_FieldList(A_efield, A_efieldList);}
+
+\KeywordTok{typedef} \KeywordTok{enum}\NormalTok{ \{A_plusOp, A_minusOp, A_timeOp, A_divideOp, A_eqOp, A_neqOp, A_ltOp, A_leOp, A_gtOp, A_geOp\} A_oper;}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{header-n122}{%
+\subsubsection{Position}\label{header-n122}}
+
+当出现剖析错误时\ldots\ldots 能告诉我 ERROR 在哪儿吗？
+
+\begin{verbatim}
+int x == 3;
+1,5:  ^^ ERROR: blablabla
+\end{verbatim}
+
+比如像这样和谐美妙的错误提示\ldots 写 Lab 经常见的错误提示\ldots（x）
+
+Bison 可以提供错误位置的提示。然而 Yacc 做不到。
+
+所以我们还是用 Bison 好啦。
+
+\hypertarget{header-n128}{%
+\subsection{SE-227}\label{header-n128}}
+
+CSE，CSE，LaLaLaLaLa
+
+这门课还不如改名叫做「Introduction to the File Systems」
+
+\hypertarget{header-n131}{%
+\subsubsection{Hints}\label{header-n131}}
+
+\begin{itemize}
+\item
+  Soft Link 和 Hard Link
+\item
+  File Read \& Timeline
+\end{itemize}
+
+\hypertarget{header-n137}{%
+\subsubsection{One Layer Deeper}\label{header-n137}}
+
+再往下看一层，我们可以看出来 PIO 是最接近磁盘底层的抽象。
+
+Load/Store。无所谓 Block 代表的是数据，是 META
+data。总归都成了一堆数据。
+
+这里有一个关键字 \texttt{volatile}，指明了这种从 Disk 到 Register
+的映射是虚假的。要告诉 Compilers 和 OS，这不是真的 DRAM，这是 Disk 啊。
+
+\hypertarget{header-n141}{%
+\subsubsection{Bus}\label{header-n141}}
+
+总线？
+
+啥是 Bus 呢？在所有的设备之间连起来的一条车道，每个
+Component（小组件）都可以往里面丢信息，从里面吃信息。
+
+每一次 Bus 的「开行」会带来一系列的比特位。为了不造成混淆，每个
+Component 都分到其中特定的一些位段。
+
+其中，绝大部分都被 Memory 吃掉了。（啧
+
+事实上，总线上面跑的绝大部分就是 Virtual Memory Address，虚拟内存地址。
+
+但事实上，其中有（很少）一部分被空出来了，还需要给
+Network、Keyboard、Disk、Monitor 用。
+
+在 ICS 里面简化起见，就说这里面的内容全部都是
+VMA。（事实上还有一些跟着在总线里跑的东西。）
+
+\hypertarget{header-n149}{%
+\paragraph{Broadcasting}\label{header-n149}}
+
+广播。
+
+总线上的两个组件通信时，总线上所有人都可以了解到其中内容，是谓广播。
+
+同时任何一个总线组件也都可以截获任何总线 Transaction。
+
+简单方便，也不安全。
+
+\hypertarget{header-n154}{%
+\paragraph{Bus Judgement}\label{header-n154}}
+
+总线仲裁。确认每一时刻总线归谁使用，避免出现中间 Spy。
+
+\hypertarget{header-n156}{%
+\subsubsection{Transaction}\label{header-n156}}
+
+咱们来试着来一回 Transaction 吧。
+
+使用的是一种 READY Status 的方式。
+
+总归，总线传递的是一串很长的数字，也可以把它看作是一串 1/0
+二进制位的组合。
+
+事先，每个总线上的 Component
+都已经了解到了自己所占有的总线位范围，知道了自己应该去 Observe 哪些位。
+
+\begin{quote}
+BIOS 会感知你插入了多大块的内存，并首先给 Memory 分配合适的二进制位。
+
+基础的一些设备，如键盘/IDE 都是写死的（IBM 干的），因此始终都需要
+Special Fix（特别处理）。
+
+其他的设备，如 Plug-in and Use 型设备都是由 OS 动态分配的。
+\end{quote}
+
+\hypertarget{header-n165}{%
+\paragraph{Examples}\label{header-n165}}
+
+在 CPU 发出一条指令，如
+
+\begin{verbatim}
+LOAD 1742, R1
+\end{verbatim}
+
+的时候，出了 CPU 就将其编码为对应的总线请求，Memory
+发现这跟我有关了就去读取内存，读出来之后又通过总线还给 CPU，CPU
+再将其放在自己的 Register 里。
+
+\hypertarget{header-n169}{%
+\subsubsection{NoC}\label{header-n169}}
+
+现代的 Bus 替代品，Network on
+Chip，芯片载网络。不仅是一条直路，而包含了更多的支路、甚至路由；形成了一整个网络。
+
+每个请求都包含了一个「地址」+「命令」。比起传统的总线来说已经快得多了。
+
+\hypertarget{header-n172}{%
+\subsubsection{Summary}\label{header-n172}}
+
+Processor、Memory、I/O Device
+
+之间是一个三角关系。Processor 和 IO Device，Processor 和 Memory，Memory
+和 I/O Device 都是可以互相通信的，via 总线。
+
+\hypertarget{header-n175}{%
+\subsubsection{Crash Consistency}\label{header-n175}}
+
+崩溃发生后，能保持一致吗？
+
+如下策略：
+
+\hypertarget{header-n178}{%
+\paragraph{\texorpdfstring{ALL\emph{OR}NOTHING}{ALLORNOTHING}}\label{header-n178}}
+
+要么全有要么全完蛋
+
+只要一次在三个地方写，就可以保证恢复的时候能做到
+\texttt{ALL\_OR\_NOTHING}。要么全写好要么全恢复。
+
+NEW／OLD is OK。Bad Inconsistency isn't OK。
+
+\hypertarget{header-n182}{%
+\paragraph{Recovering from Crash}\label{header-n182}}
+
+上面的这些所有都是文件系统的抽象想象，Disk 本身不知道你在搞些什么的。
+
+\begin{itemize}
+\item
+  Synchronous meta-data update + fsck
+\end{itemize}
+
+Meta-Data 很重要，因此保证写穿！其他的有问题咱们再 fscheck 吧（
+
+\begin{itemize}
+\item
+  Soft update
+\end{itemize}
+
+不展开说。
+
+\begin{itemize}
+\item
+  Logging/Journaling
+\end{itemize}
+
+记日志。目前的 \texttt{Linux} \texttt{ext3/ext4} 都是支持 Logging
+的，这种机制可以保证 Consistency。
+
+每次做任何的 Write 操作，都会在日志里面留下特别的印记。
+
+顺序：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  (D)先把数据块写入 Disk；
+\end{enumerate}
+
+\begin{quote}
+（如果此时断电，只是白写了一堆 Disk，但是没有 metadata。没关系）
+\end{quote}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  (Jm)再把 MetaData 连着当前时间等等信息写入 Journal 区；
+\end{enumerate}
+
+\begin{quote}
+（如果此时断电，还是 Nothing，因为原有的 Disk 里面没有被写入任何
+MetaData。只是在日志里。）
+\end{quote}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  (Jc)最后进行 Commit。非常非常细小的操作。
+\end{enumerate}
+
+\texttt{/*\ Critical.\ 这个操作一定不能出问题。\ */}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  (M)最后将 MetaData 写入 File System，此时就不需要 Flush
+  了。因为就算断电数据丢失，Journal 也可以保证我能恢复这个 MetaData 了。
+\end{enumerate}
+
+假如我们直接往 Disk 里写
+MetaData，很可能在开始写的时候破坏了原有的数据，但在中途断电的时候无法回去。
+
+\begin{quote}
+Ext 文件系统之中有个模式叫做 Full Journal
+Mode（连同数据也一起写在日志里。您想想这多慢呢\ldots）
+
+还有个模式叫做 Ordered Journal Mode。数据不进日志，但是 MetaData
+进日志。
+
+这是默认模式。因为 FJM 太慢了\ldots{}
+\end{quote}
+
+\hypertarget{header-n221}{%
+\subsubsection{Improvements: Journaling without
+Ordering}\label{header-n221}}
+
+加一个 Checksum 校验和，将 Data 和 MetaData 共同计算出一个校验和放置在
+Commit 末尾。
+
+\hypertarget{header-n223}{%
+\section{CSE 期中考试悲报}\label{header-n223}}
+
+10 月 29 日星期二
+
+\end{document}
