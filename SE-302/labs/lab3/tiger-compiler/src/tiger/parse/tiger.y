@@ -361,11 +361,14 @@ tydec_one: TYPE ID EQ ty {
     $$ = new A::NameAndTy($2, $4);
 };
 
-tydeclist: tydeclist tydec_one {
-    $$.tydeclist = new A::NameAndTyList($2, $1.tydeclist);
+tydeclist: tydec_one tydeclist {
+    $$.tydeclist = new A::NameAndTyList($1, $2.tydeclist);
+}
+| tydec_one {
+    $$.tydeclist = new A::NameAndTyList($1, nullptr);
 };
 
-tydec: LBRACE tydeclist RBRACE {
+tydec: tydeclist {
     $$ = $1.tydeclist;
 } | tydec_one {
     $$ = new A::NameAndTyList($1, nullptr);
