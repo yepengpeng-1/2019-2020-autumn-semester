@@ -1,0 +1,583 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs}
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{2019/09/17}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-302}\label{header-n2}}
+
+现在我们开始讨论如何实现上节课中提到的「分割」、「识别」。
+
+首先，我们给出一个字串 S，且已知一个正则表达式 R。我们总得先实现如何判断
+S 是否属于 R 的 Closure。
+
+这个该如何实现（Implementation）呢？
+
+需要用到一个东西：
+
+\hypertarget{header-n7}{%
+\subsubsection{Finite Automata（有限自动机）}\label{header-n7}}
+
+有限自动机（自动机里面简单的那种）
+
+之前提过，一个 RegEx 就是一个 Specification，描述性的。
+
+而这里的 Automata，是实现自动机的一种途径。
+
+一个有限自动机，一个五元组： -\/-\/- 三个重要元素
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  输入的一个字母表（Alphabet Σ），说明了输入一定是这些字母构成的
+\item
+  一组状态（States S），状态之间可以互相转移（Transition）。
+  如果把这些状态画成顶点圆，状态之间转移的可能性看作边箭头，那你就有了一个有向图。
+\item
+  一个初始状态 n。
+  在图中表示为一个圆圈，上面有一个不从任何状态指向他的箭头。 -\/-\/-
+  两个辅助元素
+\item
+  一组可接受的状态 F (是 S 的子集)，在达到 F 的时候停止。
+  在上面的有向图中，终态画成双圈。
+\item
+  状态之间转移的可能性，即 Transitions；对应到图里的边。
+\end{enumerate}
+
+有一些输入会导致状态机卡死，在某一点出无处可去。
+
+遇到这种情况，我们就说这些输入不属于这个有限状态机。
+
+\hypertarget{header-n25}{%
+\subsubsection{存在不可确定的有限自动机}\label{header-n25}}
+
+（中文书 P15）
+有一些自动机的定义中，从单个状态中存在多种相同符号的转移方式。也可能存在一些标志有ε的边，这种边的转换不需要吃进任何字符，就可以完成状态的转换。
+
+这种不完全决定于输入的有限自动机叫做 Non-Deterministic Finite
+Automana，简称为 NFA。
+
+而上一小节里面的，不存在这种奇怪情况的自动机叫做 Deterministic Finite
+Automana，简称为 DFA。
+
+区分它们的区别。
+
+\begin{quote}
+另外，从理论上来说，我们的图灵自动机需要的内存是无限的；而在这里的
+Finite Automata 需要的内存理论上是有限的。只需要编码当前状态就够了。
+\end{quote}
+
+\hypertarget{header-n32}{%
+\subsubsection{区分 NFA ／ DFA}\label{header-n32}}
+
+DFA：Deterministic。要么走不动，要么一条路走到黑。不存在什么随机状况。
+
+但对 NFA：有一些地方的走法（Transaction）不唯一，即存在 Multiple
+Choice（多种走法且都合法），甚至有的地方还能不读取字符直接走（Epsilon
+Move）。
+
+当然，不是每种走法都可以到达终点。
+
+但是对 NFA 来说，只要有一种情况可以到达 Final State 就算 Accept 了。
+
+通常来说，NFA 的有向图表示比 DFA 要简单。
+
+理论上 NFA 跟 DFA 能力相同，都可以识别 RegEx。
+
+但事实上 DFA 容易实现（因为没有 Non-Deterministic
+的分支，方便写代码），可惜难以构造（难以用 DFA 来写出 RegEx 的表达）
+
+而 NFA 刚好相反。用 NFA 可以很方便表示出 RegEx 的形式，但是难以去实现
+NFA 本身。
+
+所以我们讨巧一些，先用 NFA 表示 RegEx 的规则，再将其转换为 DFA
+来实现。如何？
+
+\hypertarget{header-n42}{%
+\subsubsection{大象放进冰箱三部曲}\label{header-n42}}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  正则表达式转换为 NFA；
+\item
+  NFA 转换为 DFA；
+\item
+  验证正则表达式，直接查 DFA 构造出的表就可以了。
+\end{enumerate}
+
+\hypertarget{header-n50}{%
+\paragraph{第一步：如何把正则表达式转换为 NFA？}\label{header-n50}}
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/17-08-34-49-RegEx.to.NFA.png}
+\caption{}
+\end{figure}
+
+Example:
+
+\texttt{(1\textbar{}0)*1} 这个 RegEx 如何？
+
+\hypertarget{header-n55}{%
+\paragraph{第二步：NFA =\textgreater{} DFA？}\label{header-n55}}
+
+对于那些不确定转换方向的节点，我们选择迭代地搜索出 T
+所可能到达的所有状态，我们叫它 edge（边缘）；另外，还有那些 只经过 ε
+边，不接受任何字符所能到达的顶点。我们称之为 closure（闭包）。
+
+我们现在从 Start
+开始寻找。寻找什么呢？寻找那些同样字符对应不同转换的情况，以及 epsilon
+不吃输入就转换的情况，我们统统把他们构成一整个状态，确保不再出现一个输入字符不能确定的状态。注意，同一个编号的状态现在可能在多处出现；一个大状态可能包含多个不同编号的「原状态」。总之现在，仅仅根据
+Input Char 来决断分类。最后看起来应该像这样：
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/17-08-58-46-dfa.shape.png}
+\caption{}
+\end{figure}
+
+然后，对那些不定方向的 T，我们就能构造出 DFA了。算法参见中文书 P19：
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/17-08-53-32-dfa.code.png}
+\caption{}
+\end{figure}
+
+注意，这里抛弃了那些不可到达的边。由于 DFAedge／Closure
+保证了我们不会去访问那些 Inaccessible
+的边，所以防止了我们的解释器指数爆炸。否则的话，所有状态全部可以随机组合，数量太爆炸了。
+
+但是，最多的状态也只会有 2\^{}n - 1
+种，从而转换的方向也是有限种（虽然也很大了）。
+
+到底是有限的。
+
+DFA 可以用一种神奇的表来表示：
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule
+& 0 & 1\tabularnewline
+\midrule
+\endhead
+S & T & U\tabularnewline
+T & T & U\tabularnewline
+U & T & U\tabularnewline
+\bottomrule
+\end{longtable}
+
+读法是：先看行，以（S，T，U）为例，说的是从 S 点开始，吃到一个 0
+字符可以前往 T，吃到一个 1 字符可以前往 U。其他的同理。
+
+注意，只有 DFA 才能用这种方式表示。NFA 嘛\ldots{} epsilon
+先不谈，首先一个状态吃一个同字符可以前往不同的地方。这就没办法用这种表格来表示了吧。
+
+\hypertarget{header-n84}{%
+\paragraph{工具}\label{header-n84}}
+
+NFA -\textgreater{} DFA 的过程可以使用 Flex／Jlex
+完成。计算机可以帮忙完成这个任务，因为是非常机械的一个操作。最好变成上面那张表的样子，那样我就更好写了。
+
+P.S. DFA 通常比 NFA
+更大，而且不好阅读（废话一堆状态组合在一起成大状态怎么会好读）
+
+\hypertarget{header-n87}{%
+\paragraph{Tweaks：DFA 太大怎么办？}\label{header-n87}}
+
+划分等价类方法。首先分成两部分；Accepting State／Non-Accepting State。
+
+也就是 Final State 跟 Non-Final State。
+
+终结状态跟非终结状态肯定不可能等价（don't ask wsm
+
+于是我们在 Final State Sets 中和 Non-Final State Sets
+中分别比较，观察他们所受到的转化是否有不一样。注意，我们要看的只有输出，看到达这个状态之后，相同的吃入字符能否产生一样的结果，而不考虑指向他的状态是否一致（没有必要，因为如果他们被证明等价，我们就直接让他们指向一样的位置就好了）。
+
+所以到底，我们可以直接比较上面那张表里的行。行一致就等价。
+
+\hypertarget{header-n93}{%
+\subsubsection{最后一步}\label{header-n93}}
+
+我们只需要把 Regular Expression 用 DFA 实现就行了。
+
+\hypertarget{header-n95}{%
+\paragraph{回忆：RegEx 三件套}\label{header-n95}}
+
+\begin{itemize}
+\item
+  最长匹配：尽可能长地匹配字串
+\item
+  优先级匹配：同时可以匹配两种规则，按优先级先后匹配
+\item
+  兜底匹配：遇到 error 不要结束，先兜着，往后看
+\end{itemize}
+
+正则表达式扫描符号：
+
+⟙：Current State：当前位置
+
+⟘：Last State：回退位置
+
+\textbar：String Begin：当前串的起始位置，用\textbar 来标记。
+
+为了实现贪婪匹配，需要同时维持 Current State 和 Last State。Current
+State 往前走来判断是否死，Last State
+用来记录上一个稳妥的可回退位置。String Begin
+是整个串的开头。三个值组合在一起，这样才能实现圆满的 Max Munch。
+
+达成一次匹配之后，我们将当前串的起始位置设定为 Last State，Current State
+亦需要回退；然后将 DFA 放到初始状态，relsama houwy 重新开始吧
+
+\hypertarget{header-n109}{%
+\subsubsection{myth：优先级如何匹配？}\label{header-n109}}
+
+我们回忆一下，NFA -\textgreater{} DFA
+之后，很多原来的状态都会被组合在一起形成大状态。
+
+那么这些状态本身的优先级该如何处理？
+
+Answer：删掉全部低优先级的。（没人权）
+
+\hypertarget{header-n113}{%
+\subsubsection{Lex - 词法分析的生成器}\label{header-n113}}
+
+Lex 能被 Compile \& Link 成一个 .c 程序，作用是一个词法分析器。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\PreprocessorTok{#define ADJ (EM_tokPos=charPos, charPos+=yyleng)}
+\end{Highlighting}
+\end{Shaded}
+
+这类似于一个 Macro，做的操作是调节上述三个 position pointer。
+
+这还是需要写一点点 C的。
+
+Lex 里面定义好的变量：
+
+\begin{itemize}
+\item
+  \texttt{yylval}
+\item
+  \texttt{yyleng}，长度
+\item
+  \texttt{yytext}，token 的内容，\texttt{char\ *} 型
+\end{itemize}
+
+然后我们只需要简单写点 RegEx \& Actions 就好了。
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/17-09-41-58-lex.standard.png}
+\caption{}
+\end{figure}
+
+\hypertarget{header-n129}{%
+\subsection{SE-227}\label{header-n129}}
+
+计算机系统工程，啊。
+
+CSE，CSE，系统工程 \texttt{of} 计算机
+
+\hypertarget{header-n132}{%
+\paragraph{Q\&A:}\label{header-n132}}
+
+\begin{itemize}
+\item
+  What's file name? Data or Metadata?
+
+  \begin{itemize}
+  \item
+    Neither. 它不是文件的一部分。
+  \end{itemize}
+\item
+  What's the actual content of a directory (文件夹 or 目录)? What's its
+  size?
+
+  \begin{itemize}
+  \item
+    （大小仅仅由其中包含文件的数量有关。跟文件实际的大小无关。）
+  \item
+    （翻译成目录比文件夹更好。真的就是书的目录啊！）
+  \end{itemize}
+\item
+  Is a directory data or metadata?
+
+  \begin{itemize}
+  \item
+    （从文件的角度出发，it's data，目录就是个普通的文件。）
+  \item
+    （从更高的文件系统的角度出发，目录，即文件的组织结构就是
+    metadata。）
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{header-n153}{%
+\subsubsection{Directory Entry}\label{header-n153}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{// <ext4.h>}
+
+\KeywordTok{struct}\NormalTok{ ext4_dir_entry \{}
+\NormalTok{    __le32 	inode;}
+    \CommentTok{// uint32_t}
+    
+\NormalTok{    __le16 	rec_len;}
+    \CommentTok{// uint16_t}
+    
+\NormalTok{    __le16 	name_len;}
+    \CommentTok{// uint16_t}
+    
+    \DataTypeTok{char}\NormalTok{ 	name [EXT4_NAME_LEN];}
+\NormalTok{\}}
+
+
+\CommentTok{//    File Type:}
+\CommentTok{//    0x0 - Unknown}
+\CommentTok{//    0x1 - Regular File}
+\CommentTok{//    0x2 - Directory}
+\CommentTok{//    0x3 - Character device file}
+\CommentTok{//    0x4 - Block device file}
+\CommentTok{//    0x5 - FIFO}
+\CommentTok{//    0x6 - Socket}
+\CommentTok{//    0x7 - Symbolic link}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{header-n155}{%
+\subsubsection{Two Approaches to Linking}\label{header-n155}}
+
+\hypertarget{header-n156}{%
+\paragraph{Hard Link}\label{header-n156}}
+
+没有新文件被建立。仅仅是新增了一个 Struct 指向一个已经存在的 inode。
+
+需要维护一个 \texttt{ref\_cnt} 来确定 inode 现在被多少次引用。
+
+\begin{itemize}
+\item
+  Hard Link 可以用来实现快捷方式（但应该没什么人用这个吧）
+\item
+  Hard Link \emph{不能}给不同用户不同的权限（因为这是写在 inode 里的）
+\item
+  实现 . 和 .. （指向自己和上级目录）
+\end{itemize}
+
+事实上这个没什么用
+
+\hypertarget{header-n167}{%
+\paragraph{Soft Link}\label{header-n167}}
+
+有新文件被建立，新文件就是 Soft Link
+itself。大小非常小，只和原身文件路径的长度有关。
+
+不需要维护
+\texttt{ref\_cnt}，删除本体，替身无法打开但不会消失。删除替身也不会影响原身。
+
+更类似于我们的快捷方式／替身。
+
+\hypertarget{header-n171}{%
+\subsubsection{File System APIs}\label{header-n171}}
+
+\texttt{A\_Pi}
+
+我们来实际地看看这些 API 吧。不仅关注用法，还关注实现。
+
+\hypertarget{header-n174}{%
+\paragraph{chdir}\label{header-n174}}
+
+change directory / cd：要实现它，必须找到这个目录或者爆一个不存在错
+
+\hypertarget{header-n176}{%
+\paragraph{mkdir}\label{header-n176}}
+
+跟创建普通文件一样，只不过 type = 2 (DIRECTORY)
+
+\hypertarget{header-n178}{%
+\paragraph{creat}\label{header-n178}}
+
+创建一个普通文件
+
+\hypertarget{header-n180}{%
+\paragraph{link}\label{header-n180}}
+
+把一个存在的文件给链接上
+
+\hypertarget{header-n182}{%
+\paragraph{unlink}\label{header-n182}}
+
+把一个文件从目录中拿走（取消链接）。如果 refcnt == 0，那就把文件也干掉。
+
+\hypertarget{header-n184}{%
+\paragraph{rename}\label{header-n184}}
+
+重命名三步走：
+
+unlink creat link
+
+\hypertarget{header-n187}{%
+\paragraph{open. read. write. close.}\label{header-n187}}
+
+C 的 API，但是这些 API 不施加于目录上。这层抽象还是要有的！
+
+\hypertarget{header-n189}{%
+\paragraph{mount / unmount}\label{header-n189}}
+
+挂载／卸载可移动介质。
+
+\hypertarget{header-n191}{%
+\subsubsection{Question \#2}\label{header-n191}}
+
+如果我们挂载一个 \texttt{FAT} 格式的移动介质，不存在 inode
+的情况下我们是如何对其进行索引的？
+
+事实上 FAT 的分层做的是不怎么好的。
+
+这里，OS 帮大忙了。
+
+\texttt{vnode}：Virtualized iNode，软件虚拟出来的一种 inode。
+
+就算实际上你使用的是 FAT 存储，根本没有 inode，
+
+我也可以给你虚拟出一个 Virtual 的 inode，
+
+让 API Caller 可以用上那些 inode 的 API。这些都是以 System Call
+的形式调用的。
+
+\hypertarget{header-n199}{%
+\subsubsection{\texorpdfstring{\texttt{open}
+or\texttt{fopen}？}{open orfopen？}}\label{header-n199}}
+
+\texttt{open} 返回的是一个 \texttt{fd}，而 \texttt{fopen} 返回的是
+\texttt{FILE\ *}。
+
+（\texttt{open} 是 Linux (Unix) 系统提供的 System Call，平台相关）
+
+（\texttt{FILE\ *}其实也是个 libc 提供的宏展开表达式，平台无关）
+
+另外实际上\ldots{}\texttt{fopen} 要比 \texttt{open}
+更快一些。有缓存，有优化。非常棒。
+
+\hypertarget{header-n204}{%
+\subsubsection{三个 inode 时间戳}\label{header-n204}}
+
+\begin{itemize}
+\item
+  atime：上次读取（READ）
+\item
+  mtime：上次修改（WRITE）
+\item
+  ctime：上次 inode 的修改（LINK）
+\end{itemize}
+
+\end{document}

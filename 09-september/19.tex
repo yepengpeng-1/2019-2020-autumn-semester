@@ -1,0 +1,281 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{2019/09/19}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-344}\label{header-n2}}
+
+\begin{quote}
+计算机图形学
+\end{quote}
+
+\hypertarget{header-n5}{%
+\subsubsection{理论性基础}\label{header-n5}}
+
+主要讲一些计算机图形学是啥？研究些什么？跟几何学的渊源？发展和应用？
+
+\hypertarget{header-n7}{%
+\subsubsection{Definition}\label{header-n7}}
+
+\texttt{CG} -\textgreater{} \texttt{Computer\ Graphics}
+
+用计算机来生成、处理、显示「图形」。
+
+\hypertarget{header-n10}{%
+\subsubsection{Problems}\label{header-n10}}
+
+主要问题：模型、动画、渲染。
+
+\begin{itemize}
+\item
+  Modeling
+\item
+  Animating
+\item
+  Rendering
+\end{itemize}
+
+\hypertarget{header-n19}{%
+\subsubsection{Solutions}\label{header-n19}}
+
+CG 的研究范畴
+
+\begin{itemize}
+\item
+  Physical Simulation (物理仿真)
+\item
+  Physical Hardware \& Software (图形软硬件)
+
+  \begin{itemize}
+  \item
+    硬件部分
+
+    \begin{itemize}
+    \item
+      数据采集和测量
+    \end{itemize}
+
+    \begin{quote}
+    从真实世界中通过图形的方式来获取数据
+    \end{quote}
+
+    \begin{itemize}
+    \item
+      传感控制
+    \end{itemize}
+
+    \begin{quote}
+    通过上面获取的数据来干预真实世界
+    \end{quote}
+  \item
+    软件部分
+
+    \begin{itemize}
+    \item
+      矢量绘图软件
+    \end{itemize}
+
+    \begin{quote}
+    绘图软件不用多说，实在太多了。
+    \end{quote}
+
+    \begin{quote}
+    矢量图指的是用顶点和曲线等几何信息来描述的图形，放大不走形
+    \end{quote}
+
+    \begin{itemize}
+    \item
+      3D 建模
+    \end{itemize}
+
+    \begin{quote}
+    3ds max, Maya, etc.
+    \end{quote}
+  \item
+    Graphics Algorithms (图形算法)
+
+    算法就是上面各种应用程序的底层支撑了。
+
+    包括矢量图形处理、渲染基础、动画制作云云。
+  \end{itemize}
+\item
+  Graphics Standard (图形标准)
+\end{itemize}
+
+标准化是非常要紧的一件事情。
+
+\hypertarget{header-n60}{%
+\subsubsection{生成}\label{header-n60}}
+
+\hypertarget{header-n61}{%
+\subsubsection{处理}\label{header-n61}}
+
+\hypertarget{header-n62}{%
+\subsubsection{显示}\label{header-n62}}
+
+\hypertarget{header-n63}{%
+\subsection{SE-302}\label{header-n63}}
+
+Compilers' Notes
+
+\hypertarget{header-n65}{%
+\subsection{Back to Lex}\label{header-n65}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\BaseNTok{%\{}
+
+\BaseNTok{%\}}
+\end{Highlighting}
+\end{Shaded}
+
+在这两个符号之间，我们会潜入一些类似于 C Macro 的东西进去。例如
+\#include、\#define 以及 union 和 struct 的定义。
+
+回忆一下上次里面出现的一些 magic variables:
+
+\begin{itemize}
+\item
+  yylval: 匹配到的字符串所对应的 semantic value (语义值)
+\item
+  yytext: 匹配到的字符串值 (未进行语义解读)
+\end{itemize}
+
+我们的目的就是通过上面所提到的自动机来把我们的输入 String slice 并
+categorize 到不同的类型里，并试图解读出其中的 semantic value
+（语义值）。
+
+我们提供给 Lex 的东西类似于之前的 \textless Token, Lexeme\textgreater{}
+Pair。
+
+观察程序 2-1，我们可以看到提供的一些 RegEx:
+
+\begin{itemize}
+\item
+  \texttt{if}, 对应着 if
+\item
+  \texttt{{[}a-z{]}{[}a-z0-9{]}*}, starts with a-z, contains 0-9a-z. ID
+  type.
+\item
+  \texttt{\{digits\}}, integer typed numeric value.
+\item
+  \texttt{(\{digits\}"."{[}0-9{]}*)\textbar{}({[}0-9{]}*"."\{digits\}},
+  float typed numeric value.
+\item
+  \texttt{("-\/-"{[}a-z{]}*"\textbackslash{}n"\textbar{}("\ "\textbar{}"\textbackslash{}n"\textbar{}"\textbackslash{}t"))+},
+  comments
+\item
+  最后一个永远不要忘记是 Error Token。用来兜底。
+\end{itemize}
+
+每次识别了一个 Token，就需要让 char pointer 往后移动一位。
+
+这个操作定义为 \#define ADJ 宏。
+
+ADJ 宏 =\textgreater{}
+\texttt{EM\_tokPos\ =\ charPos,\ charPos\ +=\ yyleng}
+
+\begin{itemize}
+\item
+  EM\_tokPos: 上次找到的 token 的 position，更新 token 位置，
+\item
+  charPos: 马上要去扫描的字符串的起始位置。
+\end{itemize}
+
+charPos 是自己定义的 Helper，EM\_tokPos 是 Lex 维护的。毕竟他负责解析
+Tokens。
+
+解析完了他知道每个 token 有多长，他是用 yyleng 来记录的。
+
+注意在 macro 阶段我们定义了一种 yylval 类型，它既可以是 int 也可以是
+string 或 double。他们共同占有一个 struct，用 union 来组合在一起。 union
+别忘了。
+
+\end{document}

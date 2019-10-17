@@ -1,0 +1,369 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{2019/09/12}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-344}\label{header-n2}}
+
+\hypertarget{header-n3}{%
+\subsubsection{Teacher}\label{header-n3}}
+
+计算机图形学
+
+肖双九 @\texttt{xsjiu99@cs.sjtu.edu.cn}
+
+\hypertarget{header-n6}{%
+\subsubsection{TA}\label{header-n6}}
+
+葛续荣、许泽资
+
+\hypertarget{header-n8}{%
+\subsubsection{Homework}\label{header-n8}}
+
+按具体要求发邮件上交给
+\texttt{cg\_dalab@163.com}，或是上传到交大云盘里。
+
+命名规范：学号+姓名+作业编号，打包成一个 .zip / .tar.gz。
+
+\hypertarget{header-n11}{%
+\subsubsection{Text Book}\label{header-n11}}
+
+《计算机图形学》（Computer Graphics）
+
+written by \emph{Donald Hearn}, Translated by \emph{Cai Shijie},
+电子工业出版社
+
+\begin{quote}
+平时作业占比 \texttt{50\%}！请务必认真进行。
+\end{quote}
+
+\begin{quote}
+请不要抄袭互联网上或是同学的代码。
+\end{quote}
+
+\begin{quote}
+⚠️Warning: 课堂笔记都是每次平时作业报告的一部分！且占比很高。
+
+要求每次笔记都需要提出一个有价值的问题。而且最终需要回答他。
+\end{quote}
+
+\hypertarget{header-n21}{%
+\subsubsection{课件}\label{header-n21}}
+
+逐部分放置在交大云盘上。
+
+\hypertarget{header-n23}{%
+\subsubsection{Today Widget: Chapter 0}\label{header-n23}}
+
+计算机图形学入门·计算机绘图基础
+
+\hypertarget{header-n25}{%
+\paragraph{Contents}\label{header-n25}}
+
+\begin{itemize}
+\item
+  计算机图形学入门
+
+  \begin{quote}
+  今天的这节课
+  \end{quote}
+\item
+  光栅化图形学
+
+  \begin{quote}
+  我们的显示器只是一堆光栅\ldots 怎么表现东西？
+  \end{quote}
+\item
+  三维建模及其变换
+
+  \begin{quote}
+  在一个三维坐标系中，如何进行坐标变换，如何进行具体的计算？
+  \end{quote}
+\item
+  光照计算
+
+  \begin{quote}
+  要有光，看起来能更真实些
+  \end{quote}
+\item
+  图形的细节渲染
+
+  \begin{quote}
+  有了这些，看起来会更真实
+  \end{quote}
+
+  \begin{itemize}
+  \item
+    光影处理
+  \item
+    纹理
+  \item
+    图形特效
+  \item
+    阴影
+  \item
+    \ldots\ldots{}
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{header-n58}{%
+\subsubsection{进入第一章：计算机图形学入门}\label{header-n58}}
+
+\hypertarget{header-n59}{%
+\paragraph{计算机绘图基础}\label{header-n59}}
+
+\hypertarget{header-n60}{%
+\subparagraph{Definition: 啥是计算机绘图？}\label{header-n60}}
+
+为啥要绘图？对真实世界的映射。相比于语言文字，人类总能更轻易地理解图形。
+另外，绘图能帮助人类完成许多了不起的工程，传达珍贵的工程经验。
+
+\hypertarget{header-n62}{%
+\subparagraph{为啥要用计算机绘图？}\label{header-n62}}
+
+算力强，发展快。
+
+自 1940s 开始，计算机辅助绘图已经非常常见且普遍了。
+
+反过来，计算机图形界面也反过来使得计算机更加普及、易用了。
+
+\hypertarget{header-n66}{%
+\subparagraph{计算机图形硬件：支撑一切的基础}\label{header-n66}}
+
+没有纸，没有笔，咱们怎么画东西？
+
+\begin{itemize}
+\item
+  图形输出设备（Image Output Devices）
+\end{itemize}
+
+\begin{quote}
+没有输出设备您画了半天画了个啥？
+\end{quote}
+
+最简单最常见的：显示器、绘图仪、打印机，等等。都可以把计算机绘图的结果展示出来。
+
+论及显示器，到现在还是没有本质变化\ldots 还是由大量发光像素的组合来显示图形的。
+
+无论是 CRT（阴极射线显示器）、LCD（液晶显示器），\ldots\ldots 皆如此。
+
+目前基本都是给予 2D 显示。即，如果用显示器展示 3D
+模型的话，等于是损失了一个维度。
+
+\begin{itemize}
+\item
+  图形输入设备（Image Input Devices）
+\end{itemize}
+
+计算机输入设备基本都包括在内，如鼠标、手柄、触摸屏、触摸板、绘图板，等等\ldots\ldots{}
+
+以及一些光学采集设备，如：摄像头、扫描仪、相机，等等\ldots\ldots{}
+
+还有一些比较偏门的：数据手套、坐标数字化仪（没听说过）\ldots\ldots{}
+
+\begin{itemize}
+\item
+  图形处理设备（Image Processing Devices）
+\end{itemize}
+
+好了，有了图形数据的输入输出，就该由计算机来进行处理，实现所需的制图效果了。
+
+摩尔定律、并行计算的发展使得图形处理的能力爆炸式发展；
+
+而人类对真实感和娱乐的强烈需求也刺激了图形处理的发展。
+
+这部分工作该交给谁呢？
+
+显卡！显卡！Graphics Card！专业点讲，Graphics Processing Unit。
+
+\begin{quote}
+插入：显卡的历史：
+\end{quote}
+
+\begin{quote}
+最早的显卡真的就只是用来显示（还是单色的\ldots\ldots），由 IBM 推出于
+1981 年，至于显示什么还是交给 CPU 的。
+\end{quote}
+
+\begin{quote}
+但是 CPU 全才，并不是单单用来做显示计算的，所以其效率较低。
+\end{quote}
+
+\begin{quote}
+那么，我们逐渐把那些跟图形有关的内容单独拉出来放在另一张芯片里，美其名曰「图形加速卡」，
+\end{quote}
+
+\begin{quote}
+可以分担一部分 CPU 的功能\ldots 最后它的功能越来越多，反走样，3D
+计算，光照计算，特效\ldots\ldots{}
+\end{quote}
+
+\begin{quote}
+这些全部都写在硬件里，效率很高很高。（虽然很死板，但效率高啊）
+\end{quote}
+
+\begin{quote}
+最后，这些东西都交给了 GPU。
+\end{quote}
+
+\begin{quote}
+但是如果所有的这些东西全部写死了，那就失去了灵活性。我们希望他可以兼具灵活性和效率，因此就出现了
+\end{quote}
+
+\begin{quote}
+可编程 GPU！（Yeah！）直接对硬件编程；加上 GPU 的晶体管已经大大超过了
+CPU，Intel 感到极大压力（雾
+\end{quote}
+
+这就是一点简单的计算机图形历史了。
+
+\hypertarget{header-n110}{%
+\subparagraph{计算机图形软件}\label{header-n110}}
+
+谈完硬件谈软件（用户和机器之间的交互层
+
+\begin{itemize}
+\item
+  计算机图形 API
+\end{itemize}
+
+首先，咱们来介绍几个著名 API：
+
+\begin{itemize}
+\item
+  跨平台、通用：OpenGL
+\item
+  Windows 专用、邪恶、微软家的：DirectX
+\end{itemize}
+
+现在所有的硬件产品、图形引擎基本都接受两种标准。
+
+其他一些（没什么人用的）API：Java 3D、Java Mobile 3D、Windows
+Mobile（已死）APIs
+
+\begin{itemize}
+\item
+  高级图形渲染器
+\end{itemize}
+
+基于以上的那些 APIs，有人构建了一些更高层的引擎：
+
+\begin{itemize}
+\item
+  Pixar 家的 RenderMan
+
+  \begin{quote}
+  只给 Disney/Pixar 自家用
+  \end{quote}
+\item
+  NVidia 家的 Gelato
+
+  \begin{quote}
+  与 RenderMan 兼容的，（某些方面）更高效的渲染器（法务部警告
+  \end{quote}
+\item
+  German mental images 公司推出的 MentalRay 渲染器
+
+  \begin{quote}
+  已经被 NVidia 买下来了（
+  \end{quote}
+\end{itemize}
+
+\begin{quote}
+Question：API 跟 图形渲染器的关系？ A: 图形渲染器基于具体的 API。
+\end{quote}
+
+\begin{itemize}
+\item
+  游戏引擎（另一码事儿）
+\end{itemize}
+
+也在 API 上层，而且除去图形相关的东西，还包含了很多其他的
+跟游戏内容有关的东西，包括交互、资源管理、逻辑等等等等，（像是
+Unity，Unreal 之类的东西）有些杂。
+
+因此这门课里不用游戏引擎来讲。
+
+\hypertarget{header-n147}{%
+\subparagraph{OpenGL}\label{header-n147}}
+
+\begin{itemize}
+\item
+  开放的图形 API，工业化的标准
+\item
+  完全独立于窗口系统，OS，等等一切东西。
+\item
+  从点线面开始，构建一切东西
+\item
+  能力：创建二维、三维物体，布置（layout）并观察场景
+\end{itemize}
+
+\hypertarget{header-n157}{%
+\subparagraph{OpenGL 的库函数}\label{header-n157}}
+
+核心库：名为 gL，所有的函数名开头都是 GL。
+
+实用库：GLU，所有函数名开头均为 GLU。
+
+辅助库：GLaux，一些窗口相关的东西
+
+工具库：GLUT，创建窗口和其他 GUI 的库函数
+
+另有基于 GLUT 的 GUI 库名为 GLUI。
+
+面向 Windows 的扩展：WGL，仅仅包括很旧版本的 OpenGL。
+
+OpenGL 扩展库并没有它本身那么标准\ldots 基本也是群魔乱舞\ldots{}
+
+Warning：提交作业时附上你使用的库。（否则 TA 跑不起来\ldots{}
+
+\end{document}

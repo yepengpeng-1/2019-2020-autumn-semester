@@ -1,0 +1,245 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Sep 30 Mon}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-342}\label{header-n2}}
+
+本节课不讲特别重要的知识。
+
+\begin{quote}
+（反正大家也不会听）
+\end{quote}
+
+主要讲一下彩色图像。
+
+\begin{quote}
+（因为这部分内容今后的 Project 中或是应用之中不是特别重要的一部分。）
+\end{quote}
+
+\hypertarget{header-n9}{%
+\subsubsection{彩色是如何产生的？}\label{header-n9}}
+
+\hypertarget{header-n10}{%
+\paragraph{Additive}\label{header-n10}}
+
+在现实世界的颜色混合中，色彩的混合是取交集的
+
+（因此所有颜色的颜料混在一起会得到黑色）；
+
+这个唤做 Additive 混色系统（\texttt{原色を重ね合わせる加色混合法の}）。
+
+\hypertarget{header-n14}{%
+\paragraph{Subtractive}\label{header-n14}}
+
+而在 CRT、液晶显示等光线状态中，色彩的混合是取并集的
+
+（因此所有颜色的光线混在一起会得到白色）。
+
+此为 Subtractive 混色系统。
+
+\hypertarget{header-n18}{%
+\subsubsection{颜色的表示}\label{header-n18}}
+
+\hypertarget{header-n19}{%
+\paragraph{RGB}\label{header-n19}}
+
+Red + Green + Blue，采用的是一个正方体来表示颜色空间。
+
+\hypertarget{header-n21}{%
+\paragraph{HSV/HSL}\label{header-n21}}
+
+HSL 即色相、饱和度、亮度（英语：Hue, Saturation, Lightness）。
+
+HSV即色相、饱和度、明度（英语：Hue, Saturation, Value）。
+
+又称HSB，其中B即英语：Brightness。
+色相（H）是色彩的基本属性，就是平常所说的颜色名称，如红色、黄色等。
+饱和度（S）是指色彩的纯度，越高色彩越纯，低则逐渐变灰，取0-100\%的数值。
+明度（V），亮度（L），取0-100\%。
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/30-14-13-03-800px-Hsl-hsv_models.svg.png}
+\caption{}
+\end{figure}
+
+因此这个看起来是一个圆柱体。
+
+\hypertarget{header-n27}{%
+\paragraph{Conversion}\label{header-n27}}
+
+这两种模型应该如何转换呢？
+
+所谓转换，也就是HSL和HSV在数学上定义为在RGB空间中的颜色的\emph{R},\emph{G}和\emph{B}的坐标的变换。
+
+\hypertarget{header-n30}{%
+\subparagraph{RGB =\textgreater{} HSL/HSV}\label{header-n30}}
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/30-14-14-52-rgb-\textgreater{}hsl:hsv.png}
+\caption{}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/30-14-15-21-rgb-\textgreater{}hsv.png}
+\caption{}
+\end{figure}
+
+本质上是将这个正方体给立起来，变成一个类似于圆柱体的东西。然后再把它给变形成类似于圆柱体的样子就好了。
+
+\hypertarget{header-n34}{%
+\subparagraph{HSL =\textgreater{} RGB}\label{header-n34}}
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/30-14-17-43-hsl-\textgreater{}rgb.png}
+\caption{}
+\end{figure}
+
+色度在不同的范围之内，变化是有细微的不同的。
+
+\hypertarget{header-n38}{%
+\subsubsection{颜色均衡化}\label{header-n38}}
+
+选择一个亮区、再选择一个暗区；将他们进行颜色拉伸，直到他们与第三区的颜色匹配，就算
+OK。
+
+通常来说不会只针对一个颜色空间进行颜色均衡化。一般会在 RGB、CMYK、HSL
+等多个颜色空间中都进行颜色均衡化，使得在各个空间中的色度都很均衡。就很棒。
+
+\hypertarget{header-n41}{%
+\subsubsection{颜色恢复}\label{header-n41}}
+
+给黑白图像重新上色，应该用什么算法？
+
+首先在 RGB 下上色，
+
+然后回到 HSL 下针对色度和饱和度进行中值滤波，
+
+然后对亮度进行高斯滤波，
+
+是一个效果比较好的方案。
+
+针对 Hue 和 Saturation
+中值滤波可以保证颜色倾向性的正确，不出现异常的诡色。
+
+\hypertarget{header-n48}{%
+\subsubsection{伪彩色图像}\label{header-n48}}
+
+Pseudocolor Color Image
+
+把颜色跟灰度级别（或其他参数）对应，生成假的彩色图像（本身没有彩色信息）。
+
+RGB 值都由其他参数决定。图像本身没有颜色。
+
+主要是方便理解和观测。
+
+\hypertarget{header-n53}{%
+\subsubsection{颜色参数}\label{header-n53}}
+
+我们提出了更多的一些彩 色图 像信息：
+
+\begin{itemize}
+\item
+  Average hue
+\item
+  Average Saturation
+\item
+  Average Value
+\end{itemize}
+
+\hypertarget{header-n62}{%
+\subsubsection{颜色「PERCEPTION」（感觉）}\label{header-n62}}
+
+人对颜色的感受在亮度变化的情况下会产生很大的差别。
+
+在颜色突然变化时，或是前景背景颜色差异出现时，也会导致瞬间目标颜色感知差异。
+
+Example::machBandsEffect
+
+改变虹膜开口大小也可以调节进入眼睛的光线强度。
+
+不同的感光细胞的敏感性也会随着颜色的强度改变。
+
+\hypertarget{header-n68}{%
+\subsubsection{White Balance}\label{header-n68}}
+
+白平衡
+
+一般来说，为了避免颜色倾向性偏差，我们一般会在保证整体的颜色没有偏离真实值太多。
+
+\hypertarget{header-n71}{%
+\section{世界和平。}\label{header-n71}}
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/30-14-20-09-world peace.jpg}
+\caption{}
+\end{figure}
+
+\end{document}

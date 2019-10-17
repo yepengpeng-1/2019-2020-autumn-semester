@@ -1,0 +1,408 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{2019/09/16}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-342}\label{header-n2}}
+
+今天的课程内容：
+
+\hypertarget{header-n4}{%
+\subsection{Basic Image Operations}\label{header-n4}}
+
+讲一些基础的图像操作。
+
+主要分三类：
+
+\hypertarget{header-n7}{%
+\subsubsection{点运算 (Point Operation)}\label{header-n7}}
+
+逐点运算，对每一个像素进行操作。
+
+输入图像记做 I(x, y)，输出图像记做 O(x, y)。
+
+每个点操作的映射关系是 f(x, y) -\textgreater{} g(x, y)
+
+每一个点的值只跟输入的对应那点的值有关，这个就叫做「点运算」。
+
+\hypertarget{header-n12}{%
+\paragraph{Examples}\label{header-n12}}
+
+\begin{itemize}
+\item
+  调节亮度/对比度（Brightness / Saturation）
+\item
+  黑白化
+\end{itemize}
+
+公式表示： B(x, y) = f{[}A(x, y){]}
+
+f() 就是这个变换函数 (Transform Function)
+
+输出图像 \textless= 输入图像，逐点拷贝运算。
+
+\hypertarget{header-n21}{%
+\paragraph{例子}\label{header-n21}}
+
+有线性的 Transform，也有非线性的。
+
+\hypertarget{header-n23}{%
+\paragraph{应用}\label{header-n23}}
+
+逐点变换可以做的事情有：
+
+\begin{itemize}
+\item
+  Photometric Calibration
+\item
+  Contrast Enhancement
+\item
+  Thresholding
+\item
+  Contour Lines
+\item
+  Clipping
+\end{itemize}
+
+\hypertarget{header-n36}{%
+\subsubsection{代数运算（Algebraic Operation）}\label{header-n36}}
+
+这也是像素级别的运算。输出图像也是一个点一个点算出来的。
+
+但是呢，每个点的结果不仅仅依赖于原图像中对应的一个点（那就是点运算了），
+
+而是由多幅图像进行集合操作，共同计算出结果图像。
+
+几个图像加加减减\ldots 得到结果。
+
+\hypertarget{header-n41}{%
+\paragraph{例子}\label{header-n41}}
+
+\begin{verbatim}
+C(x, y) = A(x, y) + B(x, y)，
+
+C(x, y) = A(x, y) - B(x, y)，
+
+C(x, y) = A(x, y) * B(x, y)，
+
+C(x, y) = A(x, y) / B(x, y)，
+\end{verbatim}
+
+就是由两幅图 \texttt{A(x,\ y)} 和 \texttt{B(x,\ y)} 共同构造了结果图
+\texttt{C(x,\ y)}。
+
+\hypertarget{header-n44}{%
+\subparagraph{图像的加 (Addition)}\label{header-n44}}
+
+可以进行 Noise Reduction：
+
+多张相同角度的图片进行叠加，可以去除每次拍照中出现的随机噪音（Noise）。
+
+也可以进行 Double-exposure effect：二次曝光效果，
+
+在进光量很低的情况下，利用多次曝光积累信息来提高画面亮度。
+
+\hypertarget{header-n49}{%
+\subparagraph{图像的减 (Subtraction)}\label{header-n49}}
+
+可以进行「背景去除」，也就是俗称的抠图。
+
+还能进行 Motion
+Detection（检测运动物体），通过「Subtraction」探知图像中的运动部分。变化了的（没被
+Subtract 掉的）就是 Motion Object 了。
+
+还还可以进行 Gradient Magnitude，梯度放大；
+
+\href{https://www.sciencedirect.com/topics/engineering/gradient-magnitude}{Gradient
+Magnitude}
+
+imagic
+
+\hypertarget{header-n55}{%
+\subparagraph{图像的× （Multiplication）}\label{header-n55}}
+
+乘算啥？乘就是逻辑与（Logical AND(\&)）；
+
+实际应用：Mask，把需要的部分画成白色（1），不需要的部分画成黑色（0），得到一张面具（掩码）；
+
+跟实际图做与操作，就能把那一部分抠出来。
+
+\hypertarget{header-n59}{%
+\subparagraph{图像的除➗（Division）}\label{header-n59}}
+
+常常用于医学；
+
+通常我们除以一个 I(x, y)，使得成像效果更明亮；
+
+详见后面的同态滤波
+
+\hypertarget{header-n63}{%
+\subsubsection{几何操作（Geometric Operation）}\label{header-n63}}
+
+啥是几何操作啊？
+
+旋转、平移、缩放，等等；这些都是几何操作。
+
+\hypertarget{header-n66}{%
+\paragraph{特点}\label{header-n66}}
+
+空间位置发生变化了。没有上面的那些一一对应/多一对应的点映射了。
+
+新的坐标点取什么值？跟哪些点相关？
+
+\hypertarget{header-n69}{%
+\paragraph{例子}\label{header-n69}}
+
+基本都要借助矩阵来表示这种几何操作。
+
+缩放、旋转和平移、镜像反转等等都可以通过矩阵来表示。
+
+计算顺序和矩阵一样，也是从右到左。
+
+\hypertarget{header-n73}{%
+\paragraph{如何确定一些空缺点的值？}\label{header-n73}}
+
+例如，将一张图放大之后，如何才能确定产生的空缺点的像素值？
+
+这里我们需要了解 Interpolation Algorithm
+
+插值算法。
+
+\begin{verbatim}
+作业：了解
+
+* Nearest Neighbor Interpolation、
+
+* Bilinear Interpolation（也称作 Square Interpolation），以及
+
+* Higher Order Interpolation
+\end{verbatim}
+
+课上我们先看最简单的那种插值算法「最近邻插值法」（Nearest Neighbor
+Interpolation）：
+
+谁离这个目标点最近，我们就把这个值赋给他。
+
+计算起来非常快，计算量很小。只是\ldots 效果比较难看，非常容易出现锯齿（Dog's
+Teeth）效果。
+
+那么双线性插值呢？
+
+比刚才的好一点，不仅有一个点来确定，而一并考虑周围四个点对他的影响；
+
+\texttt{f(x,\ y)\ =\ ax\ +\ by\ +\ cxy\ +\ d}
+
+且各方向上的系数不同。
+
+\begin{figure}
+\centering
+\includegraphics{/Users/yue/Desktop/图像.jpeg}
+\caption{}
+\end{figure}
+
+（公式看 PPT）
+
+由于这一方法依赖于更多的点，因此计算量更大，只是效果会比最近邻要好；交错部分更加平滑，不容易出现生硬的锯齿。
+
+\hypertarget{header-n88}{%
+\paragraph{Neighborhood Operations}\label{header-n88}}
+
+淋浴操作（雾）
+
+邻域操作
+
+\hypertarget{header-n91}{%
+\subparagraph{连通性检查}\label{header-n91}}
+
+Pixel Connectivity
+
+4 邻域：一个像素点的上下左右四个点。合称四邻域。
+
+8 邻域：一个像素点上下左右左上左下右上右下八个点。合称八邻域。
+
+所谓「4 连通」：只走上下左右四个方向，两个像素点可以连通。
+
+（对于一个二值化的图，这里简单的连通定义是：可以通过四邻域内的行走达到另一个点，则称之为连通。）
+
+「8连通」自己想。差不多。
+
+问题来了：给定两个点，如何判断他们是否连通？
+
+更进一步，如何根据点的连通性，把这些点给分组？
+
+IC：Intensity Criterion，判断两个点是否可以相连的判断准则（一个范围）。
+
+对这里的二值化简单形态，相等就是 True，不等就是 False
+
+经典标记算法 Labeling Algorithm（顺序扫描式）：
+
+\begin{verbatim}
+1 - First Scan
+    从左上 (0, 0) 到右下 (width, height)，一边扫描过来。
+    如果所有的邻居都不满足 IC，那么给 P 一个新的 Label。
+    如果只有一个邻居满足 IC，那么就给 P 这个邻居的 Label。
+    如果两个到三个邻居满足 IC，那么随便给 P 其中一个 Label，而且在 Label 表中记录这几个邻居的 Label 等价。
+    
+这是第一次 Scan。注意经过了第一次 Scan 之后是不算完成的。
+
+2 - Fix Conflicts
+    Label 表中出现的等价 Label 全部合并，形成一个最终的 label。
+\end{verbatim}
+
+\hypertarget{header-n104}{%
+\subsubsection{空间域图像增强}\label{header-n104}}
+
+这是最常见的、最容易理解的图像增强方式。
+
+Image Enhancement in Spacial Domain
+
+\begin{itemize}
+\item
+  对比度的增强
+\item
+  图像平滑
+\item
+  图像锐化
+\item
+  同态滤波
+\end{itemize}
+
+主要的方法：
+
+空间域处理，全局运算（对着整幅图进行运算）、局部运算（对一部分像素进行运算）、以及点运算（仅对单个像素进行运算）。
+
+频域处理：在图像的 Fourier 变换域中处理。
+
+\hypertarget{header-n119}{%
+\subparagraph{具体怎么做？}\label{header-n119}}
+
+\begin{itemize}
+\item
+  对比度增强
+
+  \begin{itemize}
+  \item
+    灰度变换法
+
+    \begin{itemize}
+    \item
+      线性变换
+    \end{itemize}
+
+    所谓线性的扩展呢，设原来的灰度范围在 \texttt{{[}a,\ b{]}}
+    之间；我们想要把他扩展到\texttt{{[}c,\ d{]}}，那么我们就使用这个公式进行变换：
+
+    就是一个线性扩展而已\ldots{}
+
+    \begin{itemize}
+    \item
+      扩展：分段线性灰度变换
+    \end{itemize}
+
+    只对其中一部分进行线性拉伸，另外的部分不进行拉伸甚至收窄。简而言之\ldots 只需把上面的
+    \texttt{{[}a,\ b{]}\ -\textgreater{}\ {[}c,\ d{]}} 增加到
+    \texttt{{[}a,\ b,\ c{]}\ -\textgreater{}\ {[}d,\ e,\ f{]}}
+    就能更细致分段地控制每一段的亮度了。
+
+    \begin{itemize}
+    \item
+      对数变换
+    \item
+      指数变换
+    \end{itemize}
+  \item
+    直方图📊调整法
+
+    啥是直方图啊？（Histogram）
+
+    一种表示数据的可视化方法而已。
+
+    这里特指的直方图是：数字图像中每一个灰度级别和他的出现的频率的统计关系。
+
+    通常横坐标为灰度级别，纵坐标为频数（出现概率）。
+
+    通过直方图，可以大致知道其亮度偏向：暗还是亮？
+
+    但是其具体的空间信息是丢失了的。这些亮的像素暗的像素在哪？不知道。
+
+    哪些图可以方便地二值化？那些直方图看起来像是马鞍形的（中间有一处灰度级别出现频率较低的）作为谷底可以找到二值化的阈值。
+
+    那么，我们如何调节这个图像使它看起来更好看呢？
+
+    \begin{itemize}
+    \item
+      直方图均衡化
+    \end{itemize}
+
+    如果说直方图中频率集中在比较小的一个灰度级别范围内的话，我们可以把它拉伸到一整个灰度级别范围，均衡化，使得图像看起来更好。
+
+    \begin{itemize}
+    \item
+      直方图匹配
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,443 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{longtable,booktabs}
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{2019/09/24}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-302 Compilers}\label{header-n2}}
+
+今天我们要讲的是一种文法判断的方法。
+
+\hypertarget{header-n4}{%
+\subsubsection{方法一：Top Down Parsing}\label{header-n4}}
+
+从顶向下的 parse，常用的实现是「递归下降法」。
+
+假设我们现在已经有了一组 \texttt{Tokens}:
+
+\begin{verbatim}
+t1 t2 t3 t4 t5
+\end{verbatim}
+
+如果合法的话，应该能构成一个 \texttt{Parse\ Tree}。
+
+因为我们用的是 Top -\textgreater{} Down，因此我们从根儿上开始构造。
+
+基本上按照自顶向下，从左向右的顺序。
+
+\begin{verbatim}
+E -> T + E|T
+T -> int | int * T | (E)
+\end{verbatim}
+
+留意到我们上面的文法是（加法和乘法）右结合的，且乘法优先级高于加法。
+
+\hypertarget{header-n13}{%
+\subsubsection{开始举例}\label{header-n13}}
+
+我们用这个 Token Stream 来举例：
+
+\begin{verbatim}
+int5 * int2
+\end{verbatim}
+
+我们现在用这两个 Production 一个一个来尝试。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  E0 -\textgreater{} T1 + E2，
+
+  \begin{enumerate}
+  \def\labelenumii{\arabic{enumii}.}
+  \item
+    T1 -\textgreater{} (E3)，显然原柿子里面没有做括号。完蛋。
+  \item
+    T1 -\textgreater{} int，这个 Match 了。但是发现 + 跟原来的
+    \texttt{*} token 匹配不上，不 Match。再找！
+  \item
+    T1 -\textgreater{} \texttt{int\ *\ T}，这个勉强 Match，但之后 T1
+    是匹配不上的（哪来的 + 呢）
+  \item
+    没得选了，看来最开头一个 Production 就走错了。回溯！
+  \end{enumerate}
+\item
+  我们现在用另一个产生柿来做。换成 \texttt{E0\ -\textgreater{}\ T}！
+
+  \begin{enumerate}
+  \def\labelenumii{\arabic{enumii}.}
+  \item
+    \ldots\ldots{}
+  \item
+    让我们来试试 \texttt{T\ -\textgreater{}\ int\ *\ T}。Match 了！
+
+    \begin{enumerate}
+    \def\labelenumiii{\arabic{enumiii}.}
+    \item
+      然后 T -\textgreater{} int。匹配出了 \texttt{int\ *\ int}！
+    \end{enumerate}
+  \end{enumerate}
+\end{enumerate}
+
+大概就是这样进行自顶向下的 Token Stream Match 了\ldots\ldots{}
+
+如果找过了所有都还没成功\ldots{}
+
+这种题么，带回溯的递归还是比较难编写的\ldots（想想你的 LC）
+
+\hypertarget{header-n42}{%
+\paragraph{情况说明}\label{header-n42}}
+
+Top Down Parsing 啊，并不是总能用的。
+
+我们刚才用的是右结合的文法。为什么？
+
+因为左结合 Sometimes doesn't work. 并不是总对的。
+
+考虑 \texttt{S\ -\textgreater{}\ S\ a} 这种文法。这会带来什么问题吗？
+
+\texttt{S\ -\textgreater{}\ S\ a\ -\textgreater{}\ S\ S\ a\ -\textgreater{}\ S\ S\ S\ a\ -\textgreater{}\ ...}
+
+我好像总是拿不出来一个 Token，总可能还有机会，总把自己拿去尝试\ldots{}
+
+结果就是无限递归，停不下来。Left-recursive grammar 如果有了一个
+Non-Terminal S，这种情况就会造成 Infinite Loop。
+
+\hypertarget{header-n50}{%
+\paragraph{解决方案}\label{header-n50}}
+
+消左递归的方法：
+
+以 \texttt{S\ -\textgreater{}\ S\ a\textbar{}b} 为例。将其重写为
+\texttt{S\ -\textgreater{}\ bS,\ S\textquotesingle{}\ -\textgreater{}\ aS\textquotesingle{}\ \textbar{}\ epsilon}。
+
+按照语义将其改写为不包含左递归的形式。这样的方法可以解决这个问题。
+
+\hypertarget{header-n54}{%
+\subsubsection{优缺点}\label{header-n54}}
+
+因为回溯递归的原因，unpopular。大家都不爱使用这种方法。当年 70
+年代提出的时候，大家觉得效率太低，又是穷举又是递归回溯的\ldots{}
+
+但事实上这是最通用的办法了。如果想要简化，那就只能结合具体的文法针对性写算法了。
+
+\hypertarget{header-n57}{%
+\subsubsection{方法二：Predictive Parsers}\label{header-n57}}
+
+预测式 Parse，类似上面的 Recursive Descent，但是我先从 Input 里面找
+token，去猜测我该使用哪种产生式。
+
+为了做预测，我们往前走一点，往前看 k
+个字符来做猜测，进而比较有针对性地去尝试产生式的方法，同时可以筛选掉一些完全不符合条件的产生式。
+
+因为你是去「猜」的，所以必定是需要了解特定的文法，比如他的哪些 Token
+对应哪些产生式啊？Token 的格式是啥样啊？你总得知道。
+
+提前 peek \texttt{k} 个字符的算法唤做 \texttt{LL(k)}。
+
+（最常用的 \texttt{LL(1)}。也就是仅仅提前吃一个
+Character。但这也跟文法有关\ldots）
+
+这种代码适合手写\ldots 因为严重跟原文法有关，且难以自动生成。
+
+另外，事实上 LL 不好处理表达式。对于固定的类似于 if then else print
+begin end 等词法单位，还是很好处理的。
+
+\hypertarget{header-n65}{%
+\paragraph{问题解决}\label{header-n65}}
+
+为了解决 LL 不好处理表达式的问题，我们进行一下 Left-Factored Grammer。
+
+比如：当我们發现要搞一个 Expression 出来的时候，我们要去在一张 2 × 2
+的表里头找。
+
+这张表行代表当前要找的目标类型（Statement？Expression？Terminal？），列代表要拿到的下一个
+Token 的类型（int，+，×，（，），¥ 等）
+
+然后行和列组合拿到了要进行的 Action。于是就知道下一步怎么走了。
+
+\begin{longtable}[]{@{}llllll@{}}
+\toprule
+& int & * & + & （ & ）\tabularnewline
+\midrule
+\endhead
+T & int Y & & & (E) &\tabularnewline
+E & T X & & & T X &\tabularnewline
+X & & & + E & & ε\tabularnewline
+Y & & *T & ε & & ε\tabularnewline
+\bottomrule
+\end{longtable}
+
+如果有了这张表，程序就能自然自动地进行 Tree Parse 工作了。
+
+算出所有的 Non-T 的 First，这会为我们下面计算 Follow Sets 产生帮助。
+
+然后进一步，我们还可以计算出 Follow(An)，算出来一个 An 后面可能跟的
+Token 的集合。例如：
+
+\begin{verbatim}
+Follow( + ) = { int, ( } 
+Follow( * ) = { int, ( } 
+Follow( ( ) = { int, ( } 
+Follow( E ) = {), $} 
+Follow( X ) = {$, ) } 
+Follow( T ) = {+, ) , $} 
+Follow( ) ) = {+, ) , $} 
+Follow( Y ) = {+, ) , $} 
+Follow( int ) = {*, +, ) , $}
+\end{verbatim}
+
+计算方法：
+
+\begin{verbatim}
+Add First(A1) – {epsilon} to Follow(X). 
+Stop if epsilon !in First(A1)   
+
+Add First(A2) – {epsilon} to Follow(X). 
+Stop if epsilon !in First(A2)  
+
+…  
+
+Add First(An) – {epsilon} to Follow(X). 
+Stop if epsilon !in First(An)  
+
+// 如果到最后每一个 First(An) 里面都有 epsilon，
+// 那么 Follow(Y) 也可以作为 Follow(X) 来用，补进去
+Add Follow(Y) to Follow(X)
+\end{verbatim}
+
+直到最后，我们就可以构造那张 LL(1) Parsing Table 了。
+
+\hypertarget{header-n113}{%
+\subsubsection{Error Recovery}\label{header-n113}}
+
+出错之后，我们总是希望尽可能多进行一些错误检查，多爆一些错误才好。
+
+有两种思路可以往下进行：
+
+\hypertarget{header-n116}{%
+\paragraph{a. Insert a Token}\label{header-n116}}
+
+缺了啥东西我给你补上，接着编译（
+
+但有个问题：如果说你补的策略不恰当，补了又补，有可能产生一坨死循环。永远地往下补了下去。
+
+\hypertarget{header-n119}{%
+\paragraph{b. Delete Tokens}\label{header-n119}}
+
+这个方案就是：这行写的不对？我给你全删掉（接着往下走
+
+这样的好处就是：这种策略一定是收敛的（因为程序长度是有限的），不会删出死循环的。
+
+\hypertarget{header-n123}{%
+\subsection{SE-227}\label{header-n123}}
+
+今天的主题：File System Design and Optimizations。
+
+（还要讲文件系统啊）\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/24-10-02-33-2019-09-24-10-02-23-image.png}
+
+首先我们不要忘记，FileSystem 始终是基于我们的 Disk 的。HDD 也好 SSD
+也好，都是 FS 的基础。
+
+HDD 的一个关键参数就是：转速（单位一般用的是 rpm，rounds per minute）。
+
+转速越快，盘速越快。
+
+寻道的速度一般在 ms 级别。
+
+但是 HDD 最差的性能就是 RANDOM ACCESS
+TIME。也就是\textbf{任意读取性能}是很差的。
+
+如果两条数据在物理磁道上的保存位置差别很大的话，就需要移动机械臂，因此速度是相当慢的。
+
+\hypertarget{header-n132}{%
+\subsubsection{设计.Design}\label{header-n132}}
+
+Design Guidelines and Dimensions：设计有多种维度，都有着不同的准则。
+
+可以从普通用户、应用开发者、以及系统开发者的角度来分析设计准则。
+
+\begin{itemize}
+\item
+  性能表现
+
+  \begin{itemize}
+  \item
+    Latency（延迟）多大？（一般是延迟的平均值）
+  \item
+    Tail Latency（尾延迟，即最大的延迟）
+  \item
+    Throughput（吞吐量）
+  \item
+    Scalability（可扩展性）
+  \item
+    Aged Performance（上了年纪「用了很久」之后的性能表现变化）
+  \end{itemize}
+\item
+  崩溃恢复（例如 Windows 的 \texttt{chkdsk}）
+\item
+  恢复时间（从错误中恢复要花多久？）
+\item
+  可靠性
+
+  \begin{itemize}
+  \item
+    Robustness
+  \item
+    Wear-leveling，擦了写写了擦把纸写穿之后 FS 能不能正确处理这种情况？
+  \item
+    Fragmentation，碎片化？
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{header-n162}{%
+\subsubsection{优化.Opt}\label{header-n162}}
+
+\hypertarget{header-n163}{%
+\paragraph{FFS}\label{header-n163}}
+
+咱们来看看 A Fast File System（FFS） for UNIX 是怎么优化的。
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/24-10-30-30-2019-09-24-10-30-28-image.png}
+\caption{}
+\end{figure}
+
+相对于原版 UNIX FileSystem，进行了这些优化：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  用类似于 ICS Chapter 9 的 Header/Footer，Bitmap，用字节位来记录是否
+  occupied。
+\item
+  在每个文件的末尾处预留 10\% 的空间，保证文件可以尽量连续保存。
+\item
+  Skip-sector positioning（稍后再谈）
+\end{enumerate}
+
+\hypertarget{header-n174}{%
+\paragraph{FFS 规避 Rotational Delay}\label{header-n174}}
+
+HDD 在连续读的时候比任意读的速度更快一些（也就是一些）
+
+然而因为磁盘可能一直在转，我们在连续读取 Block
+之间可能磁头就已经转走了\ldots{}
+
+因此我们可以用以下两种方案来解决这个问题：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  干脆不要连续读了，每次隔一点时间再读
+\item
+  一次读两个 Block（硬件支持或者软件实现都可以）
+\end{enumerate}
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/24-10-39-51-2019-09-24-10-39-49-image.png}
+\caption{}
+\end{figure}
+
+\begin{quote}
+Cylinder Group Diagram
+\end{quote}
+
+\hypertarget{header-n186}{%
+\paragraph{FFS 采用 First-fit Block Allocation}\label{header-n186}}
+
+最先匹配块分配原则：尽量把文件的 Block 给塞在从头到尾找的那些 Block 里。
+
+总归是能先则填。
+
+总归是有 Pros \& Cons 的。有的情况好而有的情况差。
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/09/24-10-45-19-2019-09-24-10-45-17-image.png}
+\caption{}
+\end{figure}
+
+\begin{quote}
+Reading 2 就涉及到这部分的内容。阅读时多加注意。
+\end{quote}
+
+\begin{quote}
+下面都是关于 MEDIA \& STORAGE，即存储介质的历史和未来的介绍。
+
+直接去看 PPT 好了（P22 - 52）。
+\end{quote}
+
+\end{document}

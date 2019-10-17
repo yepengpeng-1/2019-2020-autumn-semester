@@ -1,0 +1,182 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{2019/09/23}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-342}\label{header-n2}}
+
+\hypertarget{header-n3}{%
+\subsubsection{计算机图形学笔记}\label{header-n3}}
+
+回忆上节课：提到了「用直方图来进行图像增强」。没讲完。咱们接着来说？
+
+\hypertarget{header-n5}{%
+\subsubsection{直方图均衡化}\label{header-n5}}
+
+对于 像素频率 - 灰度级别
+直方图中，如果灰度级别比较集中，实际表现就是对比度低，没有什么亮-暗的对比。
+
+我们想一些办法把原来的灰度级别做一个 (A, B) -\textgreater{} (C, D)
+的拉伸映射，就可以让灰度分布范围更广，明暗对比更加强烈，显示效果相对更好一些。
+
+具体一点的操作时：将原图像的直方图通过变换函数修整成较为均衡的直方图。
+
+注意，这个修正和空间无关（因为直方图也不包含空间信息），所做的事情只是重新映射灰度级别频率图而已。因此是全图生效的。
+
+\hypertarget{header-n10}{%
+\paragraph{怎么实现？}\label{header-n10}}
+
+r 代表归一化的灰度级别（最大值为 1），P(r) 为原图中对应灰度级别 r
+中的频率。
+
+现在我们想要把直方图给修正成一个更好看（更均衡、更平直）的直方图。并且要保证倾向性不变，即原来暗的地方也还是要相对较暗，亮的地方也要相对较亮。
+
+又因为灰度的变换不应该影响像素的分布和像素数量，因此变换前后对 p(r)
+做积分（如果是离散情况，那就是直接求和）得到的像素数量应该保持不变。
+
+\hypertarget{header-n14}{%
+\paragraph{问题}\label{header-n14}}
+
+这种 Re-mapping
+的问题是：我们的变换函数很可能会导致有一些原来分开的灰度级别合并，但是我们绝对没有可能去把原来合并的灰度级别给拆成两个（直方图均衡化的实质决定不能做到）。因此结果就是会造成
+Discrete，丢失细节信息。甚至我们都不知道丢失了哪个位置的信息。因为直方图根本不知道位置信息。
+
+\hypertarget{header-n16}{%
+\subsubsection{局部直方图均衡化}\label{header-n16}}
+
+我们有了一个解决方案：AHE（Adaptive Histogram Equalization）。
+
+对于每一个像素点，我们都取出靠近他的一个稍大的方形，对其中这一小块做局部的直方图均衡化。最后，再移动到下一个像素，再次进行直方图均衡化。
+
+这就是 AHE\ldots\ldots{}
+
+这有什么好处呢？
+
+之前我们的 Mapping
+是会在全局损失信息的。也就是说，如果有一块很亮的地方，他就会吃掉暗部的大量信息。因为在直方图中他们并不能被区分开。
+
+如果我们分开进行局部均衡化的话，因为在一小块的范围内很难出现很大的明暗反差，因此就能尽量少的损失细节，也能增加整体的灰度级别（不一样的小块可以产生不一样的灰度级别）。
+
+1985 年 AHE 算法就由 Pizer 提出来了\ldots{}
+
+但实际上分块计算的代价是更大的。极大地增加了计算复杂度。
+
+\hypertarget{header-n25}{%
+\paragraph{优化 AHE}\label{header-n25}}
+
+对于那些亮度类似的部分，我们直接将其分成一整块是不是能节约些时间呢？
+
+因此我们就使用聚类来进行分块，再对每一块进行 AHE
+就能节约时间，并且不显著影响 AHE 的结果。
+
+\hypertarget{header-n28}{%
+\paragraph{AHE: Desired Histogram}\label{header-n28}}
+
+我们还有另一种方法来实现 Re-mapping:
+
+先给出你希望得到的（Desired）直方图图形，（但保证积分结果跟原来的直方图的积分结果相同），然后将每一个灰度级别按照积分的数量对应到另一个灰度级别（保证像素数量及以及相对关系不改变），一点点对应构成一张映射表（Table）。最后按照这张表重新分配灰度级别就实现了
+HE。
+
+\hypertarget{header-n31}{%
+\subsubsection{图像的增强：图像平滑}\label{header-n31}}
+
+平滑嘛\ldots 大概就是清除掉图像里面的一些噪音，一些不平滑的、坑坑洼洼的
+Noise。
+
+分为两种：一种是空间域的平滑，另外一种是频域的平滑。
+
+我们今天仅仅考虑空间域的平滑。
+
+\hypertarget{header-n35}{%
+\paragraph{空间域平滑／局部平均法}\label{header-n35}}
+
+计算快，实现简单，结果「比较令人满意」（看你要求高不高了）
+
+简单局部平均法：
+
+假定 \texttt{g(x,\ y)\ =\ f(x,\ y)\ +\ n(x,\ y)}，其中 n(x, y)
+就是噪音。
+
+我们需要
+
+\texttt{g(x,\ y)\ =\ 1/M\ *\ Sum(g(x,\ y)\ nearby\textquotesingle{}s\ M\ points)}
+
+基本假设：图像的噪音可加的、均值为 0 的、与图像信号无关的。
+
+简单进行这种操作毫无疑问会导致图像变模糊\ldots 轮廓边缘尤甚。
+
+\hypertarget{header-n43}{%
+\paragraph{空间域平滑／中值滤波法}\label{header-n43}}
+
+这种方法实际上更加常用。实现简单，效果不错。
+
+用局部的中值来代替局部的平均值，刚刚的局部平均法会导致模糊，现在我们改用中值。
+
+（为了简单表示，这里仅仅考虑灰度中值）
+
+计算量也小，计算也算简单。
+
+仅仅对脉冲持续期小于窗口宽/2 的脉冲才有效果。
+
+然而局部平均法会对任何变化都产生影响，也就是因此会在边缘产生模糊效果。
+
+\hypertarget{header-n50}{%
+\paragraph{空间域平滑／加权平均法}\label{header-n50}}
+
+（讲卷积的时候还会回到这里的）
+
+\hypertarget{header-n52}{%
+\paragraph{空间域平滑／多帧平均法}\label{header-n52}}
+
+要是你在同样的位置拍了很多张，那可以用这种方法的
+
+\end{document}
