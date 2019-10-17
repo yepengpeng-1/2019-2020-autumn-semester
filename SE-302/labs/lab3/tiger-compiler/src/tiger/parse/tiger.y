@@ -1,6 +1,6 @@
 %filenames parser
 %scanner tiger/lex/scanner.h
-%debug
+// %debug
 %baseclass-preinclude tiger/absyn/absyn.h
  /*
   * Please don't modify the lines above.
@@ -37,7 +37,7 @@
 //   EQ NEQ LT LE GT GE
 //   AND OR 
   ASSIGN
-  ARRAY IF /* THEN ELSE */ WHILE FOR TO DO LET IN END OF 
+  ARRAY /* IF THEN ELSE */ WHILE FOR TO DO LET IN END OF 
   BREAK NIL
   FUNCTION VAR TYPE
 
@@ -60,12 +60,12 @@
   * Put your codes here (lab3).
   */
 
-%left EQ NEQ LT LE GT GE
+%right IF THEN ELSE
+%left AND OR
+%right EQ NEQ LT LE GT GE
 %left PLUS MINUS
 %left TIMES DIVIDE
-%left AND OR
 
-%right THEN ELSE
 
 %%
 program: exp {
@@ -73,6 +73,17 @@ program: exp {
 }
 | dec {
     
+};
+
+
+lvalue: var {
+    $$ = new A::SimpleVar(errormsg.tokPos, $1.sym);
+} | lvalue DOT ID {
+    // std::cout << "var DOT ID => lvalue! " << std::endl;
+    $$ = new A::FieldVar(errormsg.tokPos, $1, $3);
+} | lvalue subscriber {
+    // std::cout << "var subscriber => lvalue! " << std::endl;
+    $$ = new A::SubscriptVar(errormsg.tokPos, $1, $2);
 };
 
 exp: lvalue {
@@ -84,155 +95,155 @@ exp: lvalue {
 | LPAREN expseq RPAREN {
     $$ = new A::SeqExp(errormsg.tokPos, ((A::SeqExp *)$2)->seq);
 }
+| LPAREN RPAREN {
+    $$ = new A::VoidExp(errormsg.tokPos);
+}
 | INT {
     $$ = new A::IntExp(errormsg.tokPos, $1);
-    std::cout << "[yacc] exp: INT. Actual Value: " << $1 << std::endl;
+    // std::cout << "[yacc] exp: INT. Actual Value: " << $1 << std::endl;
 }
 | STRING {
     $$ = new A::StringExp(errormsg.tokPos, $1);
-    std::cout << "[yacc] exp: STRING. Actual Value: " << $1 << std::endl;
+    // std::cout << "[yacc] exp: STRING. Actual Value: " << $1 << std::endl;
 }
 | exp EQ exp {
     $$ = new A::OpExp(errormsg.tokPos, A::EQ_OP, $1, $3);
-    std::cout << "[yacc] exp: exp EQ exp." << std::endl;
-}
-| lvalue EQ exp {
-    $$ = new A::OpExp(errormsg.tokPos, A::EQ_OP, new A::VarExp(errormsg.tokPos, $1), $3);
-    std::cout << "[yacc] exp: exp EQ exp." << std::endl;
+    // std::cout << "[yacc] exp: exp EQ exp." << std::endl;
 }
 | exp NEQ exp {
     $$ = new A::OpExp(errormsg.tokPos, A::NEQ_OP, $1, $3);
-    std::cout << "[yacc] exp: exp NEQ exp." << std::endl;
+    // std::cout << "[yacc] exp: exp NEQ exp." << std::endl;
 }
 | exp LT exp {
     $$ = new A::OpExp(errormsg.tokPos, A::LT_OP, $1, $3);
-    std::cout << "[yacc] exp: exp LT exp. " << std::endl;
+    // std::cout << "[yacc] exp: exp LT exp. " << std::endl;
 }
 | exp LE exp {
     $$ = new A::OpExp(errormsg.tokPos, A::LE_OP, $1, $3);
-    std::cout << "[yacc] exp: exp LE exp. " << std::endl;
+    // std::cout << "[yacc] exp: exp LE exp. " << std::endl;
 }
 | exp GT exp {
     $$ = new A::OpExp(errormsg.tokPos, A::GT_OP, $1, $3);
-    std::cout << "[yacc] exp: exp GT exp. " << std::endl;
+    // std::cout << "[yacc] exp: exp GT exp. " << std::endl;
 }
 | exp GE exp {
     $$ = new A::OpExp(errormsg.tokPos, A::GE_OP, $1, $3);
-    std::cout << "[yacc] exp: exp GE exp. " << std::endl;
+    // std::cout << "[yacc] exp: exp GE exp. " << std::endl;
 }
 | exp TIMES exp {
     $$ = new A::OpExp(errormsg.tokPos, A::TIMES_OP, $1, $3);
-    std::cout << "[yacc] exp: exp TIMES exp. " << std::endl;
+    // std::cout << "[yacc] exp: exp TIMES exp. " << std::endl;
 }
 | exp DIVIDE exp {
     $$ = new A::OpExp(errormsg.tokPos, A::DIVIDE_OP, $1, $3);
-    std::cout << "[yacc] exp: exp DIVIDE exp. " << std::endl;
+    // std::cout << "[yacc] exp: exp DIVIDE exp. " << std::endl;
 }
 | exp PLUS exp {
     $$ = new A::OpExp(errormsg.tokPos, A::PLUS_OP, $1, $3);
-    std::cout << "[yacc] exp: exp PLUS exp. " << std::endl;
+    // std::cout << "[yacc] exp: exp PLUS exp. " << std::endl;
 }
 | exp MINUS exp {
     $$ = new A::OpExp(errormsg.tokPos, A::MINUS_OP, $1, $3);
-    std::cout << "[yacc] exp: exp MINUS exp. " << std::endl;
+    // std::cout << "[yacc] exp: exp MINUS exp. " << std::endl;
 }
 | MINUS exp {
-    $$ = new A::OpExp(errormsg.tokPos, A::MINUS_OP, 0, $2);
-    std::cout << "[yacc] exp: exp MINUS exp. " << std::endl;
+    $$ = new A::OpExp(errormsg.tokPos, A::MINUS_OP, new A::NilExp(errormsg.tokPos), $2);
+    // std::cout << "[yacc] exp: nobody MINUS exp. " << std::endl;
 }
 | exp AND exp {
     $$ = new A::IfExp(errormsg.tokPos, $1, $3, $1);
-    std::cout << "[yacc] exp: exp1 AND exp2 => IF exp1 THEN exp2 ELSE exp1." << std::endl;
+    // std::cout << "[yacc] exp: exp1 AND exp2 => IF exp1 THEN exp2 ELSE exp1." << std::endl;
 }
 | exp OR exp {
     $$ = new A::IfExp(errormsg.tokPos, $1, $1, $3);
-    std::cout << "[yacc] exp: exp1 OR exp2 => IF exp1 THEN exp1 ELSE exp2." << std::endl;
+    // std::cout << "[yacc] exp: exp1 OR exp2 => IF exp1 THEN exp1 ELSE exp2." << std::endl;
 }
 | lvalue ASSIGN exp {
     $$ = new A::AssignExp(errormsg.tokPos, $1, $3);
-    std::cout << "[yacc] exp: exp ASSIGN exp." << std::endl;
+    // std::cout << "[yacc] exp: exp ASSIGN exp." << std::endl;
 }
 | var ASSIGN exp {
     $$ = new A::AssignExp(errormsg.tokPos, new A::SimpleVar(errormsg.tokPos, $1.sym), $3);
-    std::cout << "[yacc] exp: var ASSIGN exp." << std::endl;
+    // std::cout << "[yacc] exp: var ASSIGN exp." << std::endl;
 }
 | ID subscriber ASSIGN exp {
     auto lvalue = new A::SubscriptVar(errormsg.tokPos, new A::SimpleVar(errormsg.tokPos, $1), $2);
     $$ = new A::AssignExp(errormsg.tokPos, lvalue, $4);
-    std::cout << "[yacc] exp: ID subscriber ASSIGN exp." << std::endl;
+    // std::cout << "[yacc] exp: ID subscriber ASSIGN exp." << std::endl;
+}
+| ID subscriber DOT ID ASSIGN exp {
+    auto lvalue = new A::FieldVar(errormsg.tokPos, new A::SubscriptVar(errormsg.tokPos, new A::SimpleVar(errormsg.tokPos, $1), $2), $4);
+    $$ = new A::AssignExp(errormsg.tokPos, lvalue, $6);
+    // std::cout << "[yacc] exp: ID subscriber DOT ID ASSIGN exp." << std::endl;
 }
 | IF exp THEN exp {
     $$ = new A::IfExp(errormsg.tokPos, $2, $4, new A::VoidExp(errormsg.tokPos));
-    std::cout << "[yacc] exp: IF exp THEN exp." << std::endl;
+    // std::cout << "[yacc] exp: IF exp THEN exp." << std::endl;
 }
 | IF exp THEN exp ELSE exp {
     $$ = new A::IfExp(errormsg.tokPos, $2, $4, $6);
-    std::cout << "[yacc] exp: IF exp THEN exp ELSE exp." << std::endl;
+    // std::cout << "[yacc] exp: IF exp THEN exp ELSE exp." << std::endl;
 }
 | BREAK {
     $$ = new A::BreakExp(errormsg.tokPos);
-    std::cout << "[yacc] exp: BREAK." << std::endl;
+    // std::cout << "[yacc] exp: BREAK." << std::endl;
 }
 | LET decs IN expseq END {
     $$ = new A::LetExp(errormsg.tokPos, $2, $4);
-    std::cout << "[yacc] exp: LET." << std::endl;
+    // std::cout << "[yacc] exp: LET." << std::endl;
 }
 | FOR var ASSIGN exp TO exp DO exp {
     $$ = new A::ForExp(errormsg.tokPos, $2.sym, $4, $6, $8);
-    std::cout << "[yacc] exp: FOR." << std::endl;
+    // std::cout << "[yacc] exp: FOR." << std::endl;
 }
 | WHILE exp DO exp {
     $$ = new A::WhileExp(errormsg.tokPos, $2, $4);
-    std::cout << "[yacc] exp: WHILE." << std::endl;
+    // std::cout << "[yacc] exp: WHILE." << std::endl;
 }
 | NIL {
     $$ = new A::NilExp(errormsg.tokPos);
-    std::cout << "[yacc] exp: NIL." << std::endl;
+    // std::cout << "[yacc] exp: NIL." << std::endl;
 }
 | ID LPAREN explist RPAREN {
-    $$ = new A::CallExp(errormsg.tokPos, $1, $2.explist);
-    std::cout << "[yacc] exp: CALLEXP." << std::endl;
+    $$ = new A::CallExp(errormsg.tokPos, $1, $3.explist);
+    // std::cout << "[yacc] exp: CALLEXP." << std::endl;
+}
+| var LPAREN explist RPAREN {
+    $$ = new A::CallExp(errormsg.tokPos, $1.sym, $3.explist);
+    // std::cout << "[yacc] exp: CALLEXP." << std::endl;
 }
 | ID LBRACE efieldlist RBRACE {
     $$ = new A::RecordExp(errormsg.tokPos, $1, $3.efieldlist);
-    std::cout << "[yacc] exp: RecordExp." << std::endl;
+    // std::cout << "[yacc] exp: RecordExp." << std::endl;
 }
 | ID subscriber OF exp {
     $$ = new A::ArrayExp(errormsg.tokPos, $1, $2, $4);
-    std::cout << "[yacc] exp: ArrayExp." << std::endl;
+    // std::cout << "[yacc] exp: ArrayExp." << std::endl;
 }
 | lvalue subscriber {
     $$ = new A::VarExp(errormsg.tokPos, new A::SubscriptVar(errormsg.tokPos, $1, $2));
-    std::cout << "[yacc] exp: Subscript." << std::endl;
+    // std::cout << "[yacc] exp: Subscript." << std::endl;
 }
 | ID subscriber {
     $$ = new A::VarExp(errormsg.tokPos, new A::SubscriptVar(errormsg.tokPos, new A::SimpleVar(errormsg.tokPos, $1), $2));
-    std::cout << "[yacc] exp: Subscript." << std::endl;
-};
+    // std::cout << "[yacc] exp: Subscript." << std::endl;
+}
+;
 
-lvalue: var {
-    $$ = new A::SimpleVar(errormsg.tokPos, $1.sym);
-} | var DOT ID {
-    std::cout << "var DOT ID => lvalue! " << std::endl;
-    $$ = new A::FieldVar(errormsg.tokPos, $1.var, $3);
-} | var subscriber {
-    std::cout << "var subscriber => lvalue! " << std::endl;
-    $$ = new A::SubscriptVar(errormsg.tokPos, $1.var, $2);
-};
 
 subscriber: LBRACK exp RBRACK {
-    std::cout << "gotta subscriber! " << std::endl;
+    // std::cout << "gotta subscriber! " << std::endl;
     $$ = $2;
 };
 
-explist: explist COMMA exp {
-    $$.explist = new A::ExpList($3, $1.explist);
+explist: exp COMMA explist {
+    $$.explist = new A::ExpList($1, $3.explist);
 }
 | exp {
     $$.explist = new A::ExpList($1, nullptr);
 }
 | {
-    $$.explist = new A::ExpList(new A::VoidExp(errormsg.tokPos), nullptr);
+    $$.explist = nullptr;
 };
 
 expseq: exp SEMICOLON expseq {
@@ -245,7 +256,7 @@ expseq: exp SEMICOLON expseq {
 
 var: ID {
     $$.var = new A::SimpleVar(errormsg.tokPos, $1);
-    std::cout << "[yacc] var: ID." << std::endl;
+    // std::cout << "[yacc] var: ID." << std::endl;
 };
 
 
@@ -254,6 +265,9 @@ ty: LBRACE tyfields RBRACE {
 }
 | ARRAY OF ID {
     $$ = new A::ArrayTy(errormsg.tokPos, $3);
+}
+| ID {
+    $$ = new A::NameTy(errormsg.tokPos, $1);
 };
 
 tyfields_nonempty: ID COLON ty COMMA tyfields {
@@ -301,8 +315,8 @@ decs: declist {
     $$ = $1.declist;
 };
 
-declist: declist dec {
-    $$.declist = new A::DecList($2.dec, $1.declist);
+declist: dec declist {
+    $$.declist = new A::DecList($1.dec, $2.declist);
 }
 | dec {
     $$.declist = new A::DecList($1.dec, nullptr);
@@ -310,16 +324,16 @@ declist: declist dec {
 
 fundec_one: FUNCTION ID LPAREN tyfields RPAREN EQ exp {
     $$ = new A::FunDec(errormsg.tokPos, $2, $4, nullptr, $7);
-    std::cout << "[yacc] fundec: FUNCTION ID LPAREN tyfields RPAREN ASSIGN exp." << std::endl;
+    // std::cout << "[yacc] fundec: FUNCTION ID LPAREN tyfields RPAREN ASSIGN exp." << std::endl;
 }
 | FUNCTION ID LPAREN tyfields RPAREN COLON ID EQ exp {
     $$ = new A::FunDec(errormsg.tokPos, $2, $4, $7, $9);
-    std::cout << "[yacc] fundec: FUNCTION ID LPAREN tyfields RPAREN ASSIGN exp." << std::endl;
+    // std::cout << "[yacc] fundec: FUNCTION ID LPAREN tyfields RPAREN ASSIGN exp." << std::endl;
 };
 
 fundeclist: fundeclist fundec_one {
     $$.fundeclist = new A::FunDecList($2, $1.fundeclist);
-    std::cout << "[yacc] fundeclist: fundec FUNCTION ID LPAREN tyfields RPAREN ASSIGN exp." << std::endl;
+    // std::cout << "[yacc] fundeclist: fundec FUNCTION ID LPAREN tyfields RPAREN ASSIGN exp." << std::endl;
 };
 
 fundec: fundeclist {
