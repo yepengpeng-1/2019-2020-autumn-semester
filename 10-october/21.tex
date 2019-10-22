@@ -1,0 +1,311 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Oct 21 Mon}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-342::Computer Vision}\label{header-n2}}
+
+今日头条：Mathematical Morphology and Binary
+Operations。是谓「数学形态学及二值运算」。
+
+在数学形态学里，也有一个跟卷积核很类似的东西：结构元（Structure
+Elements）。
+
+\hypertarget{header-n5}{%
+\subsubsection{Dilation \& Erosion}\label{header-n5}}
+
+也称作 SE，结构元，Kernel（但和卷积核不一样。）
+
+通常来说结构元的结构是基本对称且位于中心的像素值为 1。
+
+用结构元能检测出一些特定的基本形状。
+
+\hypertarget{header-n9}{%
+\paragraph{Basic Operations}\label{header-n9}}
+
+我们最关心的是两个基本操作：「膨胀」和「腐蚀」。
+
+留意：本节课中的所有说明都基于二值化。
+
+\hypertarget{header-n12}{%
+\paragraph{Dilation}\label{header-n12}}
+
+膨胀，也称为闵可夫斯基和（Minkowski Addition）。
+
+\hypertarget{header-n14}{%
+\subparagraph{Definition}\label{header-n14}}
+
+\textbf{膨胀（Dilation）}的定义为「位于某个点的探针(结构元素)是否\emph{有}探测到物件？」
+
+\hypertarget{header-n16}{%
+\subparagraph{Equations}\label{header-n16}}
+
+\includegraphics{https://wikimedia.org/api/rest_v1/media/math/render/svg/147d9ba93f224385ffd71be0fdea6b6a42c7301c}。也写作\includegraphics{https://wikimedia.org/api/rest_v1/media/math/render/svg/dc6b3304ed6539f47a042c9eaa15209eb8df1ace}。
+
+\hypertarget{header-n18}{%
+\subparagraph{Descriptions}\label{header-n18}}
+
+留意：需要先对 B 做映像（翻转，或者中心对称）。公式中可标识为
+\(\hat{B}\)，代表需要进行一个中心对称操作。
+
+跟卷积里面先需要进行的操作一样。否则对于非中心对称的 SE
+来说，结果是不对的。
+
+\(A\) 为原始图像；\(B\) 为我们采用的 SE。首先把 \(B\)
+绕着探针进行一个翻转；然后，将 SE
+所提供「探针」在原图形的边缘上滑动时，如果探针所在位置和原图的交集不为空，则把此时探针点对应的像素位置设定为
+1；否则将该像素值设定为 0。这些像素都会被放在 \(A ⊕ B\) 结果之中。
+
+\hypertarget{header-n22}{%
+\subparagraph{Rules}\label{header-n22}}
+
+\begin{itemize}
+\item
+  \(D(A, B) = A ⊕ B = B ⊕ A = D(B, A)\) （交换律）
+\item
+  \((A ⊕ B) ⊕ C = A ⊕ (B ⊕ C)\) （结合律）
+\item
+  \(A ⊕ (B + x) = (A ⊕ B) + x\) （结合律 II）
+\item
+  \(nB = (B ⊕ B ⊕ B ⊕ B ... ⊕ B) (for\ n\ times)\)
+\item
+  \(A ⊕ (B ∪ C) = A ⊕ B ∪ A ⊕ C\)
+\end{itemize}
+
+\hypertarget{header-n34}{%
+\paragraph{Erosion}\label{header-n34}}
+
+Erosion 跟 Dilation 很相似；只是它比 Dilation 苛刻很多：
+
+\hypertarget{header-n36}{%
+\subparagraph{Definition}\label{header-n36}}
+
+\textbf{腐蚀（Erosion）}的定义为「位于某个点的探针(结构元素)是否\emph{全都有}探测到物件？」
+
+注意！此处 Erosion 不强调需要进行翻转。
+
+\hypertarget{header-n39}{%
+\subparagraph{Equations}\label{header-n39}}
+
+\includegraphics{https://wikimedia.org/api/rest_v1/media/math/render/svg/e328d1a1cd6516a4e32458d58918974934256113}。另外，通常地，⊖
+符号可以使用 \$ 符号代替。
+
+\hypertarget{header-n41}{%
+\subparagraph{Descriptions}\label{header-n41}}
+
+将 SE
+所提供「探针」在原图形的边缘上滑动时，如果探针所在位置和原图的交集\textbf{完全匹配}（该为
+1 的地方都为 1），则把此时探针点对应的像素位置设定为
+1；否则将该像素值设定为 0。这些像素都会被放在 \(A ⊖ B\) 结果之中。
+
+因为设定 1 的条件很苛刻，因此一般来说 Erosion
+得到的结果相比原图是缩水的。
+
+\hypertarget{header-n44}{%
+\subparagraph{Rules}\label{header-n44}}
+
+\begin{itemize}
+\item
+  \(E(A, B) ≠ E(B, A)\) （不可交换律）
+\item
+  \((A ⊖ B) ⊖ C = A ⊖ (B ⊕ C)\) （谜样结合律）
+\end{itemize}
+
+\hypertarget{header-n50}{%
+\paragraph{Warning}\label{header-n50}}
+
+请留意，膨胀跟腐蚀并非可逆运算。他们是对偶操作，但是不可逆。
+
+即，进行了腐蚀操作之后不一定能通过膨胀回到原图形，反过来也一样。即使他们用了相同的「SE」。
+
+他们都造成了部分信息的丢失。
+
+膨胀未必就能保留所有原图中的 1 点，当结构元原点并不为 1 时。
+
+腐蚀也未必就不能包含原来不在原图中的 1 点，当结构元原点并不为 1 时。
+
+不能简单理解成对原图像像素的额外增加和收缩。
+
+\hypertarget{header-n57}{%
+\paragraph{Quick Operations}\label{header-n57}}
+
+\((A ⊖ B) ⊖ C = A ⊖ (B ⊕ C)\)；
+
+或者我们写作\(A ⊖ (B ⊕ C) = (A ⊖ B) ⊖ C\)。
+
+因为从 \(A ⊖ (B ⊕ C)\) 到 \((A ⊖ B) ⊖ C\) 的转化我们更常用；
+
+因为我们是快速地把结构元减小了；可以极大地提高速度。
+
+\hypertarget{header-n62}{%
+\paragraph{Dual-Operations}\label{header-n62}}
+
+对偶操作
+
+\(A ⊕ B = [A^C ⊖ (- B)]^C\)。
+
+反过来也一样。
+
+\hypertarget{header-n66}{%
+\subsubsection{Opening \& Closing}\label{header-n66}}
+
+开闭操作都是膨胀跟腐蚀操作的组合而已。
+
+\hypertarget{header-n68}{%
+\paragraph{Binary Opening}\label{header-n68}}
+
+\hypertarget{header-n69}{%
+\subparagraph{Definition}\label{header-n69}}
+
+二元开操作定义为 \(A ∘ B = (A ⊖ B) ⊕ B\)。
+
+\hypertarget{header-n71}{%
+\subparagraph{Description}\label{header-n71}}
+
+先腐蚀再膨胀。不可能比原来更大。
+
+这也就印证了上面的：腐蚀跟膨胀不是可逆操作；否则这里的操作就没有意义了。
+
+这种操作，等于是沿着图形内边缘滚动，比结构元更小的一些细枝末节区域都被开操作给去除掉了。
+
+\hypertarget{header-n75}{%
+\subparagraph{Rules}\label{header-n75}}
+
+\begin{itemize}
+\item
+  \(O(A + x, B) = O(A, B) + x\)
+\item
+  \(O(A, B) ⊆ A\)
+\item
+  \((A ∘ B) ∘ B = A ∘ B\)
+\end{itemize}
+
+\begin{quote}
+用相同的结构元多次进行开操作结果一样。
+\end{quote}
+
+\hypertarget{header-n85}{%
+\paragraph{Binary Closing}\label{header-n85}}
+
+二元闭操作嘛\ldots{}
+
+\hypertarget{header-n87}{%
+\subparagraph{Definition}\label{header-n87}}
+
+猜的出来，\(A ∙ B = (A ⊕ B) ⊖ B\)。
+
+\hypertarget{header-n89}{%
+\subparagraph{Description}\label{header-n89}}
+
+实心圆圈：先膨胀再腐蚀。不可能比原图形小。
+
+这种操作可以填充那些小于结构元的孔洞和尖锐拐角。
+
+\hypertarget{header-n92}{%
+\subparagraph{Rules}\label{header-n92}}
+
+\begin{itemize}
+\item
+  \(C(A + x, B) = C(A, B) + x\)
+\end{itemize}
+
+\hypertarget{header-n96}{%
+\paragraph{Dual-Operations}\label{header-n96}}
+
+D 跟 C 也是对偶的操作。很自然的。
+
+\(A ∘ B = [A^C ∙ (- B)]^C\)。
+
+反过来一样。
+
+\hypertarget{header-n100}{%
+\subsubsection{Hit \textbar{} Miss}\label{header-n100}}
+
+上面的四种运算都是基于一个简单的断言：命中／不命中。这是一种很好的图形检测算法啊。
+
+\hypertarget{header-n102}{%
+\subsubsection{Pattern Spectrum}\label{header-n102}}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  进行一个开操作。
+\item
+  不停地使用不同大小的 SE 进行开操作并对其进行做减；叫做 Distance Size
+  Transformation（DST）。
+\item
+  在二值化的图形中；计算对象数量。
+\item
+  不停重复进行开操作和减操作，得到不同尺寸大小结构元的出现数目。
+\item
+  在二维图像为空时停止。此时腐蚀完了。
+\end{enumerate}
+
+\hypertarget{header-n114}{%
+\subsubsection{Recursive Dilation}\label{header-n114}}
+
+「反复膨胀」
+
+\end{document}
