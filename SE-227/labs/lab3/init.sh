@@ -1,0 +1,1 @@
+sudo docker run -it --privileged --cap-add=ALL -v /Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-227/labs/lab2:/home/stu/devlop ddnirvana/cselab_env:latest /bin/bash
