@@ -3,7 +3,6 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-
 #include "Reader.h"
 #include "Triangle.hpp"
 
@@ -28,13 +27,18 @@ static bool useDefaultDepthCheck = true;
 static void onWindowResized(int w, int h)
 {
 	windowWidth = w, windowHeight = h;
+	glViewport(0, 0, w, h);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 
 static void updateRotation() {
-	rotationX -= 0.4f;
-	rotationY -= 0.4f;
-	rotationZ -= 0.4f;
+	auto speed = 0.4f;
+	rotationX -= speed;
+	rotationY -= speed;
+	rotationZ -= speed;
 
 	if (rotationX >= 360.0) {
 		rotationX -= 360.0;
@@ -64,41 +68,67 @@ static void onRender()
 	glLoadIdentity();
 	updateRotation();
 
+	
 	glRotatef(rotationX, 1.0, 0.0, 0.0);
 	glRotatef(rotationY, 0.0, 1.0, 0.0);
 	glRotatef(rotationZ, 0.0, 0.0, 1.0);
+
+	glColor3d(0.6, 0.6, 0.7);
+	for (float i = -50; i <= 50; i += 1)
+	{
+		/** 绘制线 */
+		glBegin(GL_LINES);
+
+		/** X轴方向 */
+		glVertex3f(-50, 0, i);
+		glVertex3f(50, 0, i);
+
+		/** Z轴方向 */
+		glVertex3f(i, 0, -50);
+		glVertex3f(i, 0, 50);
+
+		glEnd();
+	}
+
+
 	
 	// glViewport(0, 0, windowWidth, windowHeight);
+	glBegin(GL_TRIANGLES);
+	//glColor3d(1.0, 0.0, 0.0);
+	//glVertex3i(1, 1, 0);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glShadeModel(GL_SMOOTH);
+	//glColor3d(1.0, 1.0, 0.0);
+	//glVertex3i(0, 1, 0);
+
+	//glColor3d(1.0, 0.0, 1.0);
+	//glVertex3i(0, 1, 1);
 
 	// glColor3f(0.0, 1.0, 1.0);
 	if (useDefaultDepthCheck) {
-		glBegin(GL_TRIANGLES);
+		double ratio = 100.0;
 		int counter = 1;
 		for (auto i : triangles) {
 			auto point = i.tPoint1;
 			glColor3d(point.r, point.g, point.b);
-			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-			glVertex3i(point.x, point.y, point.z);
+			std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
 			
 			point = i.tPoint2;
 			glColor3d(point.r, point.g, point.b);
-			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-			glVertex3i(point.x, point.y, point.z);
+			std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
 
 			point = i.tPoint3;
 			glColor3d(point.r, point.g, point.b);
-			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-			glVertex3i(point.x, point.y, point.z);
+			std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
 			
 			std::cout << "draw a triangle #" << counter << std::endl;
 			counter += 1;
 		}
-		glEnd();
+		
 	}
-
+	glEnd();
 	// glColor3f(1.0, 0.0, 1.0);
 	// glutWireTeapot(0.4f);
 	glutSwapBuffers();
@@ -156,6 +186,7 @@ int main(int argc, char** argv) {
 		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
 		glutInitWindowSize(windowWidth, windowHeight);
+		onWindowResized(windowWidth, windowHeight);
 		glutCreateWindow("triAngels");
 
 		glutReshapeFunc(onWindowResized);
@@ -165,15 +196,13 @@ int main(int argc, char** argv) {
 		// 启用阴影平滑
 		glShadeModel(GL_SMOOTH);
 		// 黑色背景
-		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClearColor(0.0, 0.0, 0.0, 1.0f);
 		// 设置深度缓存
 		glClearDepth(1.0);
 		// 启用深度测试
 		glEnable(GL_DEPTH_TEST);
 		// 所作深度测试的类型
 		glDepthFunc(GL_LEQUAL);
-		// 告诉系统对透视进行修正
-		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 		GLenum error = glewInit();
 		if (error != GLEW_OK)
