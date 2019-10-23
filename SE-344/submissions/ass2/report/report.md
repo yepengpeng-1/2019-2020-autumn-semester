@@ -44,3 +44,7 @@
 
 通过断点调试方法，发现程序可以成功处理 `overlapping.tri` 和 `intersecting.tri` 两个 `.tri` 文件，并能正确生成 `Triangle` 对象。
 
+#### 第三部分：三角形绘制
+
+首先，我们引入 `Triangle.hpp` 及 `Reader.h` 头文件来读入所需的文件。
+

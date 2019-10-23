@@ -28,9 +28,12 @@ std::vector<Triangle> readTriangle(std::string fileName) {
 			>> r1 >> g1 >> b1
 			>> r2 >> g2 >> b2
 			>> r3 >> g3 >> b3;
+
 		trigs.push_back(Triangle(x1, y1, z1, r1, g1, b1, x2, y2, z2, r2, g2, b2, x3, y3, z3, r3, g3, b3));
 
-		infs >> tmp;
+		while (infs.peek() == (int)'\n' || infs.peek() == (int)' ') {
+			infs.get();
+		}
 	}
 
 	infs.close();
