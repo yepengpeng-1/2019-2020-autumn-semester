@@ -1,0 +1,211 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{PO-903}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{思考题 3}\label{header-n2}}
+
+\hypertarget{header-n4}{%
+\paragraph{Q1:
+请分别解释干电池、铅酸电池和锂离子电池的工作原理。}\label{header-n4}}
+
+\hypertarget{header-n11}{%
+\subparagraph{干电池}\label{header-n11}}
+
+干电池（Dry Cell）是一种以糊状电解液来产生直流电的化学电池。
+
+最常见的干电池「碳锌电池」（Dry Leclanché Cell）在一个锌罐中存放
+NH\textsubscript{4}Cl 和 ZnCl\textsubscript{2}
+混合糊状液体，通过一层纸及粉末状的碳及 MnO\textsubscript{2} 隔开。
+
+此时，NH\textsubscript{4}\textsuperscript{+} 离子提供了整体环境中的
+H\textsuperscript{+} 离子；
+
+在阳极，Zn 被氧化产生 Zn\textsuperscript{2+}，同时产生两个电子；
+
+同时在阴极，二氧化锰和 NH\textsubscript{4}\textsuperscript{+}
+产生的氢离子得到电子，被还原成 Mn\textsubscript{2}O\textsubscript{3}。
+
+阳极反应： Zn(\emph{s}) → Zn\textsuperscript{2+}(\emph{aq}) + 2
+e\textsuperscript{−}
+
+阴极反应：2MnO\textsubscript{2}(\emph{s}) + 2
+H\textsuperscript{+}(\emph{aq}) + 2 e\textsuperscript{−} →
+Mn\textsubscript{2}O\textsubscript{3}(\emph{s}) +
+H\textsubscript{2}O(\emph{l})
+
+整个反应中，Zn 被氧化为正二价；而 MnO\textsubscript{2} 中的正四价的 Mn
+则被还原为 Mn\textsubscript{2}O\textsubscript{3} 中的正三价。
+
+同时产生的 NH\textsubscript{3} 和 Zn\textsuperscript{2+}
+离子还会发生一个副反应：
+
+Zn\textsuperscript{2+}(\emph{aq}) + 2 NH\textsubscript{3}(\emph{aq}) +
+2Cl\textsuperscript{\^{}−}\^{}(\emph{aq}) →
+Zn(NH\textsubscript{3})\textsubscript{2}Cl\textsubscript{2}(\emph{s})
+
+碳锌电池的电动势大约是 \(1.54V\)
+。电动势的不确定是由于阴极反应十分复杂，相比来说，阳极反应（锌端）则有一个已知的电势。
+
+而副反应及活性反应物的消耗直接导致电池的内阻增加，电池电动势降低。
+
+\hypertarget{header-n35}{%
+\subparagraph{铅酸电池}\label{header-n35}}
+
+铅酸蓄电池，又称铅蓄电池，是蓄电池的一种，电极主要由铅制成，电解液是硫酸溶液的一种蓄电池。
+
+和上面提到的碳锌干电池不同，铅酸电池是可充电电池，因此分充电和放电两部分进行分析。
+
+放电时
+
+整个环境中存在着硫酸电离出的高浓度的 H\textsuperscript{+} 离子和
+SO\textsubscript{4}\textsuperscript{2−} 离子。
+
+负极上的 Pb 单质被氧化，和 SO\textsubscript{4}\textsuperscript{2−}
+离子生成固体 PbSO\textsubscript{4}，同时失去两个电子。
+
+正极上的 PbO\textsubscript{2} 固体被还原，和 H\textsuperscript{+} 离子和
+SO\textsubscript{4}\textsuperscript{2−} 离子一同生成固体
+PbSO\textsubscript{4}，同时得到两个电子。
+
+化学方程式写作：
+
+负极反应：\({\displaystyle {\rm {Pb+SO_{4}^{2-}\rightarrow PbSO_{4}+2e^{-}}}}\)
+
+正极反应：\({\displaystyle {\rm {PbO_{2}+4H^{+}+SO_{4}^{2-}+2e^{-}\rightarrow 2H_{2}O+PbSO_{4}}}}\)
+
+总反应可以写作：\({\rm {PbO_{{2(s)}}+Pb_{{(s)}}+2{H_{2}SO_{4}}_{{(aq)}}\rightarrow 2{PbSO_{4}}_{{(s)}}+2{H_{2}O}_{{(l)}}}}\)
+
+充电时
+
+充电时的反应基本是放电时反应的逆反应。硫酸铅和水转化为二氧化铅、海绵状铅与稀硫酸。
+
+总反应为\({\rm {2{PbSO_{4}}_{{(s)}}+2{H_{2}O}_{{(l)}}\rightarrow PbO_{{2(s)}}+Pb_{{(s)}}+2{H_{2}SO_{4}}_{{(aq)}}}}\)。
+
+应用
+
+铅酸电池寿命大约 2 到 4 年，不过长期处于低电量的铅酸电池寿命会缩短。
+
+铅酸电池最常见故障是硫酸铅结晶过多。
+
+\hypertarget{header-n96}{%
+\subparagraph{锂离子电池}\label{header-n96}}
+
+锂离子电池（Lithium-ion
+battery）是一种充电电池，它主要依靠锂离子在正极和负极之间移动来工作。
+
+和铅酸电池一样，这也是一种可充电式电池。
+
+正极上发生的反应为
+\({\displaystyle \mathrm {Li} _{1-x}\mathrm {CoO_{2}} +x\mathrm {Li^{+}} +x\mathrm {e^{-}} \leftrightarrows \mathrm {LiCoO_{2}} }\)。
+
+负极上发生的反应为
+\({\displaystyle x\mathrm {LiC_{6}} \leftrightarrows \ x\mathrm {Li^{+}} +x\mathrm {e^{-}} +x\mathrm {C_{6}} }\)。
+
+现实中由于过度放电时产生的锂钴氧化物和 Li\textsuperscript{+} 产生的
+CoO，电池会产生一些不可逆的损耗。
+
+化学式为：\({\mathrm  {Li^{+}}}+{\mathrm  {e^{-}}}+{\mathrm  {LiCoO_{2}}}\rightarrow {\mathrm  {Li_{2}O}}+{\mathrm  {CoO}}\)。
+
+\hypertarget{header-n119}{%
+\paragraph{Q2:
+请说明锂离子电池隔膜的种类、性能要求及其制备方法。}\label{header-n119}}
+
+性能要求
+
+隔膜（Separator）的主要意义时将两个电极分开，仅仅让需要进行交换的粒子穿过，而不让他们直接接触，防止他们产生类似于「短路」的事故。
+
+由于目前的锂离子电池中，电解液多为有机溶剂体系，因而需要有耐有机溶剂的隔膜材料。实际生产中一般采用高强度薄膜化的聚烯烃多孔膜。
+
+主要的要求包括：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  电子绝缘，否则会产生直接短路；
+\item
+  良好的 Li\textsuperscript{2+} 透过率；
+\item
+  耐电解质腐蚀。
+\end{enumerate}
+
+另外，对于移动电子设备而言，安全性也很重要。目前大部分的隔膜可以实现「shutdown
+separator」，即在设备温度过高时，直接关闭离子通道以保证设备安全。
+
+种类及制备方法
+
+根据不同的物理、化学特性，锂电池隔膜材料可以分为：
+
+\begin{itemize}
+\item
+  织造膜
+\item
+  非织造膜（无纺布）
+\item
+  微孔膜
+\item
+  复合膜
+\item
+  隔膜纸
+\item
+  碾压膜
+\end{itemize}
+
+聚烯烃材料具有优异的力学性能、化学稳定性和相对廉价的特点，因此聚乙烯、聚丙烯等聚烯烃微孔膜在锂电池研究开发初期便被用作锂电池隔膜。
+
+也有用其他材料制备锂电池隔膜的研究，如 1999 年 F. Boudin
+等采用相转化法以聚偏氟乙烯（PVDF）为本体聚合物制备锂电池隔膜；Kuribayash
+Isao等研究纤维素复合膜作为锂电池隔膜材料。
+
+然而，至今商品化锂电池隔膜材料仍主要采用聚乙烯、聚丙烯微孔膜。
+
+\end{document}
