@@ -6,12 +6,12 @@
 
 class DepthChecker {
 public:
-	DepthChecker(std::vector<Triangle> triangles) {
+	DepthChecker(std::vector<Triangle> triangles, bool ignoreColor = false) {
 		trigs = triangles;
-		analyse();
+		analyse(ignoreColor);
 	}
 
-	void analyse() {
+	void analyse(bool ignoreColor) {
 		mappings.clear();
 
 		int32_t minX = 65535, maxX = -65536, minY = 65535, maxY = -65536;
@@ -31,6 +31,10 @@ public:
 					maxY = i.y;
 				}
 			}
+			minX = std::max(minX, -640);
+			maxX = std::min(maxX, 640);
+			minY = std::max(minY, -640);
+			maxY = std::min(maxY, 640);
 		}
 
 		for (int32_t x = minX; x <= maxX; ++x) {
@@ -54,19 +58,30 @@ public:
 					TrianglePoint P = TrianglePoint(x, y, z, 0.0, 0.0, 0.0);
 					TrianglePoint& P1 = tri.tPoint1, & P2 = tri.tPoint2, & P3 = tri.tPoint3;
 
-					double u = -(((P.y - P1.y) * (P1.x - P3.x) - (P.x - P1.x) * (P1.y -
+					double red, green, blue;
+					if (ignoreColor) {
+						red = tri.tPoint1.r;
+						green = tri.tPoint2.g;
+						blue = tri.tPoint3.b;
+					}
+					else {
+						double u = -(((P.y - P1.y) * (P1.x - P3.x) - (P.x - P1.x) * (P1.y -
 							P3.y)) / double((P1.y - P2.y) * (P1.x - P3.x) - (P1.x - P2.x) * (P1.y -
 								P3.y)));
 
-					double v = -((-P.y * P1.x + P.x * P1.y + P.y * P2.x - P1.y * P2.x - P.x * P2.y +
-						P1.x * P2.y) / double(
-							P1.y * P2.x - P1.x * P2.y - P1.y * P3.x + P2.y * P3.x + P1.x * P3.y -
-							P2.x * P3.y));
+						double v = -((-P.y * P1.x + P.x * P1.y + P.y * P2.x - P1.y * P2.x - P.x * P2.y +
+							P1.x * P2.y) / double(
+								P1.y * P2.x - P1.x * P2.y - P1.y * P3.x + P2.y * P3.x + P1.x * P3.y -
+								P2.x * P3.y));
 
-					double t = 1 - u - v;
-					double red = t * P1.r + u * P2.r + v * P3.r;
-					double green = t * P1.g + u * P2.g + v * P3.g;
-					double blue = t * P1.b + u * P2.b + v * P3.b;
+						double t = 1 - u - v;
+
+						red = t * P1.r + u * P2.r + v * P3.r;
+						green = t * P1.g + u * P2.g + v * P3.g;
+						blue = t * P1.b + u * P2.b + v * P3.b;
+					}
+					
+
 
 					auto currentPoint = TrianglePoint(x, y, z, red, green, blue);
 
@@ -74,7 +89,7 @@ public:
 
 						auto it = mappings.find(std::pair<int, int>(x, y));
 						if (it != mappings.end()) {
-							if (it->second.z >= currentPoint.z) {
+							if (it->second.z > currentPoint.z) {
 								continue;
 							}
 						}
@@ -116,7 +131,7 @@ private:
 			return false;
 		}
 		if (cross(a, b, c) == 0) {
-			return false;
+			return true;
 		}
 		return true;
 	}

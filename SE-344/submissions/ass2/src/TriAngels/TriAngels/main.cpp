@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include "Reader.h"
+#include "Weaving.hpp"
 #include "Triangle.hpp"
 #include "DepthChecker.hpp"
 
@@ -24,6 +25,8 @@ static GLfloat const maxSpeedLimit = 0.5f;
 static std::vector<Triangle> triangles;
 
 static bool useDefaultDepthCheck = true;
+
+static bool singleColorMode = false;
 
 static void onWindowResized(int w, int h)
 {
@@ -77,21 +80,23 @@ static void onRender()
 	glRotatef(rotationY, 0.0, 1.0, 0.0);
 	glRotatef(rotationZ, 0.0, 0.0, 1.0);
 
-	glColor3d(0.6, 0.6, 0.7);
-	for (float i = -50; i <= 50; i += 0.2f)
-	{
-		/** 绘制线 */
-		glBegin(GL_LINES);
+	if (useDefaultDepthCheck) {
+		glColor3d(0.6, 0.6, 0.7);
+		for (float i = -50; i <= 50; i += 0.2f)
+		{
+			/** 绘制线 */
+			glBegin(GL_LINES);
 
-		/** X轴方向 */
-		glVertex3f(-50, 0, i);
-		glVertex3f(50, 0, i);
+			/** X轴方向 */
+			glVertex3f(-50, 0, i);
+			glVertex3f(50, 0, i);
 
-		/** Z轴方向 */
-		glVertex3f(i, 0, -50);
-		glVertex3f(i, 0, 50);
+			/** Z轴方向 */
+			glVertex3f(i, 0, -50);
+			glVertex3f(i, 0, 50);
 
-		glEnd();
+			glEnd();
+		}
 	}
 
 	double ratio = 150.0;
@@ -122,14 +127,26 @@ static void onRender()
 		glEnd();
 	}
 	else {
-		glPointSize(7.0);
-		auto depthChecker = DepthChecker(triangles);
-		glBegin(GL_POINTS);
-		for (auto p : depthChecker.scanLines()) {
-			glColor3d(p.r, p.g, p.b);
-			glVertex3d(p.x / ratio, p.y / ratio, p.z / ratio);
+		if (singleColorMode) {
+			glPointSize(4.0);
+			auto depthChecker = DepthChecker(triangles, singleColorMode);
+			glBegin(GL_POINTS);
+			for (auto p : depthChecker.scanLines()) {
+				glColor3d(p.r, p.g, p.b);
+				glVertex2d(p.x / ratio, p.y / ratio);
+			}
+			glEnd();
 		}
-		glEnd();
+		else {
+			glPointSize(7.0);
+			auto depthChecker = DepthChecker(triangles, singleColorMode);
+			glBegin(GL_POINTS);
+			for (auto p : depthChecker.scanLines()) {
+				glColor3d(p.r, p.g, p.b);
+				glVertex3d(p.x / ratio, p.y / ratio, p.z / ratio);
+			}
+			glEnd();
+		}
 	}
 	
 	glutSwapBuffers();
@@ -141,7 +158,7 @@ int main(int argc, char** argv) {
 	char depthCheckFlag;
 
 	std::cout << "First of all, would you like to use the FreeGLUT provided depth check " << std::endl
-		<< "or the self implemented depth checking algorithm? " << std::endl 
+		<< "or the self implemented depth checking algorithm? " << std::endl
 		<< "Input 'Y' or 'y' for the default depth check" << std::endl
 		<< "or input 'N' or 'n' for my customized version." << std::endl
 		<< "Make your choice: >>> ";
@@ -155,15 +172,15 @@ int main(int argc, char** argv) {
 	}
 	else {
 		useDefaultDepthCheck = false;
-		std::cout << "You've enabled the self-implemented provided default depth check." << std::endl 
+		std::cout << "You've enabled the self-implemented provided default depth check." << std::endl
 			<< "Notice that under this mode, the view rotation feature will be disabled." << std::endl << std::endl;
 	}
 
 	std::cout << "Please input a number to pick the phase of this assignment: " << std::endl
-			  << "\t1 - Overlapping Triangles" << std::endl
-			  << "\t2 - Intersecting Triangles" << std::endl
-			  << "\t3 - Weaving Rectangles" << std::endl
-			  << "\nMake your choice: >>> ";
+		<< "\t1 - Overlapping Triangles" << std::endl
+		<< "\t2 - Intersecting Triangles" << std::endl
+		<< "\t3 - Weaving Rectangles" << std::endl
+		<< "\nMake your choice: >>> ";
 
 	std::cin >> inputFlag;
 
@@ -177,64 +194,69 @@ int main(int argc, char** argv) {
 			path = "../../../resources/overlapping.tri";
 		}
 		triangles = readTriangle(path);
+		singleColorMode = false;
 	}
 	else if (inputFlag == 2) {
 		std::string path;
 		std::cout << "Please provide the .tri file's path (relatively). \nOr, use '../../../resources/intersecting.tri' by default." << std::endl;
 
 		std::cin >> path;
-		
+
 		if (path == "!") {
 			path = "../../../resources/intersecting.tri";
 		}
 		triangles = readTriangle(path);
+		singleColorMode = false;
 	}
 	else if (inputFlag == 3) {
-
+		auto weaves = WeavingManager();
+		triangles = weaves.getWeavingShape();
+		singleColorMode = true;
+		std::cout << "Successfully generated weaving texture with " << triangles.size() << " triangle(s)." << std::endl;
 	}
 	else {
 		std::cout << "Gotta invalid flag. Return Code: -1." << std::endl;
 		return -1;
 	}
 
-	if (inputFlag == 3) {
-		/* Draw weaving triangles */
-	}
-	else {
-		/* Draw triangles! */
-		glutInit(&argc, argv);
 
-		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+	/* Draw triangles! */
+	glutInit(&argc, argv);
 
-		glutInitWindowSize(windowWidth, windowHeight);
-		onWindowResized(windowWidth, windowHeight);
-		glutCreateWindow("triAngels");
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
-		glutReshapeFunc(onWindowResized);
-		glutDisplayFunc(onRender);
+	glutInitWindowSize(windowWidth, windowHeight);
+	onWindowResized(windowWidth, windowHeight);
+	glutCreateWindow("triAngels");
+
+	glutReshapeFunc(onWindowResized);
+	glutDisplayFunc(onRender);
+
+	if (useDefaultDepthCheck) {
 		glutIdleFunc(onRender);
-
-		// 启用阴影平滑
-		glShadeModel(GL_SMOOTH);
-		// 黑色背景
-		glClearColor(0.0, 0.0, 0.0, 1.0f);
 		// 设置深度缓存
 		glClearDepth(1.0);
 		// 启用深度测试
 		glEnable(GL_DEPTH_TEST);
 		// 所作深度测试的类型
 		glDepthFunc(GL_LEQUAL);
-
-		GLenum error = glewInit();
-		if (error != GLEW_OK)
-		{
-			printf("glew init failure.");
-			return 1;
-		}
-
-		glutMainLoop();
-
-		return 0;
+		// 启用阴影平滑
+		glShadeModel(GL_SMOOTH);
 	}
+
+	// 白色背景
+	glClearColor(1.0, 1.0, 1.0, 1.0f);
+
+
+	GLenum error = glewInit();
+	if (error != GLEW_OK)
+	{
+		printf("glew init failure.");
+		return 1;
+	}
+
+	glutMainLoop();
+
+
 	return 0;
 }
