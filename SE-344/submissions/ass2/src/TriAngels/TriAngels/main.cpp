@@ -8,7 +8,7 @@
 
 using namespace std;
 
-static int windowWidth = 1280, windowHeight = 720;
+static int windowWidth = 1024, windowHeight = 1024;
 
 static GLfloat rotationX = 0.0f;
 static GLfloat rotationY = 0.0f;
@@ -35,6 +35,9 @@ static void onWindowResized(int w, int h)
 
 
 static void updateRotation() {
+	if (!useDefaultDepthCheck) {
+		return;
+	}
 	auto speed = 0.4f;
 	rotationX -= speed;
 	rotationY -= speed;
@@ -74,7 +77,7 @@ static void onRender()
 	glRotatef(rotationZ, 0.0, 0.0, 1.0);
 
 	glColor3d(0.6, 0.6, 0.7);
-	for (float i = -50; i <= 50; i += 1)
+	for (float i = -50; i <= 50; i += 0.2f)
 	{
 		/** »æÖÆÏß */
 		glBegin(GL_LINES);
@@ -104,27 +107,27 @@ static void onRender()
 	//glVertex3i(0, 1, 1);
 
 	// glColor3f(0.0, 1.0, 1.0);
-	if (useDefaultDepthCheck) {
+	if (useDefaultDepthCheck || true) {
 		double ratio = 100.0;
-		int counter = 1;
+		// int counter = 1;
 		for (auto i : triangles) {
 			auto point = i.tPoint1;
 			glColor3d(point.r, point.g, point.b);
-			std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
 			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
 			
 			point = i.tPoint2;
 			glColor3d(point.r, point.g, point.b);
-			std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
 			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
 
 			point = i.tPoint3;
 			glColor3d(point.r, point.g, point.b);
-			std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
 			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
 			
-			std::cout << "draw a triangle #" << counter << std::endl;
-			counter += 1;
+			// std::cout << "draw a triangle #" << counter << std::endl;
+			// counter += 1;
 		}
 		
 	}
@@ -137,6 +140,26 @@ static void onRender()
 
 int main(int argc, char** argv) {
 	int inputFlag;
+	char depthCheckFlag;
+
+	std::cout << "First of all, would you like to use the FreeGLUT provided depth check " << std::endl
+		<< "or the self implemented depth checking algorithm? " << std::endl 
+		<< "Input 'Y' or 'y' for the default depth check" << std::endl
+		<< "or input 'N' or 'n' for my customized version." << std::endl
+		<< "Make your choice: >>> ";
+
+
+	std::cin >> depthCheckFlag;
+
+	if (depthCheckFlag == 'Y' || depthCheckFlag == 'y') {
+		useDefaultDepthCheck = true;
+		std::cout << "You've enabled the FreeGLUT provided default depth check." << std::endl << std::endl;
+	}
+	else {
+		useDefaultDepthCheck = false;
+		std::cout << "You've enabled the self-implemented provided default depth check." << std::endl 
+			<< "Notice that under this mode, the view rotation feature will be disabled." << std::endl << std::endl;
+	}
 
 	std::cout << "Please input a number to pick the phase of this assignment: " << std::endl
 			  << "\t1 - Overlapping Triangles" << std::endl
