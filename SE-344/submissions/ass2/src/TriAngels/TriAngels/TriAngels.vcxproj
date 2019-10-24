@@ -132,6 +132,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DepthChecker.hpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Reader.cpp" />
   </ItemGroup>

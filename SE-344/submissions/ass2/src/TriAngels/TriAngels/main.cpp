@@ -5,6 +5,7 @@
 #include <GL/freeglut.h>
 #include "Reader.h"
 #include "Triangle.hpp"
+#include "DepthChecker.hpp"
 
 using namespace std;
 
@@ -93,22 +94,11 @@ static void onRender()
 		glEnd();
 	}
 
+	double ratio = 150.0;
 
-	
-	// glViewport(0, 0, windowWidth, windowHeight);
-	glBegin(GL_TRIANGLES);
-	//glColor3d(1.0, 0.0, 0.0);
-	//glVertex3i(1, 1, 0);
-
-	//glColor3d(1.0, 1.0, 0.0);
-	//glVertex3i(0, 1, 0);
-
-	//glColor3d(1.0, 0.0, 1.0);
-	//glVertex3i(0, 1, 1);
-
-	// glColor3f(0.0, 1.0, 1.0);
-	if (useDefaultDepthCheck || true) {
-		double ratio = 100.0;
+	if (useDefaultDepthCheck) {
+		glBegin(GL_TRIANGLES);
+		
 		// int counter = 1;
 		for (auto i : triangles) {
 			auto point = i.tPoint1;
@@ -129,11 +119,19 @@ static void onRender()
 			// std::cout << "draw a triangle #" << counter << std::endl;
 			// counter += 1;
 		}
-		
+		glEnd();
 	}
-	glEnd();
-	// glColor3f(1.0, 0.0, 1.0);
-	// glutWireTeapot(0.4f);
+	else {
+		glPointSize(7.0);
+		auto depthChecker = DepthChecker(triangles);
+		glBegin(GL_POINTS);
+		for (auto p : depthChecker.scanLines()) {
+			glColor3d(p.r, p.g, p.b);
+			glVertex3d(p.x / ratio, p.y / ratio, p.z / ratio);
+		}
+		glEnd();
+	}
+	
 	glutSwapBuffers();
 }
 
