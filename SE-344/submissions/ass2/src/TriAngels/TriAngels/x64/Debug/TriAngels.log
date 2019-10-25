@@ -1,6 +1,3 @@
 ﻿  DepthChecker.hpp
-  Reader.cpp
-  main.cpp
-  正在生成代码...
 LINK : warning LNK4076: 增量状态文件“Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass2\src\TriAngels\x64\Debug\TriAngels.ilk”无效(将删除)；正以非增量方式链接
   TriAngels.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass2\src\TriAngels\x64\Debug\TriAngels.exe
