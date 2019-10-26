@@ -1,3 +1,4 @@
+#include <cmath>
 #include <algorithm>
 
 #ifndef TRIANGLE_HPP
@@ -19,6 +20,11 @@ public:
 		g = std::max(std::min(G, 1.0), 0.0);
 		b = std::max(std::min(B, 1.0), 0.0);
 	}
+
+	void rotate(double rotation)  {
+		x = int32_t(x * cos(rotation) + z * sin(rotation));
+		z = int32_t(z * cos(rotation) + x * sin(rotation));
+	}
 };
 
 class Triangle {
@@ -37,6 +43,12 @@ public:
 		tPoint1 = TrianglePoint(tP1x, tP1y, tP1z, tP1r, tP1g, tP1b);
 		tPoint2 = TrianglePoint(tP2x, tP2y, tP2z, tP2r, tP2g, tP2b);
 		tPoint3 = TrianglePoint(tP3x, tP3y, tP3z, tP3r, tP3g, tP3b);
+	}
+
+	void rotate(double rotation) {
+		tPoint1.rotate(rotation);
+		tPoint2.rotate(rotation);
+		tPoint3.rotate(rotation);
 	}
 
 

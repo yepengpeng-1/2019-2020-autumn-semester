@@ -206,6 +206,11 @@ int main(int argc, char** argv) {
 			path = "../../../resources/intersecting.tri";
 		}
 		triangles = readTriangle(path);
+		if (!useDefaultDepthCheck) {
+			for (auto& i : triangles) {
+				i.rotate(0.76);
+			}
+		}
 		singleColorMode = false;
 	}
 	else if (inputFlag == 3) {
