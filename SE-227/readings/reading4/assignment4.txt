@@ -1,0 +1,11 @@
+Recitation-4: End-to-end Argument
+Please read End-to-end argument. Check here.
+
+Think about following questions:
+
+Use your own word to describe “end-to-end” argument.
+Give at lease three cases that are suitable to use this principle.
+Give at lease three cases that are NOT suitable to use this principle.
+[Discussion] Consider the design of the file system based on inode (as we learn from class and the lab ). Which part(s) of the design do you think can be removed? In another word, which part(s) of the design is(are) not flexible enough and should be implemented by the user? (Hint: don’t be limited by the FS API.)
+[Discussion] The same question, for the OS.
+Take your time preparing for this. You are required to hand in your answers to public ftp before 23:59, 2018-11-04.
