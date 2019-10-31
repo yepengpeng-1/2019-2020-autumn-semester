@@ -1,0 +1,255 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Oct 28 Mon}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-342::CV}\label{header-n2}}
+
+\hypertarget{header-n3}{%
+\subsubsection{Remember}\label{header-n3}}
+
+回忆上节课所讲的：结构元、膨胀、腐蚀、开操作、闭操作\ldots\ldots{}
+
+Hit/Miss. 定义两个无交集的结构元：一个击中前景，一个击中背景。
+
+\hypertarget{header-n6}{%
+\subsubsection{New Stuff}\label{header-n6}}
+
+\hypertarget{header-n7}{%
+\paragraph{Thinning}\label{header-n7}}
+
+所谓「细化」。
+
+对前景的细化就是对背景的粗化。
+
+\hypertarget{header-n10}{%
+\paragraph{Thickening}\label{header-n10}}
+
+所以我们直接对此对象求补集（Complementary），然后进行细化再补回来。
+
+就成了。因此也没人去做粗化。
+
+\hypertarget{header-n13}{%
+\paragraph{Shape Inspection}\label{header-n13}}
+
+如何区分不同形状的物体，并对其进行分离呢？
+
+看你具体想要区分的形状类型？
+
+最好确定的应该就是 Circle 了（没有任何旋转问题）
+
+其他的可能都得考虑旋转造成的非一致性问题。
+
+\hypertarget{header-n18}{%
+\subsubsection{Grayscale Dilation \& Erosion}\label{header-n18}}
+
+在我们从二值化的图形走向灰阶图形的的时候，该怎么处理？
+
+Dilation: 输出的是结构元指定区域的邻域内的最大值，
+
+Erosion: 输出的是结构元指定区域的邻域内的最小值。
+
+目前结构元不能再使用 非 False 即 True 的思路了。
+
+\hypertarget{header-n23}{%
+\paragraph{Dilation}\label{header-n23}}
+
+In \href{https://en.wikipedia.org/wiki/Grayscale}{grayscale} morphology,
+images are
+\href{https://en.wikipedia.org/wiki/Function_(mathematics)}{functions}
+mapping a \href{https://en.wikipedia.org/wiki/Euclidean_space}{Euclidean
+space} or \href{https://en.wikipedia.org/wiki/Lattice_graph}{grid}
+\emph{E} into
+R∪\{∞,−∞\}\includegraphics{https://wikimedia.org/api/rest_v1/media/math/render/svg/f9cee5555d47e06ecbd7cd3c6c937351743f5142},
+where
+\includegraphics{https://wikimedia.org/api/rest_v1/media/math/render/svg/786849c765da7a84dbc3cce43e96aad58a5868dc}
+is the set of \href{https://en.wikipedia.org/wiki/Real_numbers}{reals},
+∞\includegraphics{https://wikimedia.org/api/rest_v1/media/math/render/svg/c26c105004f30c27aa7c2a9c601550a4183b1f21}
+is an element greater than any real number, and −∞ is an element less
+than any real number.
+
+Grayscale structuring elements are also functions of the same format,
+called "structuring functions".
+
+Denoting an image by \emph{f}(\emph{x}) and the structuring function by
+\emph{b}(\emph{x}), the grayscale dilation of \emph{f} by \emph{b} is
+given by
+
+\((f\oplus b)(x)=\sup _{{y\in E}}[f(y)+b(x-y)]\),
+
+where "sup" denotes the
+\href{https://en.wikipedia.org/wiki/Supremum}{supremum}.
+
+\href{https://en.wikipedia.org/wiki/File:Grayscale_Morphological_Dilation.gif}{\includegraphics{https:////upload.wikimedia.org/wikipedia/commons/thumb/7/70/Grayscale_Morphological_Dilation.gif/220px-Grayscale_Morphological_Dilation.gif}}
+
+Example of dilation on a grayscale image using a 5x5 flat structuring
+element. The top figure demonstrates the application of the structuring
+element window to the individual pixels of the original image. The
+bottom figure shows the resulting dilated image.
+
+It is common to use flat structuring elements in morphological
+applications. Flat structuring functions are functions
+\emph{b}(\emph{x}) in the form
+
+\(b(x)=\left\{{\begin{array}{ll}0,&x\in B,\\-\infty ,&{\text{otherwise}},\end{array}}\right.\)
+
+where
+\includegraphics{https://wikimedia.org/api/rest_v1/media/math/render/svg/2c752e3a4ab7676572b6f4ab3f038aebaab3e4f5}.
+
+In this case, the dilation is greatly simplified, and given by
+
+\((f\oplus b)(x)=\sup _{{y\in E}}[f(y)+b(x-y)]=\sup _{{z\in E}}[f(x-z)+b(z)]=\sup _{{z\in B}}[f(x-z)].\)
+
+(Suppose \emph{x} = (\emph{px}, \emph{qx}), \emph{z} = (\emph{pz},
+\emph{qz}), then \emph{x} − \emph{z} = (\emph{px} − \emph{pz}, \emph{qx}
+− \emph{qz}).)
+
+In the bounded, discrete case (\emph{E} is a grid and \emph{B} is
+bounded), the \href{https://en.wikipedia.org/wiki/Supremum}{supremum}
+operator can be replaced by the
+\href{https://en.wikipedia.org/wiki/Maximum}{maximum}. Thus, dilation is
+a particular case of
+\href{https://en.wikipedia.org/wiki/Order_statistics}{order statistics}
+filters, returning the maximum value within a moving window (the
+symmetric of the structuring function support \emph{B})
+
+简单说，定义如此。按照这样的办法就好了。
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/10/28/{[}779EEDC8-536D-42A5-B746-FF712BDA227C{]} IMG_1258.jpeg}
+\caption{}
+\end{figure}
+
+\hypertarget{header-n40}{%
+\paragraph{Erosion}\label{header-n40}}
+
+\hypertarget{header-n41}{%
+\subsection{\texorpdfstring{Grayscale
+erosion{[}\href{https://en.wikipedia.org/w/index.php?title=Erosion_(morphology)\&action=edit\&section=4}{edit}{]}}{Grayscale erosion{[}edit{]}}}\label{header-n41}}
+
+\href{https://en.wikipedia.org/wiki/File:Grayscale_Morphological_Erosion.gif}{\includegraphics{https:////upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Grayscale_Morphological_Erosion.gif/220px-Grayscale_Morphological_Erosion.gif}}
+
+Example of erosion on a grayscale image using a 5x5 flat structuring
+element. The top figure demonstrates the application of the structuring
+element window to the individual pixels of the original image. The
+bottom figure shows the resulting eroded image.
+
+In \href{https://en.wikipedia.org/wiki/Grayscale}{grayscale} morphology,
+images are
+\href{https://en.wikipedia.org/wiki/Function_(mathematics)}{functions}
+mapping a \href{https://en.wikipedia.org/wiki/Euclidean_space}{Euclidean
+space} or \href{https://en.wikipedia.org/wiki/Lattice_graph}{grid}
+\emph{E} into
+\includegraphics{https://wikimedia.org/api/rest_v1/media/math/render/svg/f9cee5555d47e06ecbd7cd3c6c937351743f5142},
+where
+\includegraphics{https://wikimedia.org/api/rest_v1/media/math/render/svg/786849c765da7a84dbc3cce43e96aad58a5868dc}
+is the set of \href{https://en.wikipedia.org/wiki/Real_numbers}{reals},
+\includegraphics{https://wikimedia.org/api/rest_v1/media/math/render/svg/c26c105004f30c27aa7c2a9c601550a4183b1f21}
+is an element larger than any real number, and
+\includegraphics{https://wikimedia.org/api/rest_v1/media/math/render/svg/ca2608c4b5fd3bffc73585f8c67e379b4e99b6f1}
+is an element smaller than any real number.
+
+Denoting an image by \emph{f(x)} and the grayscale structuring element
+by \emph{b(x)}, where B is the space that b(x) is defined, the grayscale
+erosion of \emph{f} by \emph{b} is given by
+
+\((f\ominus b)(x)=\inf _{{y\in B}}[f(x+y)-b(y)]\),
+
+where "inf" denotes the
+\href{https://en.wikipedia.org/wiki/Infimum}{infimum}.
+
+In other words the erosion of a point is the minimum of the points in
+its neighborhood, with that neighborhood defined by the structuring
+element. In this way it is similar to many other kinds of image filters
+like the \href{https://en.wikipedia.org/wiki/Median_filter}{median
+filter} and the
+\href{https://en.wikipedia.org/wiki/Gaussian_filter}{gaussian filter}.
+
+\begin{figure}
+\centering
+\includegraphics{https://raw.githubusercontent.com/yuetsin/private-image-repo/master/2019/10/28/{[}B32D85DB-AE9E-49C0-8270-0A48E553326C{]} IMG_1259.jpeg}
+\caption{}
+\end{figure}
+
+\hypertarget{header-n50}{%
+\subsubsection{Edge Detection}\label{header-n50}}
+
+\hypertarget{header-n51}{%
+\paragraph{Inner Edge}\label{header-n51}}
+
+原图像---腐蚀结果
+
+\hypertarget{header-n53}{%
+\paragraph{Outer Edge}\label{header-n53}}
+
+膨胀结果---原图像
+
+\hypertarget{header-n55}{%
+\paragraph{Standard Edge}\label{header-n55}}
+
+膨胀结果---腐蚀结果
+
+\end{document}

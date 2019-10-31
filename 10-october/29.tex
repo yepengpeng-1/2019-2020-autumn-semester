@@ -1,0 +1,372 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Oct 29 Tue}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-302::Compilers}\label{header-n2}}
+
+继续 Translation（AST =\textgreater{} IR）。
+
+\hypertarget{header-n4}{%
+\subsubsection{Arithmetics}\label{header-n4}}
+
+算术操作的翻译，相对比较容易。
+
+\hypertarget{header-n6}{%
+\subsubsection{Conditional}\label{header-n6}}
+
+条件表达式\ldots 留意到我们需要支持 Shortcut（短路求值）。
+
+\hypertarget{header-n8}{%
+\paragraph{\& \textbar{}}\label{header-n8}}
+
+处理 OR 跟 AND 的情况下，我们将其展开为 IF - THEN - ELSE
+语句来实现短路操作。
+
+在抽象语法分析阶段已经被拆成 IF - THEN - ELSE 了。因此也不用过于担心。
+
+\hypertarget{header-n11}{%
+\paragraph{If Expression}\label{header-n11}}
+
+IF 来了！怎么处理？
+
+\texttt{if\ e1\ then\ e2\ else\ e3}
+
+最简单的思路就是把 \(e1\) 视为 Cx，e2 和 e3 都视为 Ex 表达式。即使 e2 跟
+e3 都是不返回值的表达式（Nx），也会对其做好强制类型转换。
+
+只不过这样效率较低（需要进行多次 unEx 和强制类型转换）；
+
+况且在 e2 和 e3 为 Cx 的情况下，进行 unEx
+可能会导致转移和标号产生混乱。这是很不好的。
+
+\hypertarget{header-n17}{%
+\paragraph{If Expression Fix}\label{header-n17}}
+
+特别识别出 e2 跟 e3 的表达式类型（Cx?
+Ex?）再将其表示为对应的表达式类型。
+
+如果是 Nx，那也不用取出返回值了（没有用的）\ldots\ldots{}
+
+\hypertarget{header-n20}{%
+\paragraph{strcmp}\label{header-n20}}
+
+String comparison 可不能直接把头指针放到 CJUMP 里进行比较\ldots{}
+
+我们需要逐个地比较 bytes 才能得到结果。
+
+最终我们不去实现这个函数。调用 Runtime System Library 函数
+\texttt{stringEqual} 就行了\ldots{}
+
+P.S. string unequal 的实现得调用一回
+\texttt{stringEqual}，然后自己把结果反一反就得了\ldots{}
+
+\hypertarget{header-n25}{%
+\subsubsection{String Literal}\label{header-n25}}
+
+\hypertarget{header-n26}{%
+\paragraph{Assembly}\label{header-n26}}
+
+\begin{verbatim}
+.section	.data
+
+string:
+	.ascii	"hello, world\n"
+string_end:
+	.equ	len, string_end - string
+	
+.section	.text
+.global		main
+
+main:
+	...
+\end{verbatim}
+
+在一般的汇编之中，字符串常量会被放在一处内存 Segment 之中；
+
+每碰到一个 String，就增加一个 Fragment。
+
+系统记录了每一串字符串的内容和长度。
+
+为了索引（找到）这个字符串，我们一般使用一个
+Label（标签🏷️）作为寻找字符串的指针。
+
+\hypertarget{header-n32}{%
+\paragraph{F\_string}\label{header-n32}}
+
+\texttt{F\_string(lab,\ lit)} 可以把字符串字面量 lit (String Literal)
+给放到 Data Segment 中，并且赋予其标签 lab (Label)。
+
+Pascal 里头，字符串是固定长度的。不够长度的部分用 0 填充（这没什么用）
+
+C 的实现是：字符串不定长，可以无限长，仅仅以 \textbackslash0
+作为字符串的结束。（这个实现不错，只是 \textbackslash0
+无法在字符串本体中出现，这是个问题。）
+
+Tiger
+的实现是：字符串由两部分构成；第一部分是字符串的长度；第二部分是对应长度的字节（即字符串内容）。
+
+\hypertarget{header-n37}{%
+\subsubsection{Record Creation}\label{header-n37}}
+
+上面提到过，Record 的引用都只是用他的所谓「指针」。
+
+事实上 Record 本体是存在 Heap 上的，而且从不释放它们。
+
+因此不像字符串无法动态生成，Record 是需要动态生成并且在 Heap
+上开辟空间的。
+
+\hypertarget{header-n41}{%
+\paragraph{Function Call}\label{header-n41}}
+
+首先，计算出 Record 所需要占用的空间；然后开辟出这么多的内存。
+
+\hypertarget{header-n43}{%
+\paragraph{Initialization}\label{header-n43}}
+
+随后，我们需要对此类 Record 的每一个 Entry
+进行初始化。是的，没有办法进行一次完成；必须一个个写。
+
+\hypertarget{header-n45}{%
+\subsubsection{Array Creation}\label{header-n45}}
+
+Array 的创建跟 Record 的创建绝对类似。
+
+同样需要调用外部的内存分配函数（因为 Tiger 做不了这件事情）；
+
+同样需要一个个地对每个参数进行初始化。（难受）
+
+\hypertarget{header-n49}{%
+\subsubsection{While / For Loop}\label{header-n49}}
+
+怎么翻译循环呢？
+
+\hypertarget{header-n51}{%
+\paragraph{While 循环}\label{header-n51}}
+
+基本语法：
+
+\begin{verbatim}
+while (condition)
+	do body
+\end{verbatim}
+
+翻译一下，是这样的：
+
+\begin{verbatim}
+test:
+	if not(condition) goto done
+	body
+	goto test
+done:
+\end{verbatim}
+
+\hypertarget{header-n56}{%
+\paragraph{Break 中断}\label{header-n56}}
+
+但是留意一下有一个特别的东西需要特别处理：\texttt{break}。
+
+为什么就一个呢？因为\ldots Tiger 没有 \texttt{continue}。
+
+\texttt{break} 的意义是直接跳脱循环，直接进入离他最近的那个
+\texttt{done}。
+
+只不过因为可能存在多个递归的循环，我们要很小心不要跳错了。
+
+因此 \texttt{transExp} 需要获取一个额外的参数：done 标号，确定了如果有
+\texttt{break} 我该跳到哪里。
+
+\hypertarget{header-n62}{%
+\paragraph{For 循环}\label{header-n62}}
+
+\begin{verbatim}
+for i := lo to hi
+	do body
+\end{verbatim}
+
+for 循环的基本语法是这样的。
+
+翻译的话，可以翻译成 while 来做（本身也就是一层语法糖衣）
+
+\begin{verbatim}
+let var i := lo
+	var limit := hi
+in while i <= limit
+	do (body; i := i + 1)
+end
+\end{verbatim}
+
+翻译成这样，可以吗？
+
+在 lo \textgreater= hi 的时候就直接炸了。在 hi = INTMAX 的时候也炸了。
+
+解决方案也很简单；把 \textless= 改用 \textless{}
+来判断，并且先进行测试再做 \texttt{i\ :=\ i\ +\ 1}。
+
+不过既然咱们不在意这些 Corner Cases，我们也就不管了。
+
+\hypertarget{header-n71}{%
+\subsubsection{Function Call}\label{header-n71}}
+
+\texttt{CALL(NAME\ lf,\ {[}sl,\ e1,\ e2,\ ...{]})}。就是这样的。
+
+sl 是静态链。
+
+\hypertarget{header-n74}{%
+\subsubsection{Declaration}\label{header-n74}}
+
+声明？分为很多种。Variable Decl, Function Decl, Type Decl...
+总归很麻烦。
+
+\hypertarget{header-n76}{%
+\paragraph{Function Declaration}\label{header-n76}}
+
+麻烦了。这样我们需要在 \texttt{.text} 中增加一部分新的汇编代码。
+
+汇编分为好几部分：
+
+\hypertarget{header-n79}{%
+\subparagraph{Prologue}\label{header-n79}}
+
+标准化的入口处理代码。
+
+首先要用
+
+\begin{verbatim}
+.text
+
+	...
+	
+.type	incr, @function
+\end{verbatim}
+
+来指明这是一个名为 \texttt{incr} 的函数正在被定义。
+
+随后，我们需要调整 Stack 指针（IA32
+需要同时调整栈顶指针和栈底指针；AMD64 只需要调整栈底），
+
+以便存放我们开在栈上的临时变量。
+
+之后，还需要分别处理 \texttt{@escaping} 和 \texttt{non-escaping}
+的参数，将其分别放到栈帧里和寄存器里。
+
+最后，我们只需要保存 Callee-saved 寄存器的内容入栈就好了。
+
+\hypertarget{header-n88}{%
+\subparagraph{Body}\label{header-n88}}
+
+Body 就是 Compiler 按照函数体内的代码翻译出来的。
+
+\hypertarget{header-n90}{%
+\subparagraph{Epilogue}\label{header-n90}}
+
+出口处理代码也是很标准化的，主要包括如下部分：
+
+\begin{itemize}
+\item
+  将返回值放到返回结果寄存器（\%rax）的指令。
+\item
+  恢复 Callee-saved 寄存器的内容（之前是入栈了的，现在弹出来）。
+\item
+  恢复栈指针（跟上面一样反着操作）。
+\item
+  一条 return 指令（JUMP 到该返回的地址）。
+\item
+  汇编里面一条特殊指令（Psuedo Command），标识函数的结束。
+\end{itemize}
+
+\hypertarget{header-n103}{%
+\subparagraph{Fragment}\label{header-n103}}
+
+跟每遇到一个 String 都要做一个 Fragment 一样，函数也会生成一个 Function
+Fragment List。
+
+\hypertarget{header-n105}{%
+\paragraph{Variable Declaration}\label{header-n105}}
+
+\hypertarget{header-n106}{%
+\subsubsection{Basic Blocks \& Traces}\label{header-n106}}
+
+\begin{quote}
+基本块与轨迹
+\end{quote}
+
+Tree 和机器语言也不可以直接转换，也存在很多 Conflict 的情况。
+
+比如，CJUMP 存在 True/False
+的两种跳转分支，而实际的机器是跳／不跳，转下一条指令的区分。
+
+CALL 中 CALL 会带来问题。在 Tree 语言里仍然保留着 f(g(x))
+形式的代码；但是在实际机器码中这肯定是不被允许的。
+
+ESEQ 也会带来问题；计算顺序会带来不确定的结果。
+
+为了去除这些问题，我们会引入到一个新的 Tree：Canonical Tree。
+
+\hypertarget{header-n114}{%
+\subsubsection{Canonical Tree}\label{header-n114}}
+
+P.S. Canonical Tree 跟原来的 TreeLang
+的结构完全一致，只不过她会做这样的修正：⌫
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Lineralize：线性化。去除所有的 SEQ 和
+  ESEQ（确保跟汇编代码中的顺序执行样式相同）；
+\item
+  组合成不包含转移和标号的基本块（Basic Blocks）集合。
+\item
+  将基本块集合组合成一组轨迹（Trace）。
+\end{enumerate}
+
+\end{document}
