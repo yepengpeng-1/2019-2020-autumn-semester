@@ -1,0 +1,124 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Assignment 4}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsubsection{Q1}\label{header-n2}}
+
+燃料电池可以分为哪几类？请分别说明其工作原理。
+
+\hypertarget{header-n14}{%
+\subsubsection{A1}\label{header-n14}}
+
+主要分为以下类型：
+
+\hypertarget{header-n19}{%
+\paragraph{质子交换膜燃料电池（PEMFC）}\label{header-n19}}
+
+原型的质子交换膜燃料电池的效率前缘设计、质子导电聚合物膜（电解质）的分隔主要在阳极和阴极双方。这也被称为固态聚合物电解质燃料电池（solid
+polymer electrolyte fuel cell, SPEFC）。
+
+阳极一边的氢流到阳极催化剂，并分离成质子和电子，运作温度约80-100℃。阴极催化剂，氧分子与（其中有游历通过外部电路）电子和质子发生反应形成水。
+
+\hypertarget{header-n27}{%
+\paragraph{固体氧化物燃料电池（SOFC）}\label{header-n27}}
+
+固体氧化物燃料电池（英语：Solid Oxide Fuel
+Cell，缩写：SOFC）由用氧化钇稳定氧化锆（YSZ，\textless15μm）那样的陶瓷给氧离子通电的电解质和由多孔质给电子通电的燃料和空气极构成。空气中的氧在空气极/电解质界面被还原形成氧离子，在空气燃料之间氧的分差作用下，在电解质中向燃料极侧移动，在燃料极电解质界面和燃料中的氢或一氧化碳的中间氧化产物反应，生成水蒸气或二氧化碳，放出电子。电子通过外部回路，再次返回空气极，此时产生电能。
+
+由于是高温运作（800-1000℃），通过设置底面循环，可以获得超过60\%效率的高效发电，使用寿命预期可以超过40000\textasciitilde80000小时。
+
+由于氧离子是在电解质中移动，所以也可以用
+CO、天然气、煤气化的气体作为燃料。
+
+SOFC系统的化学反应可以表达如下：
+
+阳极反应：2H\textsubscript{2} + 2O\textsubscript{2}\textsuperscript{−} →
+2H\textsubscript{2}O + 4e\textsuperscript{−}
+阴极反应：O\textsubscript{2} + 4e\textsuperscript{--} →
+2O\textsubscript{2}\textsuperscript{−} 整体电池反应：2H\textsubscript{2}
++ O\textsubscript{2} → 2H\textsubscript{2}O
+
+\hypertarget{header-n41}{%
+\paragraph{熔融碳酸盐燃料电池（MCFC）}\label{header-n41}}
+
+熔融碳酸盐燃料电池（英语：Molten Carbonate Fuel
+Cell，缩写：MCFC）要求650°C（1,200°F）高温，类似于SOFC。MCFC以熔融碱金属碳酸盐作电解质，并在高温下，这种盐变为熔化态允许电荷（负碳酸根离子）的在电池中移动。{[}20{]}
+用于熔融碳酸盐燃料电池（MCFC）系统中的化学反应可表示如下：{[}21{]}
+阳极反应：CO\textsubscript{3}2\textsuperscript{−} + H\textsubscript{2} →
+H\textsubscript{2}O + CO\textsubscript{2} + 2e\textsuperscript{−}
+阴极反应：CO\textsubscript{2} + ½O\textsubscript{2} +
+2e\textsuperscript{−} → CO\textsubscript{3}2\textsuperscript{−}
+整体反应：H\textsubscript{2} + ½O\textsubscript{2} → H\textsubscript{2}O
+
+\hypertarget{header-n48}{%
+\paragraph{碱性燃料电池（AFC）}\label{header-n48}}
+
+碱性燃料电池（alkaline fuel cell,
+AFC）是一种燃料电池，由法兰西斯·汤玛士·培根（Francis Thomas
+Bacon）所发明，以碳为电极，并使用氢氧化钾为电解质，操作温度约为摄氏100\textasciitilde{}250度（最新的碱性燃料电池操作温度约为摄氏23\textasciitilde{}70度）。
+
+\hypertarget{header-n9}{%
+\subsubsection{Q2}\label{header-n9}}
+
+以锂离子电池驱动的电动汽车、燃料电池汽车和传统内燃机汽车那种更环保？请详细说明理由。
+
+\hypertarget{header-n57}{%
+\subsubsection{A2}\label{header-n57}}
+
+就其环保程度而言，锂离子电池驱动的电动汽车消耗的能源完全来自其内部的可充电式锂离子电池。因此其能量来源可以来自外部的清洁电力，因此应属于最清洁的能源。
+
+而燃料电池汽车则分为很多种；有的以氢气和氧气为燃料，则不产生次生污染物；而以汽油为燃料的则难免会因为副反应而产生污染物。因此燃料电池汽车属于部分环保的类型。
+
+传统内燃机汽车自然是最不环保的。
+
+\end{document}
