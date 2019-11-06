@@ -454,7 +454,6 @@ public:
     FieldList( Field* head, FieldList* tail ) : head( head ), tail( tail ) {}
 
     static void Print( FILE* out, FieldList* v, int d );
-    ;
 };
 
 class ExpList {
