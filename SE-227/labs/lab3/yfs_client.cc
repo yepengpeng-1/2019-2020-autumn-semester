@@ -158,7 +158,7 @@ int yfs_client::create( inum parent, const char* name, mode_t mode, inum& ino_ou
 
     if ( r != OK ) {
         // lookup failure
-        lc->release( parent );
+        // lc->release( parent );
         return r;
     }
 
@@ -226,6 +226,7 @@ int yfs_client::mkdir( inum parent, const char* name, mode_t mode, inum& ino_out
 }
 
 int yfs_client::lookup( inum parent, const char* name, bool& found, inum& ino_out ) {
+    // lc->acquire( parent );
     nslog( "\tyfs::lookup - entered\n\tparent: %llu\n\tname: %s\n", parent, name );
     int            r = OK;
     list< dirent > entries;
@@ -233,7 +234,7 @@ int yfs_client::lookup( inum parent, const char* name, bool& found, inum& ino_ou
     r = readdir( parent, entries );
 
     if ( r != OK ) {
-
+        // lc->release( parent );
         return r;
     }
     nslog( "\tyfs::lookup - readdir success\n" );
@@ -250,6 +251,7 @@ int yfs_client::lookup( inum parent, const char* name, bool& found, inum& ino_ou
     }
 
     nslog( "\tyfs::lookup - nothing found...\n" );
+    // lc->release( parent );
     return r;
 }
 
@@ -344,7 +346,6 @@ int yfs_client::write( inum ino, size_t size, off_t off, const char* data, size_
 }
 
 int yfs_client::unlink( inum parent, const char* name ) {
-    lc->acquire( parent );
 
     int whatever;
     int r = OK;
@@ -356,10 +357,10 @@ int yfs_client::unlink( inum parent, const char* name ) {
     r = readdir( parent, ent_list );
 
     if ( r != OK ) {
-        lc->release( parent );
         return r;
     }
 
+    lc->acquire( parent );
     int counter = 0;
     for ( list< dirent >::iterator it = ent_list.begin(); it != ent_list.end(); ++it ) {
         if ( strcmp( it->name.c_str(), name ) == 0 ) {
@@ -433,21 +434,20 @@ int yfs_client::readlink( inum ino, std::string& data ) {
 }
 
 int yfs_client::symlink( inum parent, const char* name, const char* link, inum& ino_out ) {
-    lc->acquire( parent );
+
     nslog( "yfs::symlink entered.\n" );
 
     int r = OK, whatever;
 
     bool found_lookup;
     if ( lookup( parent, name, found_lookup, ino_out ) != extent_protocol::OK ) {
-        r = IOERR;
-        goto release;
+        return IOERR;
     }
 
     if ( found_lookup ) {
-        r = EXIST;
-        goto release;
+        return EXIST;
     }
+    lc->acquire( parent );
 
     if ( ( ec->create( extent_protocol::T_LINK, ino_out ) != extent_protocol::OK ) || ec->put( ino_out, std::string( link ), whatever ) != extent_protocol::OK ) {
         r = IOERR;
