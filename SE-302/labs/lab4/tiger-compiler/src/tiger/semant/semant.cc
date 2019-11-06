@@ -68,7 +68,7 @@ TY::Ty* FieldVar::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) con
     auto recEnt = ( E::VarEntry* )recT;
 
     if ( this->var->kind != A::Var::Kind::FIELD ) {
-        errormsg.Error( labelcount, "That's not even a record!" );
+        errormsg.Error( labelcount, "unmatched assign exp" );
     }
 
     auto fields = ( ( TY::RecordTy* )( ( A::SimpleVar* )this->var )->SemAnalyze( venv, tenv, labelcount ) )->fields;
