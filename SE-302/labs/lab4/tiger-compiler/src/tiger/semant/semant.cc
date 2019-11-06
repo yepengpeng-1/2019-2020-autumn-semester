@@ -35,6 +35,18 @@ static TY::FieldList* make_fieldlist( TEnvType tenv, A::FieldList* fields ) {
     return new TY::FieldList( new TY::Field( fields->head->name, ty ), make_fieldlist( tenv, fields->tail ) );
 }
 
+static TY::FieldList* make_fieldlist_from_e( TEnvType tenv, A::EFieldList* fields ) {
+    if ( fields == nullptr ) {
+        return nullptr;
+    }
+
+    TY::Ty* ty = fields->head->exp->SemAnalyze( nullptr, tenv, 0 );
+    std::cout << " make_fieldlist kind called. " << fields->head->name->Name() << std::endl;
+    if ( !ty ) {
+    }
+    return new TY::FieldList( new TY::Field( fields->head->name, ty ), make_fieldlist_from_e( tenv, fields->tail ) );
+}
+
 }  // namespace
 
 namespace A {
@@ -51,7 +63,25 @@ TY::Ty* SimpleVar::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) co
 
 TY::Ty* FieldVar::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
     std::cout << "Entered FieldVar::SemAnalyse; labelcount: " << labelcount << std::endl;
-    return TY::VoidTy::Instance();
+    auto recT = this->var->SemAnalyze( venv, tenv, labelcount );
+    // if ( recT->kind == E ) {
+    auto recEnt = ( E::VarEntry* )recT;
+
+    if ( this->var->kind != A::Var::Kind::FIELD ) {
+        errormsg.Error( labelcount, "That's not even a record!" );
+    }
+
+    auto fields = ( ( TY::RecordTy* )( ( A::SimpleVar* )this->var )->SemAnalyze( venv, tenv, labelcount ) )->fields;
+    while ( fields ) {
+        std::cout << "checking field " << fields->head->name->Name() << " and " << this->sym->Name() << std::endl;
+        if ( fields->head->name->Name() == this->sym->Name() ) {
+            return fields->head->ty;
+        }
+        fields = fields->tail;
+    }
+
+    errormsg.Error( labelcount, "field " + this->sym->Name() + " doesn't exist" );
+    // }
 }
 
 TY::Ty* SubscriptVar::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
@@ -142,8 +172,9 @@ TY::Ty* OpExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const 
 
 TY::Ty* RecordExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
     std::cout << "Entered RecordExp::SemAnalyse; labelcount: " << labelcount << std::endl;
-    // TODO: Put your codes here (lab4).
-    return TY::VoidTy::Instance();
+    auto recT = tenv->Look( this->typ );
+
+    return new TY::RecordTy( make_fieldlist_from_e( tenv, this->fields ) );
 }
 
 TY::Ty* SeqExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
@@ -159,6 +190,8 @@ TY::Ty* SeqExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const
 
 TY::Ty* AssignExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
     std::cout << "Entered AssignExp::SemAnalyse; labelcount: " << labelcount << std::endl;
+    this->exp->SemAnalyze( venv, tenv, labelcount );
+    this->var->SemAnalyze( venv, tenv, labelcount );
     return TY::VoidTy::Instance();
 }
 
