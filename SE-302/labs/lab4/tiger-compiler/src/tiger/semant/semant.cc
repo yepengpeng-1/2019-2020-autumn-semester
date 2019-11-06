@@ -42,8 +42,7 @@ static TY::FieldList* make_fieldlist_from_e( TEnvType tenv, A::EFieldList* field
 
     TY::Ty* ty = fields->head->exp->SemAnalyze( nullptr, tenv, 0 );
     std::cout << " make_fieldlist kind called. " << fields->head->name->Name() << std::endl;
-    if ( !ty ) {
-    }
+
     return new TY::FieldList( new TY::Field( fields->head->name, ty ), make_fieldlist_from_e( tenv, fields->tail ) );
 }
 
@@ -67,8 +66,8 @@ TY::Ty* FieldVar::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) con
     // if ( recT->kind == E ) {
     auto recEnt = ( E::VarEntry* )recT;
 
-    if ( this->var->kind != A::Var::Kind::FIELD ) {
-        errormsg.Error( labelcount, "unmatched assign exp" );
+    if ( recT->kind != TY::Ty::Kind::RECORD ) {
+        errormsg.Error( labelcount, "not a record type" );
     }
 
     auto fields = ( ( TY::RecordTy* )( ( A::SimpleVar* )this->var )->SemAnalyze( venv, tenv, labelcount ) )->fields;
@@ -81,13 +80,24 @@ TY::Ty* FieldVar::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) con
     }
 
     errormsg.Error( labelcount, "field " + this->sym->Name() + " doesn't exist" );
+    return TY::VoidTy::Instance();
     // }
 }
 
 TY::Ty* SubscriptVar::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
     std::cout << "Entered SubscriptVar::SemAnalyse; labelcount: " << labelcount << std::endl;
-    // TODO: Put your codes here (lab4).
-    return TY::VoidTy::Instance();
+
+    auto recT = this->var->SemAnalyze( venv, tenv, labelcount );
+    // if ( recT->kind == E ) {
+    auto recEnt = ( E::VarEntry* )recT;
+
+    if ( this->var->kind != A::Var::Kind::SUBSCRIPT ) {
+        errormsg.Error( labelcount, "array type required" );
+    }
+
+    if ( recEnt->ty->kind == TY::Ty::Kind::ARRAY ) {
+        return ( ( TY::ArrayTy* )( recEnt->ty ) )->ty;
+    }
 }
 
 TY::Ty* VarExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
@@ -132,21 +142,33 @@ TY::Ty* CallExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) cons
         errormsg.Error( labelcount, "undefined function " + this->func->Name() );
         return TY::VoidTy::Instance();
     }
-    A::ExpList* arg = this->args;
+    auto        formals = ( ( E::FunEntry* )fun )->formals;
+    A::ExpList* arg     = this->args;
     TY::Ty*     retType;
-    while ( arg ) {
-        retType = arg->head->SemAnalyze( venv, tenv, labelcount );
-        arg     = arg->tail;
+    while ( arg || formals ) {
+        if ( arg && formals ) {
+            std::cout << "comparing arg->head and formals->head" << std::endl;
+            if ( !arg->head->SemAnalyze( venv, tenv, labelcount )->IsSameType( formals->head ) ) {
+                errormsg.Error( labelcount, "para type mismatch" );
+                break;
+            }
+            arg     = arg->tail;
+            formals = formals->tail;
+        }
+        else {
+            if ( arg ) {
+                errormsg.Error( labelcount, "too many params in function " + this->func->Name() );
+            }
+            else {
+                errormsg.Error( labelcount, "too less params in function " + this->func->Name() );
+            }
+            break;
+        }
     }
+
     auto result = ( ( E::FunEntry* )fun )->result;
-    if ( !result && retType->kind != TY::Ty::Kind::VOID ) {
-        // errormsg.Error( labelcount, "procedure returns value" );
-        return TY::VoidTy::Instance();
-    }
-    if ( result->IsSameType( retType ) ) {
-        std::cout << "callexp result matches retType" << std::endl;
-        return result;
-    }
+    std::cout << "Call operation returns an " << result->kind << std::endl;
+    return result;
 }
 
 TY::Ty* OpExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
@@ -159,13 +181,29 @@ TY::Ty* OpExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const 
         errormsg.Error( labelcount, "integer required" );
         return TY::IntTy::Instance();
     }
+    else if ( rightT->kind == TY::Ty::Kind::INT && leftT->kind == TY::Ty::Kind::VOID ) {
+        errormsg.Error( labelcount, "integer required" );
+        return TY::IntTy::Instance();
+    }
+    else if ( this->oper == A::Oper::PLUS_OP && leftT->kind == TY::Ty::Kind::INT && rightT->kind == TY::Ty::Kind::STRING ) {
+        errormsg.Error( labelcount, "integer required" );
+        return TY::VoidTy::Instance();
+    }
+    else if ( this->oper == A::Oper::NEQ_OP && !leftT->IsSameType( rightT ) ) {
+        errormsg.Error( labelcount, "same type required" );
+        return TY::VoidTy::Instance();
+    }
+    else if ( leftT->kind == TY::Ty::Kind::RECORD && !leftT->IsSameType( rightT ) ) {
+        errormsg.Error( labelcount, "type mismatch" );
+        return TY::VoidTy::Instance();
+    }
     else if ( !leftT->IsSameType( rightT ) ) {
         errormsg.Error( labelcount, "same type required" );
         return TY::VoidTy::Instance();
     }
     else if ( leftT->kind == TY::Ty::Kind::INT && rightT->kind != TY::Ty::Kind::INT ) {
         errormsg.Error( labelcount, "integer required" );
-        return TY::IntTy::Instance();
+        return TY::VoidTy::Instance();
     }
     return TY::IntTy::Instance();
 }
@@ -173,7 +211,9 @@ TY::Ty* OpExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const 
 TY::Ty* RecordExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
     std::cout << "Entered RecordExp::SemAnalyse; labelcount: " << labelcount << std::endl;
     auto recT = tenv->Look( this->typ );
-
+    if ( !recT ) {
+        errormsg.Error( labelcount, "undefined type rectype" );
+    }
     return new TY::RecordTy( make_fieldlist_from_e( tenv, this->fields ) );
 }
 
@@ -190,8 +230,22 @@ TY::Ty* SeqExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const
 
 TY::Ty* AssignExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
     std::cout << "Entered AssignExp::SemAnalyse; labelcount: " << labelcount << std::endl;
-    this->exp->SemAnalyze( venv, tenv, labelcount );
-    this->var->SemAnalyze( venv, tenv, labelcount );
+    auto varKind = this->var->SemAnalyze( venv, tenv, labelcount );
+    auto expT    = this->exp->SemAnalyze( venv, tenv, labelcount );
+
+    if ( varKind->kind == TY::Ty::Kind::VOID ) {
+    }
+    else if ( varKind->kind == TY::Ty::Kind::RECORD ) {
+        if ( !expT->IsSameType( varKind ) ) {
+            errormsg.Error( labelcount, "type mismatch" );
+        }
+    }
+    else {
+        if ( !this->exp->SemAnalyze( venv, tenv, labelcount )->IsSameType( varKind ) ) {
+            errormsg.Error( labelcount, "unmatched assign exp" );
+        }
+    }
+
     return TY::VoidTy::Instance();
 }
 
@@ -208,8 +262,12 @@ TY::Ty* IfExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const 
         return TY::VoidTy::Instance();
     }
     else {
-        this->then->SemAnalyze( venv, tenv, labelcount );
-        return this->elsee->SemAnalyze( venv, tenv, labelcount );
+        auto thenT = this->then->SemAnalyze( venv, tenv, labelcount );
+        auto elseT = this->elsee->SemAnalyze( venv, tenv, labelcount );
+        if ( !thenT->IsSameType( elseT ) ) {
+            errormsg.Error( labelcount, "then exp and else exp type mismatch" );
+        }
+        return thenT;
     }
 }
 
@@ -252,7 +310,10 @@ TY::Ty* LetExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const
 
 TY::Ty* ArrayExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
     std::cout << "Entered ArrayExp::SemAnalyse; labelcount: " << labelcount << std::endl;
-    return tenv->Look( typ );
+    if ( !tenv->Look( this->typ )->IsSameType( this->init->SemAnalyze( venv, tenv, labelcount ) ) ) {
+        errormsg.Error( labelcount, "type mismatch" );
+    }
+    return new TY::ArrayTy( tenv->Look( this->typ ) );
 }
 
 TY::Ty* VoidExp::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
@@ -265,11 +326,14 @@ void FunctionDec::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) con
     FunDecList* func = this->functions;
     while ( func ) {
         auto head = func->head;
+        if ( venv->Look( head->name ) ) {
+            errormsg.Error( labelcount, "two functions have the same name" );
+        }
         if ( head->result ) {
             venv->Enter( head->name, new E::FunEntry( make_formal_tylist( tenv, head->params ), tenv->Look( head->result ) ) );
         }
         else {
-            venv->Enter( head->name, new E::FunEntry( make_formal_tylist( tenv, head->params ), nullptr ) );
+            venv->Enter( head->name, new E::FunEntry( make_formal_tylist( tenv, head->params ), TY::VoidTy::Instance() ) );
         }
         if ( func->tail ) {
             venv->Enter( func->tail->head->name, new E::FunEntry( nullptr, TY::VoidTy::Instance() ) );
@@ -293,7 +357,7 @@ void FunctionDec::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) con
             --inputParamCount;
         }
         std::cout << "function declared result: " << ( head->result ? head->result->Name() : "NULL" ) << std::endl;
-        if ( head->result == nullptr && retType->kind != TY::Ty::Kind::VOID ) {
+        if ( ( ( E::FunEntry* )( venv->Look( head->name ) ) )->result->kind == TY::Ty::Kind::VOID && retType->kind != TY::Ty::Kind::VOID ) {
             errormsg.Error( labelcount, "procedure returns value" );
         }
         std::cout << "head->result: " << head->result << ", retType->kind: " << retType->kind << std::endl;
@@ -304,18 +368,29 @@ void FunctionDec::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) con
 
 void VarDec::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
     std::cout << "Entered VarDec::SemAnalyse; labelcount: " << labelcount << std::endl;
+    auto initT = this->init->SemAnalyze( venv, tenv, labelcount );
     if ( this->typ ) {
         std::cout << "explicit type" << tenv->Look( this->typ ) << std::endl;
+        std::cout << "implicit type: " << initT << std::endl;
         venv->Enter( this->var, new E::VarEntry( tenv->Look( this->typ ) ) );
-        if ( !tenv->Look( this->typ )->IsSameType( this->init->SemAnalyze( venv, tenv, labelcount ) ) ) {
-            errormsg.Error( labelcount, "same type required" );
+        // if ( this->typ->name != this->init->SemAnalyze( venv, tenv, labelcount ) ) {
+        if ( !tenv->Look( this->typ )->IsSameType( initT ) ) {
+            // if ( tenv->Look( this->typ )->kind == TY::Ty::Kind::RECORD || tenv->Look( this->typ )->kind == TY::Ty::Kind::ARRAY ) {
+            errormsg.Error( labelcount, "type mismatch" );
+            // }
+            // else {
+            // errormsg.Error( labelcount, "same type required" );
+            // }
         }
+        // }
     }
     else {
-        std::cout << "implicit type: " << this->init->SemAnalyze( venv, tenv, labelcount ) << std::endl;
-        venv->Enter( this->var, new E::VarEntry( this->init->SemAnalyze( venv, tenv, labelcount ) ) );
+        std::cout << "implicit type: " << initT << std::endl;
+        if ( initT->kind == TY::Ty::Kind::NIL ) {
+            errormsg.Error( labelcount, "init should not be nil without type specified" );
+        }
+        venv->Enter( this->var, new E::VarEntry( initT ) );
     }
-    this->init->SemAnalyze( venv, tenv, labelcount );
 }
 
 void TypeDec::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
@@ -353,12 +428,16 @@ void TypeDec::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
             auto ans = nt->ty->SemAnalyze( tenv );
             if ( ans ) {
                 unmovedTimes = 0;
+                if ( tenv->Look( nt->name ) ) {
+                    errormsg.Error( labelcount, "two types have the same name" );
+                }
                 tenv->Enter( nt->name, ans );
             }
             else {
                 queue.push_back( nt );
                 unmovedTimes += 1;
             }
+            std::cout << "declared type " << nt->name->Name() << std::endl;
         }
         if ( queue.size() ) {
             errormsg.Error( labelcount, "illegal type cycle" );
@@ -376,6 +455,7 @@ void TypeDec::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
         else {
             errormsg.Error( labelcount, " undefined type " );
         }
+        std::cout << "declared type " << nt->name->Name() << std::endl;
     }
 }  // namespace A
 
