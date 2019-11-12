@@ -5,21 +5,21 @@
 namespace F {
 
 class X64Frame : public Frame {
-  // TODO: Put your codes here (lab6).
+    // TODO: Put your codes here (lab6).
 };
 
 class InFrameAccess : public Access {
- public:
-  int offset;
+public:
+    int offset;
 
-  InFrameAccess(int offset) : Access(INFRAME), offset(offset) {}
+    InFrameAccess( int offset ) : Access( INFRAME ), offset( offset ) {}
 };
 
 class InRegAccess : public Access {
- public:
-  TEMP::Temp* reg;
+public:
+    TEMP::Temp* reg;
 
-  InRegAccess(TEMP::Temp* reg) : Access(INREG), reg(reg) {}
+    InRegAccess( TEMP::Temp* reg ) : Access( INREG ), reg( reg ) {}
 };
 
 }  // namespace F

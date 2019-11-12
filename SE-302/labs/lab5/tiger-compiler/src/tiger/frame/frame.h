@@ -10,27 +10,27 @@
 namespace F {
 
 class Frame {
-  // Base class
+    // Base class
 };
 
 class Access {
- public:
-  enum Kind { INFRAME, INREG };
+public:
+    enum Kind { INFRAME, INREG };
 
-  Kind kind;
+    Kind kind;
 
-  Access(Kind kind) : kind(kind) {}
+    Access( Kind kind ) : kind( kind ) {}
 
-  // Hints: You may add interface like
-  //        `virtual T::Exp* ToExp(T::Exp* framePtr) const = 0`
+    // Hints: You may add interface like
+    //        `virtual T::Exp* ToExp(T::Exp* framePtr) const = 0`
 };
 
 class AccessList {
- public:
-  Access *head;
-  AccessList *tail;
+public:
+    Access*     head;
+    AccessList* tail;
 
-  AccessList(Access *head, AccessList *tail) : head(head), tail(tail) {}
+    AccessList( Access* head, AccessList* tail ) : head( head ), tail( tail ) {}
 };
 
 /*
@@ -38,37 +38,36 @@ class AccessList {
  */
 
 class Frag {
- public:
-  enum Kind { STRING, PROC };
+public:
+    enum Kind { STRING, PROC };
 
-  Kind kind;
+    Kind kind;
 
-  Frag(Kind kind) : kind(kind) {}
+    Frag( Kind kind ) : kind( kind ) {}
 };
 
 class StringFrag : public Frag {
- public:
-  TEMP::Label *label;
-  std::string str;
+public:
+    TEMP::Label* label;
+    std::string  str;
 
-  StringFrag(TEMP::Label *label, std::string str)
-      : Frag(STRING), label(label), str(str) {}
+    StringFrag( TEMP::Label* label, std::string str ) : Frag( STRING ), label( label ), str( str ) {}
 };
 
 class ProcFrag : public Frag {
- public:
-  T::Stm *body;
-  Frame *frame;
+public:
+    T::Stm* body;
+    Frame*  frame;
 
-  ProcFrag(T::Stm *body, Frame *frame) : Frag(PROC), body(body), frame(frame) {}
+    ProcFrag( T::Stm* body, Frame* frame ) : Frag( PROC ), body( body ), frame( frame ) {}
 };
 
 class FragList {
- public:
-  Frag *head;
-  FragList *tail;
+public:
+    Frag*     head;
+    FragList* tail;
 
-  FragList(Frag *head, FragList *tail) : head(head), tail(tail) {}
+    FragList( Frag* head, FragList* tail ) : head( head ), tail( tail ) {}
 };
 
 }  // namespace F
