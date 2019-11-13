@@ -1,0 +1,203 @@
+% XeLaTeX can use any Mac OS X font. See the setromanfont command below.
+% Input to XeLaTeX is full Unicode, so Unicode characters can be typed directly into the source.
+
+% The next lines tell TeXShop to typeset with xelatex, and to open and save the source with Unicode encoding.
+
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+
+\documentclass[12pt]{article}
+\usepackage{geometry}                % See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   % ... or a4paper or a5paper or ... 
+%\geometry{landscape}                % Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{fontspec}
+\setmonofont{Monaco}
+
+% Will Robertson's fontspec.sty can be used to simplify font choices.
+% To experiment, open /Applications/Font Book to examine the fonts provided on Mac OS X,
+% and change "Hoefler Text" to any of these choices.
+
+\usepackage{fontspec,xltxtra,xunicode}
+\defaultfontfeatures{Mapping=tex-text}
+\setromanfont[Mapping=tex-text]{Hoefler Text}
+\setsansfont[Scale=MatchLowercase,Mapping=tex-text]{Gill Sans}
+\setmonofont[Scale=MatchLowercase]{Andale Mono}
+
+\title{Hands-on 2}
+\author{Write Ahead Log System Report}
+\date{}                                           % Activate to display a given date or no date
+
+\newfontfamily\monaco{Monaco}
+
+\begin{document}
+\maketitle
+
+\section*{Sequence 1}
+
+After executing the commands in sequence 1, the output is as follows:
+
+\begin{lstlisting}[numberstyle=\tiny\monaco,
+        basicstyle=\small\monaco]
+        
+Opening new log
+> Beginning id: 1
+> Initializing account studentA to 1000
+> Committing id: 1
+> Ending id: 1
+> Beginning id: 2
+> Initializing account studentB to 2000
+> Beginning id: 3
+> Initializing account studentC to 3000
+> Crediting account studentC by 100
+> Debiting account studentA by 100
+> Committing id: 3
+> 
+-----------------------
+On-disk DB contents:
+Account: studentA Value: 1000
+-----------------------
+
+-----------------------
+LOG contents:
+type: START action_id: 1
+type: UPDATE action_id: 1 variable: studentA redo: "1000" undo: NULL
+type: OUTCOME action_id: 1 status: COMMITTED
+type: END action_id: 1
+type: START action_id: 2
+type: UPDATE action_id: 2 variable: studentB redo: "2000" undo: NULL
+type: START action_id: 3
+type: UPDATE action_id: 3 variable: studentC redo: "3000" undo: NULL
+type: UPDATE action_id: 3 variable: studentC redo: "3100" undo: "3000"
+type: UPDATE action_id: 3 variable: studentA redo: "900" undo: "1000"
+type: OUTCOME action_id: 3 status: COMMITTED
+-----------------------
+> crashing ...
+\end{lstlisting}
+
+\subsection*{Question 1} Wal-sys displays the current state of the database contents after you type show\_state. Why doesn't the database show studentB?
+
+\subsection*{Answer 1} The answer is the command of creating account "studentA'' is in the package between begin 1 and end 1. So after the end 1 line, the account 1 was written to the DB. However those creations after that wasn't ended even before the final crash. So the later command wasn't actually written into DB.
+
+\subsection*{Question 2} When the database recovers, which accounts should be active, and what values should they contain?
+
+\subsection*{Answer 2} Here's the result of recovery process:
+\begin{lstlisting}[numberstyle=\tiny\monaco,
+        basicstyle=\small\monaco]
+Recovering the database ..
+Starting rollback ...
+  The log was rolled back 11 lines
+Rollback done
+Winners: id: 3  Losers: id: 2  Done: id: 1 
+Starting forward scan ...
+  REDOING: type: UPDATE action_id: 3 variable: studentC redo: "3000" undo: NULL
+  REDOING: type: UPDATE action_id: 3 variable: studentC redo: "3100" undo: "3000"
+  REDOING: type: UPDATE action_id: 3 variable: studentA redo: "900" undo: "1000"
+  Logging END records for winners
+Forward scan done
+Recovery done
+\end{lstlisting}
+
+After that, the DB would contain such stuff here:
+\begin{lstlisting}[numberstyle=\tiny\monaco,
+        basicstyle=\small\monaco]
+studentC 3100
+studentA 900
+\end{lstlisting}
+
+\subsection*{Question 3} Can you explain why the "DB" file does not contain a record for studentC and contains the pre-debit balance for studentA?
+
+\subsection*{Answer 3} Because the studentB creation operation was declared in begin 2 phase, however it wasn't committed nor ended before the final crash. So it won't be in the LOG nor the DB.
+
+\section*{Sequence 2}
+
+\subsection*{Question 4} What do you expect the state of "DB" to be after wal\-sys recovers? Why?
+
+\subsection*{Answer 4} After the crash, wal\-sys should be able to recover the operations that we have ended or committed, in this case, the committed 1 and 3. However the studentB creation wasn't committed at all, so there's no way it could be recovered.
+
+\subsection*{Question 5} Run wal\-sys again to recover the database. Examine the "DB" file. Does the state of the database match your expectations? Why or why not?
+
+\subsection*{Answer 5} It matches my expectation. Because that's how I expect it works.
+
+\subsection*{Question 6} During recovery, wal\-sys reports the action\_ids of those recoverable actions that are "Losers", "Winners", and "Done". What is the meaning of these categories?
+
+\subsection*{Answer 6} Winners ID refers to those who aren't ended (written into DB) but successfully recovered according to the LOG files. Losers ID refers to those who never commits, which makes it unable to recover. Done ID refers to those who are already written to the DB, so there's no need to do any recovering stuffs.
+
+\section*{Checkpoints}
+
+After running the reset 
+
+\begin{lstlisting}[numberstyle=\tiny\monaco,
+        basicstyle=\small\monaco]
+Opening new log
+> Beginning id: 1
+> Initializing account studentA to 1000
+> Committing id: 1
+> Ending id: 1
+> Beginning id: 2
+> Initializing account studentB to 2000
+> Doing checkpoint
+> Beginning id: 3
+> Initializing account studentC to 3000
+> Crediting account studentC by 100
+> Debiting account studentB by 100
+> Committing id: 3
+> 
+-----------------------
+On-disk DB contents:
+Account: studentA Value: 1000
+-----------------------
+
+-----------------------
+LOG contents:
+type: START action_id: 1
+type: UPDATE action_id: 1 variable: studentA redo: "1000" undo: NULL
+type: OUTCOME action_id: 1 status: COMMITTED
+type: END action_id: 1
+type: START action_id: 2
+type: UPDATE action_id: 2 variable: studentB redo: "2000" undo: NULL
+type: CHECKPOINT PENDING: id: 2 COMMITTED:  DONE: id: 1 
+type: START action_id: 3
+type: UPDATE action_id: 3 variable: studentC redo: "3000" undo: NULL
+type: UPDATE action_id: 3 variable: studentC redo: "3100" undo: "3000"
+type: UPDATE action_id: 2 variable: studentB redo: "1900" undo: "2000"
+type: OUTCOME action_id: 3 status: COMMITTED
+-----------------------
+> crashing ...
+\end{lstlisting}
+
+The major difference between Sequence 2 and Sequence 1 is one more "checkpoint" keyword. And the last debit\_account was operated on transaction 2. It is specially pointed out that it's not a typo. Yes because there are other typos everywhere else in the handson.
+
+\subsection*{Question 7} Why are the results of recoverable action 2's create\_account 2 studentB 2000 command not installed in "DB" by the checkpoint command on the following line? Examine the "LOG" output file. In particular, inspect the CHECKPOINT entry. Also, count the number of entries in the "LOG" file. Run wal\-sys again to recover the database.
+
+\subsection*{Answer 7} Because the transaction 2 wasn't committed to the LOG at all, so the afterwards operation wasn't committed into the LOG. In the checkpoint line, we can see that transaction 1 was "done", however the transaction 2 was still pending anyway.
+
+\subsection*{Question 8} How many lines were rolled back? What is the advantage of using checkpoints?
+
+Note down the action\_ids of "Winners", "Losers", and "Done". Use the show\_state command to look at the recovered database and verify that the database recovered correctly. Crash the system, and then run wal\-sys again to recover the database a second time.
+
+\subsection*{Answer 8} Only back 6 lines were rolled back.
+\begin{lstlisting}[numberstyle=\tiny\monaco,
+        basicstyle=\small\monaco]
+  REDOING: type: UPDATE action_id: 3 variable: studentC redo: "3000" undo: NULL
+  REDOING: type: UPDATE action_id: 3 variable: studentC redo: "3100" undo: "3000"
+\end{lstlisting}
+
+Compared to the former recovery state, there are only two redoing declarations. 
+\subsection*{Question 9} Does the second run of the recovery procedure (for sequence 2) restore "DB" to the same state as the first run? What is this property called?
+
+\subsection*{Answer 9} Not really. See the redoing log in Answer 8, It didn't do the studentA(B) redo, because studentB wasn't created at all. Two redoing declaration is executed as follows: 
+\begin{lstlisting}[numberstyle=\tiny\monaco,
+        basicstyle=\small\monaco]
+  REDOING: type: UPDATE action_id: 3 variable: studentC redo: "3000" undo: NULL
+  REDOING: type: UPDATE action_id: 3 variable: studentC redo: "3100" undo: "3000"
+\end{lstlisting}
+
+\subsection*{Question 10} Compare the action\_ids of "Winners", "Losers", and "Done" from the second recovery with those from the first. The lists are different. How does the recovery procedure guarantee the property from Question 9 even though the recovery procedure can change? (Hint: Examine the "LOG" file).
+
+\subsection*{Answer 10} In my tests, the WLD list is still Winners: id: 3  Losers: id: 2  Done: id: 1. The lists are NOT different.
+
+\end{document}  
