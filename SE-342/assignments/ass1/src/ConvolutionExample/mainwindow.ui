@@ -289,13 +289,6 @@
     </property>
     <addaction name="actionImportImage"/>
     <addaction name="actionExportImage"/>
-    <addaction name="separator"/>
-    <addaction name="actionResume"/>
-   </widget>
-   <widget class="QMenu" name="menu">
-    <property name="title">
-     <string>進階</string>
-    </property>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -303,18 +296,7 @@
     </property>
     <addaction name="actionShowAbout"/>
    </widget>
-   <widget class="QMenu" name="menu_3">
-    <property name="title">
-     <string>顯示</string>
-    </property>
-    <addaction name="actionZoomIn"/>
-    <addaction name="actionZoomOut"/>
-    <addaction name="separator"/>
-    <addaction name="actionReset"/>
-   </widget>
    <addaction name="menuMain_Window"/>
-   <addaction name="menu_3"/>
-   <addaction name="menu"/>
    <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -337,50 +319,9 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="actionResume">
-   <property name="text">
-    <string>恢復默認</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
-   </property>
-  </action>
-  <action name="actionZoomIn">
-   <property name="text">
-    <string>放大一點</string>
-   </property>
-   <property name="toolTip">
-    <string>放大一點</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+=</string>
-   </property>
-  </action>
-  <action name="actionZoomOut">
-   <property name="text">
-    <string>縮小一點</string>
-   </property>
-   <property name="toolTip">
-    <string>縮小一點</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+-</string>
-   </property>
-  </action>
-  <action name="actionReset">
-   <property name="text">
-    <string>實際大小</string>
-   </property>
-   <property name="toolTip">
-    <string>實際大小</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+0</string>
-   </property>
-  </action>
   <action name="actionShowAbout">
    <property name="text">
-    <string>App 版本</string>
+    <string>詳情</string>
    </property>
    <property name="toolTip">
     <string>App 版本</string>
