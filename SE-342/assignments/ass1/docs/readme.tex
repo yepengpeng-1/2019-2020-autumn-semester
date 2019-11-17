@@ -1,0 +1,69 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+
+%SetFonts
+
+%SetFonts
+
+
+\title{SE-342}
+\author{Assignment \#2}
+\date{}							% Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+\section*{Prerequisites}
+
+\hspace{14pt} First, run ``prerequisites.sh" to install critical requirements.
+
+Or, use ``prerequisites.ps1" for Windows.
+
+Manually running ``pip3 install -r requirements.txt" will be fine, too.
+
+\section*{Environment}
+
+\hspace{13pt} Notice that the assignment has been tested on Python 3.7.4 [Clang 9.0.0 (clang-900.0.39.2)] on darwin.
+
+Other Python version later than 3.6 might work, but not for sure.
+
+Python 2 is not supported.
+
+This program was developed and tested on PyQt 5.13.2 (Open-source version).
+
+\section*{Running}
+
+\hspace{14pt} Execute ``run.sh" or ``run.ps1", or manually execute ``src/ConvolutionExample/convolutionexample.py".
+
+\section*{Usage}
+
+\subsection*{Import Image Document}
+
+\hspace{14pt} Select ``File" \- ``Import Image Document" or press Command + O, and pick the image file to be processed.
+
+\subsection*{Select Filter \& Convolve Kernel}
+
+\hspace{14pt} In the variable settings box, pick the ``Usage" pop-up selector and choose what you want.
+
+By using different kernel, you may change the kernel size and the sigma value as provided.
+
+\subsection*{Execute}
+
+\hspace{13pt} Click ``Apply Convolve" or ``Apply Filter" to start the calculation.
+
+Special Notice: In some special environments, the preview panel won't update until the window gets it focus again. So when the processing stops but the preview panel doesn't update, try switching focus to another tasks, and then switch it back. The preview panel should be refreshed then.
+
+\subsection*{Export Image Document}
+
+\hspace{14pt} Select ``File" \- ``Export Image Document" or press Command + S, and pick the path to be saved.
+
+\section*{License}
+
+AGPL-3.0
+
+\end{document}  
