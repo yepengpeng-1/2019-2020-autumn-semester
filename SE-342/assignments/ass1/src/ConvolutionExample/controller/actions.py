@@ -8,7 +8,7 @@ import baseio.output
 import varargs.varargs
 import convolutions.gaussian
 import convolutions.median
-
+import convolutions.average
 
 @pyqtSlot()
 def onAboutButtonClicked(self):
@@ -78,7 +78,7 @@ def filterApplyClicked(self):
     if opCode == 3:
         convolutions.gaussian.gaussianFilter()
     elif opCode == 4:
-        pass
+        convolutions.average.averageFilter()
     elif opCode == 5:
         convolutions.median.medianFilter()
     else:
