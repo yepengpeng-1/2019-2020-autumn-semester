@@ -7,6 +7,7 @@ import baseio.input
 import baseio.output
 import varargs.varargs
 import convolutions.gaussian
+import convolutions.median
 
 
 @pyqtSlot()
@@ -75,10 +76,10 @@ def filterApplyClicked(self):
         return
     opCode = varargs.varargs.operationType
     if opCode == 3:
-        convolutions.gaussian.gaussianConvolution()
+        convolutions.gaussian.gaussianFilter()
     elif opCode == 4:
         pass
     elif opCode == 5:
-        pass
+        convolutions.median.medianFilter()
     else:
         utils.prompt.showWarning("Invalid filtering operation selected. Try pick another one.")

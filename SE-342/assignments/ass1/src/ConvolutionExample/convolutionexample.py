@@ -21,7 +21,7 @@ class ConvolutionExample():
         MainWindow = QtWidgets.QMainWindow()
         ui = mainwindow.Ui_MainWindow()
         global_ui = ui
-        utils.widget_helper.global_widget = MainWindow
+        utils.widget_helper.global_widget = MainWindow.centralWidget()
         ui.setupUi(MainWindow)
         self.initAction(ui)
         utils.widget_helper.global_ce = self
@@ -38,6 +38,11 @@ class ConvolutionExample():
             global_ui.applyConvolutionButton.setEnabled(False)
             global_ui.applyFilterButton.setEnabled(True)
         
+        if index == 3:
+            global_ui.sigmaSizeSlider.setEnabled(True)
+        else:
+            global_ui.sigmaSizeSlider.setEnabled(False)
+            
         varargs.varargs.operationType = index
 
     def refreshDisplay(self):

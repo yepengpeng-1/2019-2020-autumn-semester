@@ -120,6 +120,7 @@ class Ui_MainWindow(object):
         self.sigmaSizeLabel.setObjectName("sigmaSizeLabel")
         self.horizontalLayout_4.addWidget(self.sigmaSizeLabel)
         self.sigmaSizeSlider = QtWidgets.QSlider(self.groupBox_3)
+        self.sigmaSizeSlider.setEnabled(False)
         self.sigmaSizeSlider.setMinimum(10)
         self.sigmaSizeSlider.setMaximum(100)
         self.sigmaSizeSlider.setSingleStep(1)
