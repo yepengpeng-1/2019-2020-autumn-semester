@@ -150,19 +150,22 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>卷積核大小:</string>
+              <string>卷積核尺寸:</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLabel" name="kernelSizeLabel">
              <property name="text">
-              <string>3</string>
+              <string>5</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QSlider" name="kernelSizeSlider">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="minimum">
               <number>3</number>
              </property>
@@ -193,7 +196,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Sigma (%):</string>
+              <string>Sigma (10×):</string>
              </property>
             </widget>
            </item>

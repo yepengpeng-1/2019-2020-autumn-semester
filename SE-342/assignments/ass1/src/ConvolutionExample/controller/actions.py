@@ -6,9 +6,12 @@ import baseimage.imagesetter
 import baseio.input
 import baseio.output
 import varargs.varargs
-import convolutions.gaussian
-import convolutions.median
-import convolutions.average
+import filters.gaussian
+import filters.median
+import filters.average
+import convolutions.robert
+import convolutions.prewitt
+import convolutions.sobel
 
 @pyqtSlot()
 def onAboutButtonClicked(self):
@@ -34,6 +37,7 @@ def onExportButtonClicked(self):
 @pyqtSlot()
 def typeChanged(index):
     utils.widget_helper.global_ce.flushIndex(index)
+    kernelSliderMoved(varargs.varargs.kernelSize)
 
 @pyqtSlot()
 def resetClicked(self):
@@ -43,6 +47,8 @@ def resetClicked(self):
 
 @pyqtSlot()
 def kernelSliderMoved(value):
+    opCode = varargs.varargs.operationType
+
     if value % 2 == 0:
         utils.widget_helper.global_ce.forcefullySetKernelSize(value + 1)
         varargs.varargs.kernelSize = value + 1
@@ -61,11 +67,11 @@ def convolutionApplyClicked(self):
         return
     opCode = varargs.varargs.operationType
     if opCode == 0:
-        pass
+        convolutions.robert.robertConvolve()
     elif opCode == 1:
-        pass
+        convolutions.prewitt.prewittConvolve()
     elif opCode == 2:
-        pass
+        convolutions.sobel.sobelConvolve()
     else:
         utils.prompt.showWarning("Invalid convolution operation selected. Try pick another one.")
 
@@ -76,10 +82,10 @@ def filterApplyClicked(self):
         return
     opCode = varargs.varargs.operationType
     if opCode == 3:
-        convolutions.gaussian.gaussianFilter()
+        filters.gaussian.gaussianFilter()
     elif opCode == 4:
-        convolutions.average.averageFilter()
+        filters.average.averageFilter()
     elif opCode == 5:
-        convolutions.median.medianFilter()
+        filters.median.medianFilter()
     else:
         utils.prompt.showWarning("Invalid filtering operation selected. Try pick another one.")

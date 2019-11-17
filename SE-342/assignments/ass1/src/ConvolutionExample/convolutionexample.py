@@ -42,6 +42,15 @@ class ConvolutionExample():
             global_ui.sigmaSizeSlider.setEnabled(True)
         else:
             global_ui.sigmaSizeSlider.setEnabled(False)
+
+        if index == 0 or index == 1 or index == 2:
+            global_ui.kernelSizeSlider.setEnabled(False)
+            # global_ui.kernelSizeSlider.setMinimum(2)
+            # global_ui.kernelSizeSlider.setMaximum(12)
+        else:
+            global_ui.kernelSizeSlider.setEnabled(True)
+            # global_ui.kernelSizeSlider.setMinimum(3)
+            # global_ui.kernelSizeSlider.setMaximum(13)
             
         varargs.varargs.operationType = index
 
@@ -57,6 +66,7 @@ class ConvolutionExample():
     def forcefullySetKernelSize(self, value):
         global global_ui
         global_ui.kernelSizeSlider.setValue(value)
+        global_ui.kernelSizeLabel.setNum(value)
     
     def initAction(self, ui):
         # menu bar stuff

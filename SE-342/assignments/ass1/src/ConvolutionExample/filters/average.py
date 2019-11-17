@@ -50,7 +50,3 @@ def averageFilter(use_personal_filter = False):
     # baseimage.imagesetter.clearImageObject()
     baseimage.imagesetter.setImageObject(newimg)
     utils.widget_helper.global_ce.refreshDisplay()
-
-def __gaussianFunc(x, y):
-    topit = (x * x + y * y) / (2 * varargs.varargs.sigmaValue * varargs.varargs.sigmaValue)
-    return 1 / (2 * math.pi * varargs.varargs.sigmaValue * varargs.varargs.sigmaValue) * pow(math.e, -topit)
