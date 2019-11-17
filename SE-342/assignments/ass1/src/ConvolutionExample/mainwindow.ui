@@ -10,10 +10,16 @@
     <height>430</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="maximumSize">
    <size>
-    <width>720</width>
-    <height>480</height>
+    <width>1920</width>
+    <height>1080</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -39,8 +45,8 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>720</width>
-          <height>480</height>
+          <width>19200</width>
+          <height>10800</height>
          </size>
         </property>
         <property name="title">
@@ -73,7 +79,7 @@
       <item>
        <widget class="QGroupBox" name="groupBox_3">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -93,12 +99,12 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>卷積方式</string>
+              <string>採用</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox">
+            <widget class="QComboBox" name="typeSelection">
              <item>
               <property name="text">
                <string>Roberts 卷積</string>
@@ -166,9 +172,6 @@
              <property name="singleStep">
               <number>2</number>
              </property>
-             <property name="pageStep">
-              <number>3</number>
-             </property>
              <property name="value">
               <number>5</number>
              </property>
@@ -190,7 +193,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Sigma:</string>
+              <string>Sigma (%):</string>
              </property>
             </widget>
            </item>
@@ -204,10 +207,13 @@
            <item>
             <widget class="QSlider" name="sigmaSizeSlider">
              <property name="minimum">
-              <number>1</number>
+              <number>10</number>
              </property>
              <property name="maximum">
               <number>100</number>
+             </property>
+             <property name="singleStep">
+              <number>1</number>
              </property>
              <property name="value">
               <number>50</number>
@@ -235,14 +241,14 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="applyConvolutionButton">
            <property name="text">
             <string>應用卷積</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="applyFilterButton">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -252,7 +258,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_3">
+          <widget class="QPushButton" name="resetButton">
            <property name="text">
             <string>重置</string>
            </property>
@@ -382,7 +388,7 @@
  <connections>
   <connection>
    <sender>kernelSizeSlider</sender>
-   <signal>sliderMoved(int)</signal>
+   <signal>valueChanged(int)</signal>
    <receiver>kernelSizeLabel</receiver>
    <slot>setNum(int)</slot>
    <hints>
@@ -398,7 +404,7 @@
   </connection>
   <connection>
    <sender>sigmaSizeSlider</sender>
-   <signal>sliderMoved(int)</signal>
+   <signal>valueChanged(int)</signal>
    <receiver>sigmaSizeLabel</receiver>
    <slot>setNum(int)</slot>
    <hints>

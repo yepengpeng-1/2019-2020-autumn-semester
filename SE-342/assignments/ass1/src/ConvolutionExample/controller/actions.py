@@ -5,6 +5,9 @@ import utils.widget_helper
 import baseimage.imagesetter
 import baseio.input
 import baseio.output
+import varargs.varargs
+import convolutions.gaussian
+
 
 @pyqtSlot()
 def onAboutButtonClicked(self):
@@ -26,3 +29,56 @@ def onExportButtonClicked(self):
         if fileName[0] == '':
             return
         baseio.output.saveFile(fileName[0])
+
+@pyqtSlot()
+def typeChanged(index):
+    utils.widget_helper.global_ce.flushIndex(index)
+
+@pyqtSlot()
+def resetClicked(self):
+    baseimage.imagesetter.clearImageObject()
+    # baseimage.imagesetter.displayIt()
+    utils.widget_helper.global_ce.refreshDisplay()
+
+@pyqtSlot()
+def kernelSliderMoved(value):
+    if value % 2 == 0:
+        utils.widget_helper.global_ce.forcefullySetKernelSize(value + 1)
+        varargs.varargs.kernelSize = value + 1
+    else:
+        varargs.varargs.kernelSize = value
+
+
+@pyqtSlot()
+def sigmaSliderMoved(value):
+    varargs.varargs.sigmaValue = value / 10
+
+@pyqtSlot()
+def convolutionApplyClicked(self):
+    if not baseimage.imagesetter.isOk():
+        utils.prompt.showWarning("Cannot apply convolution since there's no image available.")
+        return
+    opCode = varargs.varargs.operationType
+    if opCode == 0:
+        pass
+    elif opCode == 1:
+        pass
+    elif opCode == 2:
+        pass
+    else:
+        utils.prompt.showWarning("Invalid convolution operation selected. Try pick another one.")
+
+@pyqtSlot()
+def filterApplyClicked(self):
+    if not baseimage.imagesetter.isOk():
+        utils.prompt.showWarning("Cannot apply filter since there's no image available.")
+        return
+    opCode = varargs.varargs.operationType
+    if opCode == 3:
+        convolutions.gaussian.gaussianConvolution()
+    elif opCode == 4:
+        pass
+    elif opCode == 5:
+        pass
+    else:
+        utils.prompt.showWarning("Invalid filtering operation selected. Try pick another one.")
