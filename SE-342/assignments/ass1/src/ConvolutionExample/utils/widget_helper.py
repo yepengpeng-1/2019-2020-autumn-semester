@@ -1,0 +1,1 @@
+global_widget = None

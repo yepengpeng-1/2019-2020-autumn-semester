@@ -89,7 +89,38 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox"/>
+            <widget class="QComboBox" name="comboBox">
+             <item>
+              <property name="text">
+               <string>Roberts 卷積</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Prewitt 卷積</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Sobel 卷積</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Gaussian 濾波</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Mean 濾波</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Median 濾波</string>
+              </property>
+             </item>
+            </widget>
            </item>
           </layout>
          </item>
@@ -104,12 +135,34 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>參量</string>
+              <string>卷積核大小:</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QSlider" name="horizontalSlider_2">
+            <widget class="QLabel" name="kernelSizeLabel">
+             <property name="text">
+              <string>3</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="kernelSizeSlider">
+             <property name="minimum">
+              <number>3</number>
+             </property>
+             <property name="maximum">
+              <number>13</number>
+             </property>
+             <property name="singleStep">
+              <number>2</number>
+             </property>
+             <property name="pageStep">
+              <number>3</number>
+             </property>
+             <property name="value">
+              <number>5</number>
+             </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -128,12 +181,28 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>參量</string>
+              <string>Sigma:</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QSlider" name="horizontalSlider_3">
+            <widget class="QLabel" name="sigmaSizeLabel">
+             <property name="text">
+              <string>50</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="sigmaSizeSlider">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>50</number>
+             </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -157,16 +226,19 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="pushButton_2">
            <property name="text">
-            <string>應用濾鏡</string>
+            <string>應用卷積</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="pushButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="text">
-            <string>應用卷積</string>
+            <string>應用濾波</string>
            </property>
           </widget>
          </item>
@@ -302,5 +374,38 @@
   <tabstop>horizontalSlider</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>kernelSizeSlider</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>kernelSizeLabel</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>496</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>410</x>
+     <y>155</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sigmaSizeSlider</sender>
+   <signal>sliderMoved(int)</signal>
+   <receiver>sigmaSizeLabel</receiver>
+   <slot>setNum(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>486</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>386</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
