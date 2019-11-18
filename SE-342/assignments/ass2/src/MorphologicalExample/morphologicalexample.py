@@ -70,16 +70,10 @@ class MorphologicalExample():
         ui.threeSizeRadioButton.clicked.connect(controller.actions.threeKernelSizeRadioButtonClicked)
         ui.fiveSizeRadioButton.clicked.connect(controller.actions.fiveKernelSizeRadioButtonClicked)
         ui.sevenSizeRadioButton.clicked.connect(controller.actions.sevenKernelSizeRadioButtonClicked)
-        # variable arguments stuff
-        # ui.typeSelection.currentIndexChanged.connect(controller.actions.typeChanged)
-        # ui.kernelSizeSlider.valueChanged.connect(controller.actions.kernelSliderMoved)
-        # ui.kernelSizeSlider.valueChanged.connect(controller.actions.sigmaSliderMoved)
 
-        # operation buttons stuff
-        # ui.resetButton.clicked.connect(controller.actions.resetClicked)
-        # ui.applyConvolutionButton.clicked.connect(controller.actions.convolutionApplyClicked)
-        # ui.applyFilterButton.clicked.connect(controller.actions.filterApplyClicked)
-        # idiot stuff
+        ui.applyConvolutionButton.clicked.connect(controller.actions.applyButtonClicked)
+        ui.resetButton.clicked.connect(controller.actions.resetClicked)
+
         self.refreshDisplay()
 
 if __name__ == "__main__":

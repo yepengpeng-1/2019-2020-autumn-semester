@@ -634,7 +634,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "變更卷積核⋯"))
+        Dialog.setWindowTitle(_translate("Dialog", "變更結構元⋯"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.threeSize), _translate("Dialog", "3×3"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.fiveSize), _translate("Dialog", "5×5"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.sevenSize), _translate("Dialog", "7×7"))

@@ -17,7 +17,7 @@
    <cursorShape>ArrowCursor</cursorShape>
   </property>
   <property name="windowTitle">
-   <string>變更卷積核⋯</string>
+   <string>變更結構元⋯</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>

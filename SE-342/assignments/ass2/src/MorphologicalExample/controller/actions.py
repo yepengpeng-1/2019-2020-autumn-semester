@@ -40,6 +40,13 @@ def typeChanged(index):
     utils.widget_helper.global_ce.flushIndex(index)
 
 @pyqtSlot()
+def applyButtonClicked(index):
+    if not baseimage.imagesetter.isOk():
+        utils.prompt.showWarning("Cannot apply morphological operation.\nNo image provided now.")
+        return
+    
+
+@pyqtSlot()
 def resetClicked(self):
     baseimage.imagesetter.clearImageObject()
     # baseimage.imagesetter.displayIt()
@@ -163,7 +170,7 @@ def previewKernelButtonClicked(self):
     ui = kerneleditor.Ui_Dialog()
     utils.widget_helper.global_dialog = ui
     ui.setupUi(Dialog)
-    Dialog.setWindowTitle("預覽卷積核")
+    Dialog.setWindowTitle("預覽結構元")
     ui.okButton.clicked.connect(pressOkButton)
     ui.cancelButton.clicked.connect(pressCancelButton)
     ui.resetButton.clicked.connect(pressResetButton)

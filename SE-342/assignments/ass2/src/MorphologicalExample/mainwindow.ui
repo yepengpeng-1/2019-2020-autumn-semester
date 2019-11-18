@@ -140,7 +140,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>卷積核尺寸:</string>
+              <string>結構元尺寸:</string>
              </property>
             </widget>
            </item>
@@ -181,7 +181,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>卷積核形狀:</string>
+              <string>結構元形狀:</string>
              </property>
             </widget>
            </item>
