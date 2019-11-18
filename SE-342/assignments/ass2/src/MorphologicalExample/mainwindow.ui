@@ -107,7 +107,7 @@
             <widget class="QComboBox" name="typeSelection">
              <item>
               <property name="text">
-               <string>形態學邊緣檢測</string>
+               <string>形態學邊沿檢測</string>
               </property>
              </item>
              <item>
@@ -117,7 +117,7 @@
              </item>
              <item>
               <property name="text">
-               <string>形態學重建（灰度圖）</string>
+               <string>形態學重構（灰度圖）</string>
               </property>
              </item>
              <item>
@@ -189,6 +189,13 @@
             <widget class="QPushButton" name="previewKernelButton">
              <property name="text">
               <string>預覽</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton">
+             <property name="text">
+              <string>亂數填充</string>
              </property>
             </widget>
            </item>
