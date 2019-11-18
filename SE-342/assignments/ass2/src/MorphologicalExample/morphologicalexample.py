@@ -53,6 +53,7 @@ class MorphologicalExample():
         ui.actionImportImage.triggered.connect(controller.actions.onImportButtonClicked)
         ui.actionExportImage.triggered.connect(controller.actions.onExportButtonClicked)
 
+        ui.editKernelButton.clicked.connect(controller.actions.editKernelButtonClicked)
         # variable arguments stuff
         # ui.typeSelection.currentIndexChanged.connect(controller.actions.typeChanged)
         # ui.kernelSizeSlider.valueChanged.connect(controller.actions.kernelSliderMoved)

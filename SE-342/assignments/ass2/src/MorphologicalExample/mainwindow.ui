@@ -145,14 +145,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton">
+            <widget class="QRadioButton" name="threeSizeRadioButton">
              <property name="text">
               <string>3×3</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton_2">
+            <widget class="QRadioButton" name="fiveSizeRadioButton">
              <property name="text">
               <string>5×5</string>
              </property>
@@ -162,7 +162,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton_3">
+            <widget class="QRadioButton" name="sevenSizeRadioButton">
              <property name="text">
               <string>7×7</string>
              </property>
@@ -186,9 +186,16 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="previewKernelButton">
              <property name="text">
-              <string>自定義⋯</string>
+              <string>預覽</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="editKernelButton">
+             <property name="text">
+              <string>變更⋯</string>
              </property>
             </widget>
            </item>
@@ -212,17 +219,13 @@
          <item>
           <widget class="QPushButton" name="applyConvolutionButton">
            <property name="text">
-            <string>應用卷積</string>
+            <string>應用</string>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="applyFilterButton">
-           <property name="enabled">
-            <bool>false</bool>
+           <property name="shortcut">
+            <string>Return</string>
            </property>
-           <property name="text">
-            <string>應用濾波</string>
+           <property name="default">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
