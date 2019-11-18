@@ -43,10 +43,21 @@ class MorphologicalExample():
             global_ui.graphicsView.clear()
 
     def forcefullySetKernelSize(self, value):
+        pass
+        # global global_ui
+        # global_ui.kernelSizeSlider.setValue(value)
+        # global_ui.kernelSizeLabel.setNum(value)
+
+    def refreshKernel(self):
         global global_ui
-        global_ui.kernelSizeSlider.setValue(value)
-        global_ui.kernelSizeLabel.setNum(value)
-    
+        ksize = varargs.varargs.kernelSize
+        if ksize == 3:
+            global_ui.threeSizeRadioButton.setChecked(True)
+        elif ksize == 5:
+            global_ui.fiveSizeRadioButton.setChecked(True)
+        elif ksize == 7:
+            global_ui.sevenSizeRadioButton.setChecked(True)
+
     def initAction(self, ui):
         # menu bar stuff
         ui.actionShowAbout.triggered.connect(controller.actions.onAboutButtonClicked)
@@ -54,6 +65,11 @@ class MorphologicalExample():
         ui.actionExportImage.triggered.connect(controller.actions.onExportButtonClicked)
 
         ui.editKernelButton.clicked.connect(controller.actions.editKernelButtonClicked)
+        ui.previewKernelButton.clicked.connect(controller.actions.previewKernelButtonClicked)
+
+        ui.threeSizeRadioButton.clicked.connect(controller.actions.threeKernelSizeRadioButtonClicked)
+        ui.fiveSizeRadioButton.clicked.connect(controller.actions.fiveKernelSizeRadioButtonClicked)
+        ui.sevenSizeRadioButton.clicked.connect(controller.actions.sevenKernelSizeRadioButtonClicked)
         # variable arguments stuff
         # ui.typeSelection.currentIndexChanged.connect(controller.actions.typeChanged)
         # ui.kernelSizeSlider.valueChanged.connect(controller.actions.kernelSliderMoved)

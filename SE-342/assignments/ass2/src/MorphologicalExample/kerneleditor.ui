@@ -22,8 +22,14 @@
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="tabShape">
+      <enum>QTabWidget::Triangular</enum>
+     </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
+     </property>
+     <property name="elideMode">
+      <enum>Qt::ElideRight</enum>
      </property>
      <widget class="QWidget" name="threeSize">
       <attribute name="title">
@@ -1207,7 +1213,7 @@
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="okButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -1226,7 +1232,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="cancelButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -1250,6 +1256,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="resetButton">
+       <property name="text">
+        <string>歸零</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

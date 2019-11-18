@@ -215,7 +215,7 @@
         <property name="title">
          <string>控制鈕</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
           <widget class="QPushButton" name="applyConvolutionButton">
            <property name="text">
