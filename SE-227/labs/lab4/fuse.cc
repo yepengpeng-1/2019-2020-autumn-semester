@@ -510,8 +510,6 @@ int main( int argc, char* argv[] ) {
 
     yfs = new yfs_client( argv[ 2 ], argv[ 3 ] );
 
-    // yfs = new yfs_client();
-
     fuseserver_oper.getattr  = fuseserver_getattr;
     fuseserver_oper.statfs   = fuseserver_statfs;
     fuseserver_oper.readdir  = fuseserver_readdir;
@@ -578,9 +576,10 @@ int main( int argc, char* argv[] ) {
         fprintf( stderr, "fuse_kern_chan_new failed\n" );
         exit( 1 );
     }
-    rpcs server( yfs->ec->my_port, 1 );
 
-    server.reg( extent_protocol_r::revoke_handler, yfs->ec, &extent_client::revoke_handler );
+    // rpcs server( yfs->ec->my_port, 1 );
+
+    // server.reg( extent_protocol_r::revoke_handler, yfs->ec, &extent_client::revoke_handler );
 
     fuse_session_add_chan( se, ch );
     // err = fuse_session_loop_mt(se);   // FK: wheelfs does this; why?

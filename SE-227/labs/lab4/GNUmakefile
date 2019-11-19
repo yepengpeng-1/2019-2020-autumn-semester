@@ -55,11 +55,11 @@ lab8: lock_tester lock_server rsm_tester
 hfiles1=rpc/fifo.h rpc/connection.h rpc/rpc.h rpc/marshall.h rpc/method_thread.h\
 	rpc/thr_pool.h rpc/pollmgr.h rpc/jsl_log.h rpc/slock.h rpc/rpctest.cc\
 	lock_protocol.h lock_server.h lock_client.h gettime.h gettime.cc lang/verify.h \
-        lang/algorithm.h
-hfiles2=yfs_client.h extent_client.h extent_protocol.h extent_server.h
-hfiles3=lock_client_cache.h lock_server_cache.h handle.h tprintf.h
-hfiles4=log.h rsm.h rsm_protocol.h config.h paxos.h paxos_protocol.h rsm_state_transfer.h rsmtest_client.h tprintf.h
-hfiles5=rsm_state_transfer.h rsm_client.h
+        lang/algorithm.h handle.h handle.cc
+hfiles2=yfs_client.h extent_client.h extent_protocol.h extent_server.h handle.h handle.cc
+hfiles3=lock_client_cache.h lock_server_cache.h handle.h tprintf.h handle.h handle.cc
+hfiles4=log.h rsm.h rsm_protocol.h config.h paxos.h paxos_protocol.h rsm_state_transfer.h rsmtest_client.h tprintf.h handle.h handle.cc
+hfiles5=rsm_state_transfer.h rsm_client.h handle.h handle.cc
 rsm_files = rsm.cc paxos.cc config.cc log.cc handle.cc
 
 rpc/rpctest=rpc/rpctest.cc
@@ -92,7 +92,7 @@ lock_server : $(patsubst %.cc,%.o,$(lock_server)) rpc/$(RPCLIB)
 
 part1_tester=part1_tester.cc extent_client.cc extent_server.cc inode_manager.cc
 part1_tester : $(patsubst %.cc,%.o,$(part1_tester))
-yfs_client=yfs_client.cc extent_client.cc fuse.cc extent_server.cc inode_manager.cc
+yfs_client=yfs_client.cc extent_client.cc fuse.cc extent_server.cc inode_manager.cc handle.cc
 ifeq ($(LAB2GE),1)
   yfs_client += lock_client.cc
 endif
@@ -104,7 +104,7 @@ ifeq ($(LAB3GE),1)
 endif
 yfs_client : $(patsubst %.cc,%.o,$(yfs_client)) rpc/$(RPCLIB)
 
-extent_server=extent_server.cc extent_smain.cc inode_manager.cc
+extent_server=extent_server.cc extent_smain.cc inode_manager.cc handle.cc
 extent_server : $(patsubst %.cc,%.o,$(extent_server)) rpc/$(RPCLIB)
 
 test-lab2-part1-b=test-lab2-part1-b.c

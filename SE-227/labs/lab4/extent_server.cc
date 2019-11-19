@@ -2,6 +2,7 @@
 
 #include "extent_server.h"
 #include <fcntl.h>
+#include <handle.h>
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
@@ -101,7 +102,7 @@ extent_protocol_r::status extent_server::revoke( extent_protocol::extentid_t id 
     for ( size_t i = 0; i < ports.size(); i++ ) {
         cache_ports.push_back( ports[ i ] );
     }
-
+    pthread_mutex_unlock( &mutex );
     printf( "trying to revoke: %lld\n", id );
     int whatever;
     printf( "currently ports to be revoked: %lu\n", cache_ports.size() );
@@ -111,27 +112,26 @@ extent_protocol_r::status extent_server::revoke( extent_protocol::extentid_t id 
 
         printf( "port #%lu: %u\n", i, current_port );
         std::ostringstream os;
-        os << current_port;
-        sockaddr_in dstsock;
-        make_sockaddr( os.str().c_str(), &dstsock );
-        std::cout << "successfully make sockaddr to " << os.str() << std::endl;
-        rpcc* cl = new rpcc( dstsock );
-        printf( "successfully created by dstsock\n" );
+        os << "127.0.0.1:" << current_port;
 
-        if ( cl->bind() != 0 ) {
-            printf( "failed to cl->bind." );
+        handle                    h( os.str() );
+        extent_protocol_r::status ret;
+        if ( h.safebind() ) {
+            ret = h.safebind()->call( extent_protocol_r::revoke_handler, id, whatever );
+            printf( "Done!\n" );
         }
-        printf( "going to call cl->call()\n" );
-        int r = cl->call( extent_protocol_r::revoke_handler, id, whatever );
-        printf( "cl->call() response: %d\n", r );
+
+        if ( !h.safebind() || ret != extent_protocol_r::OK ) {
+            printf( "failure! code: %d\n", ret );
+        }
+
+        // printf( "cl->call() response: %d\n", r );
         // printf( "going to call cl->cancel()\n" );
-        // cl->cancel();
+        // // cl->cancel();
 
         // printf( "going to delete cl\n" );
-        // delete cl;
-
-        printf( "Done!\n" );
+        // // delete cl;
     }
-    pthread_mutex_unlock( &mutex );
+
     return extent_protocol::OK;
 }

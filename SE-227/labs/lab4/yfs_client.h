@@ -9,12 +9,19 @@
 #include "lock_protocol.h"
 #include <vector>
 
-#define DEBUG
+// #define DEBUG
+#define IMPORTANTDEBUG
 
 #ifdef DEBUG
 #define nslog printf
 #else
 #define nslog( ... )
+#endif
+
+#ifdef IMPORTANTDEBUG
+#define imlog printf
+#else
+#define imlog( ... )
 #endif
 
 #define FILENAME_SIZE 128

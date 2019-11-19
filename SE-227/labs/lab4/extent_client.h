@@ -8,6 +8,21 @@
 #include "rpc.h"
 #include <string>
 
+// #define DEBUG
+#define IMPORTANTDEBUG
+
+#ifdef DEBUG
+#define nslog printf
+#else
+#define nslog( ... )
+#endif
+
+#ifdef IMPORTANTDEBUG
+#define imlog printf
+#else
+#define imlog( ... )
+#endif
+
 class extent_client {
 private:
     rpcc* cl;
