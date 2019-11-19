@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 #include <unistd.h>
 
 int         myid;
@@ -483,6 +484,7 @@ void fuseserver_symlink( fuse_req_t req, const char* link, fuse_ino_t parent, co
 struct fuse_lowlevel_ops fuseserver_oper;
 
 int main( int argc, char* argv[] ) {
+
     char* mountpoint = 0;
     int   err        = -1;
     int   fd;
@@ -507,6 +509,7 @@ int main( int argc, char* argv[] ) {
     myid = random();
 
     yfs = new yfs_client( argv[ 2 ], argv[ 3 ] );
+
     // yfs = new yfs_client();
 
     fuseserver_oper.getattr  = fuseserver_getattr;
@@ -575,6 +578,9 @@ int main( int argc, char* argv[] ) {
         fprintf( stderr, "fuse_kern_chan_new failed\n" );
         exit( 1 );
     }
+    rpcs server( yfs->ec->my_port, 1 );
+
+    server.reg( extent_protocol_r::revoke_handler, yfs->ec, &extent_client::revoke_handler );
 
     fuse_session_add_chan( se, ch );
     // err = fuse_session_loop_mt(se);   // FK: wheelfs does this; why?

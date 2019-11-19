@@ -20,10 +20,11 @@
 #define FILENAME_SIZE 128
 
 class yfs_client {
-    extent_client* ec;
-    lock_client*   lc;
+
+    lock_client* lc;
 
 public:
+    extent_client*             ec;
     typedef unsigned long long inum;
     enum xxstatus { OK, RPCERR, NOENT, IOERR, EXIST };
     typedef int status;

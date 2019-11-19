@@ -90,6 +90,10 @@ public:
     rpcc( sockaddr_in d, bool retrans = true );
     ~rpcc();
 
+    sockaddr_in get_dst() {
+        return dst_;
+    }
+
     struct TO {
         int to;
     };

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 #include <vector>
 using std::list;
@@ -15,9 +16,12 @@ using std::string;
 using std::vector;
 
 yfs_client::yfs_client( std::string extent_dst, std::string lock_dst ) {
+    srand( time( NULL ) );
     int whatever;
-    ec = new extent_client( extent_dst );
-    lc = new lock_client( lock_dst );
+    ec            = new extent_client( extent_dst );
+    int rand_port = ( unsigned )rand() % 65536;
+    ec->my_port   = rand_port;
+    lc            = new lock_client( lock_dst );
     if ( ec->put( 1, "", whatever ) != extent_protocol::OK )
         printf( "error init root dir\n" );  // Xia Yubin: init root dir
 }
@@ -158,7 +162,7 @@ int yfs_client::create( inum parent, const char* name, mode_t mode, inum& ino_ou
 
     if ( r != OK ) {
         // lookup failure
-        // lc->release( parent );
+        lc->release( parent );
         return r;
     }
 

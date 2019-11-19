@@ -3,8 +3,6 @@
 #ifndef extent_protocol_h
 #define extent_protocol_h
 
-#define TO_CACHE_LIMIT 4096
-
 #include "rpc.h"
 
 class extent_protocol {
@@ -23,6 +21,14 @@ public:
         unsigned int ctime;
         unsigned int size;
     };
+};
+
+class extent_protocol_r {
+public:
+    typedef int                status;
+    typedef unsigned long long extentid_t;
+    enum xxstatus { OK, RPCERR, NOENT, IOERR };
+    enum rpc_numbers { revoke_handler = 0x6001 };
 };
 
 inline unmarshall& operator>>( unmarshall& u, extent_protocol::attr& a ) {
