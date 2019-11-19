@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <string>
 
-// #define DEBUG
+#define DEBUG
 #define IMPORTANTDEBUG
 
 #ifdef DEBUG
@@ -28,6 +28,8 @@ class extent_client {
 private:
     rpcc*           cl;
     pthread_mutex_t revoke_mutex;
+
+    int revokee = 0;
 
 public:
     extent_client( std::string dst );

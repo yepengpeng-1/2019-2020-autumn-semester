@@ -35,21 +35,21 @@ extent_client::extent_client( std::string dst ) {
 
 // a demo to show how to use RPC
 extent_protocol::status extent_client::create( uint32_t type, extent_protocol::extentid_t& id ) {
-    pthread_mutex_lock( &revoke_mutex );
     nslog( "going to call create\n" );
     // int time = rand() % 2500;
     // usleep( time );
     int r = cl->call( extent_protocol::create, my_port, type, id );
     nslog( "done call create\n" );
-    pthread_mutex_unlock( &revoke_mutex );
     return r;
 }
 
 extent_protocol::status extent_client::get( extent_protocol::extentid_t eid, std::string& buf ) {
+    // sleep( 1 );
     pthread_mutex_lock( &revoke_mutex );
     std::map< unsigned long long, std::string >::iterator result = this->getCache.find( eid );
-    if ( result != this->getCache.end() ) {
-        buf = result->second;
+    if ( result != this->getCache.end() && revokee <= 0 ) {
+        revokee = 0;
+        buf     = result->second;
         nslog( "not going to call get. Will use cached.\n" );
         pthread_mutex_unlock( &revoke_mutex );
         return extent_protocol::OK;
@@ -64,10 +64,12 @@ extent_protocol::status extent_client::get( extent_protocol::extentid_t eid, std
 }
 
 extent_protocol::status extent_client::getattr( extent_protocol::extentid_t eid, extent_protocol::attr& attr ) {
+    // sleep( 1 );
     pthread_mutex_lock( &revoke_mutex );
     std::map< unsigned long long, extent_protocol::attr >::iterator result = this->attrCache.find( eid );
-    if ( result != this->attrCache.end() ) {
-        attr = result->second;
+    if ( result != this->attrCache.end() && revokee <= 0 ) {
+        revokee = 0;
+        attr    = result->second;
         nslog( "not going to call getattr. Will use cached.\n" );
         pthread_mutex_unlock( &revoke_mutex );
         return extent_protocol::OK;
@@ -92,17 +94,16 @@ extent_protocol::status extent_client::put( extent_protocol::extentid_t eid, std
 }
 
 extent_protocol::status extent_client::remove( extent_protocol::extentid_t eid, int& i ) {
-    pthread_mutex_lock( &revoke_mutex );
     nslog( "going to call remove\n" );
     // int time = rand() % 2500;
     // usleep( time );
     int r = cl->call( extent_protocol::remove, my_port, eid, i );
-    pthread_mutex_unlock( &revoke_mutex );
     return r;
     // printf( "ok called remove\n" );
 }
 
 extent_protocol_r::status extent_client::revoke_handler( extent_protocol::extentid_t eid, int& i ) {
+    ++revokee;
     pthread_mutex_lock( &revoke_mutex );
     imlog( "going to call revoke\n" );
     std::map< unsigned long long, std::string >::iterator           getCacheIter  = this->getCache.find( eid );
@@ -115,5 +116,6 @@ extent_protocol_r::status extent_client::revoke_handler( extent_protocol::extent
         this->attrCache.erase( attrCacheIter );
     }
     pthread_mutex_unlock( &revoke_mutex );
+    --revokee;
     return extent_protocol_r::OK;
 }
