@@ -21,10 +21,12 @@ rpcc* handle::safebind() {
     rpcc* cl = new rpcc( dstsock );
     tprintf( "handler_mgr::get_handle trying to bind...%s\n", h->m.c_str() );
     int ret;
-    if ( cl->islossy() )
+    if ( cl->islossy() ) {
         ret = cl->bind();
-    else
+    }
+    else {
         ret = cl->bind( rpcc::to( 1000 ) );
+    }
     if ( ret < 0 ) {
         tprintf( "handle_mgr::get_handle bind failure! %s %d\n", h->m.c_str(), ret );
         delete cl;

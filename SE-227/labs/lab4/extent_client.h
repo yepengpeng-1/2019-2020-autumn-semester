@@ -6,6 +6,7 @@
 #include "extent_protocol.h"
 #include "extent_server.h"
 #include "rpc.h"
+#include <pthread.h>
 #include <string>
 
 // #define DEBUG
@@ -25,7 +26,8 @@
 
 class extent_client {
 private:
-    rpcc* cl;
+    rpcc*           cl;
+    pthread_mutex_t revoke_mutex;
 
 public:
     extent_client( std::string dst );

@@ -112,7 +112,7 @@ extent_protocol_r::status extent_server::revoke( extent_protocol::extentid_t id 
 
         printf( "port #%lu: %u\n", i, current_port );
         std::ostringstream os;
-        os << "127.0.0.1:" << current_port;
+        os << current_port;
 
         handle                    h( os.str() );
         extent_protocol_r::status ret;

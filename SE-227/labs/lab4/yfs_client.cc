@@ -18,9 +18,7 @@ using std::vector;
 yfs_client::yfs_client( std::string extent_dst, std::string lock_dst ) {
     srand( time( NULL ) );
     int whatever;
-    ec            = new extent_client( extent_dst );
-    int rand_port = ( unsigned )rand() % 65536;
-    ec->my_port   = rand_port;
+    ec = new extent_client( extent_dst );
 
     lc = new lock_client( lock_dst );
     if ( ec->put( 1, "", whatever ) != extent_protocol::OK )
