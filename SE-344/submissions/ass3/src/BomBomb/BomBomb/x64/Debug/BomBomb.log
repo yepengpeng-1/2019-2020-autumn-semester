@@ -1,0 +1,3 @@
+﻿  BomBomb.cpp
+LINK : warning LNK4076: 增量状态文件“Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\x64\Debug\BomBomb.ilk”无效(将删除)；正以非增量方式链接
+  BomBomb.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\x64\Debug\BomBomb.exe
