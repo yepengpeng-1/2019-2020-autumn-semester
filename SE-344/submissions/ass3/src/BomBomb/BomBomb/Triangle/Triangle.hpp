@@ -10,6 +10,14 @@ public:
 	tinyobj::real_t x, y, z;
 	double r, g, b;
 
+	bool operator==(const TrianglePoint& rhs) const
+	{
+		return this->x == rhs.x &&
+			this->y == rhs.y &&
+			this->z == rhs.z;
+	}
+
+
 	TrianglePoint() {}
 
 	TrianglePoint(tinyobj::real_t X, tinyobj::real_t Y, tinyobj::real_t Z, double R, double G, double B) {
@@ -30,6 +38,13 @@ public:
 class Triangle {
 public:
 	TrianglePoint tPoint1, tPoint2, tPoint3;
+
+	bool operator==(const Triangle& rhs) const
+	{
+		return this->tPoint1 == rhs.tPoint1
+			&& this->tPoint2 == rhs.tPoint2
+			&& this->tPoint3 == rhs.tPoint3;
+	}
 
 	Triangle() {};
 	Triangle(TrianglePoint p1, TrianglePoint p2, TrianglePoint p3) {

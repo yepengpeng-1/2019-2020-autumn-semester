@@ -5,7 +5,9 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <ctime>
+#include <random>
 #include <iostream>
+#include <algorithm>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ObjLoader/tiny_obj_loader.h"
@@ -36,7 +38,6 @@ void loadObject(bool consistentTriangles, std::string givenPath, double rColor =
 	std::string err;
 
 	bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, inputfile.c_str());
-
 	
 	if (!warn.empty()) {
 		std::cout << "When loading " << inputfile << ", warning occured: \n";
@@ -127,6 +128,11 @@ static GLfloat rotationY = 0.0f;
 static GLfloat rotationZ = 0.0f;
 
 
+static void makeExplode() {
+	std::cout << "[bomb] Exploded!" << std::endl;
+	srand(time(NULL));
+}
+
 static void onWindowResized(int w, int h) {
 	windowWidth = w, windowHeight = h;
 	glViewport(0, 0, w, h);
@@ -163,46 +169,127 @@ static void updateRotation() {
 	}
 }
 
+bool exploded = false;
+
 static void onRender() {
+	GLfloat sparkx, sparky, sparkz;
+	if (!exploded && fireLine.size() != 0) {
+		auto lastOne = fireLine[fireLine.size() - 1];
+		sparkx = lastOne.tPoint1.x * PREDEF_SCALE_RATIO;
+		sparky = lastOne.tPoint2.y * PREDEF_SCALE_RATIO;
+		sparkz = lastOne.tPoint3.z * PREDEF_SCALE_RATIO;
+		if (rand() % 3 == 0) {
+			fireLine.pop_back();
+		}
+	}
+	else {
+		if (!exploded) {
+			exploded = true;
+			makeExplode();
+		}
+		else {
+			for (auto& i : bombBody) {
+				if (abs(i.tPoint1.x) > 100.0) {
+					bombBody.erase(std::remove(bombBody.begin(), bombBody.end(), i), bombBody.end());
+					auto point = i.tPoint1;
+					// std::cout << "Removed sparks at (" << point.x << ", " << point.y << ", " << point.z << ")" << std::endl;
+					continue;
+				}
+
+				double x_movep = (rand() / double(RAND_MAX) / 20.0 + 1.0);
+				double y_movep = (rand() / double(RAND_MAX) / 20.0 + 1.0);
+				double z_movep = (rand() / double(RAND_MAX) / 20.0 + 1.0);
+				
+				i.tPoint1.r = rand() / double(RAND_MAX);
+				i.tPoint1.g = rand() / double(RAND_MAX);
+				i.tPoint1.b = rand() / double(RAND_MAX);
+				i.tPoint1.x *= x_movep;
+				i.tPoint1.y *= y_movep;
+				i.tPoint1.z *= z_movep;
+
+				x_movep = (rand() / double(RAND_MAX) / 20.0 + 1.0);
+				y_movep = (rand() / double(RAND_MAX) / 20.0 + 1.0);
+				z_movep = (rand() / double(RAND_MAX) / 20.0 + 1.0);
+
+				i.tPoint2.r = rand() / double(RAND_MAX);
+				i.tPoint2.g = rand() / double(RAND_MAX);
+				i.tPoint2.b = rand() / double(RAND_MAX);
+				i.tPoint2.x *= x_movep;
+				i.tPoint2.y *= y_movep;
+				i.tPoint2.z *= z_movep;
+
+				x_movep = (rand() / double(RAND_MAX) / 20.0 + 1.0);
+				y_movep = (rand() / double(RAND_MAX) / 20.0 + 1.0);
+				z_movep = (rand() / double(RAND_MAX) / 20.0 + 1.0);
+
+				i.tPoint3.r = rand() / double(RAND_MAX);
+				i.tPoint3.g = rand() / double(RAND_MAX);
+				i.tPoint3.b = rand() / double(RAND_MAX);
+				i.tPoint3.x *= x_movep;
+				i.tPoint3.y *= y_movep;
+				i.tPoint3.z *= z_movep;
+			}
+		}
+	}
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	const GLfloat light_ambient[] = { 0.0f,0.0f,0.0f,1.0f };
-	const GLfloat light_diffuse[] = { 1.0f,1.0f,1.0f,1.0f };
-	const GLfloat light_specular[] = { 1.0f,1.0f,1.0f,1.0f };
-	const GLfloat light_position[]  = { 0.0f,0.0f,0.0f,1.0f };
+
+	if (!exploded) {
+
+		const GLfloat light_ambient[] = { 0.1f,0.1f,0.2f,1.0f };
+		const GLfloat light_diffuse[] = { 1.0f,1.0f,1.0f,1.0f };
+		const GLfloat light_specular[] = { 1.0f,1.0f,1.0f,1.0f };
+		const GLfloat light_position[] = { 0.0f,0.0f,0.0f,1.0f };
+
+		glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+		glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+
+		// glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+
+		// glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+
+		glEnable(GL_LIGHT0);
 
 
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+		const GLfloat spark_position[] = { sparkx, sparky, sparkz, 1.0f };
 
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+		glLightfv(GL_LIGHT1, GL_POSITION, spark_position);
 
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);
 
-	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+		// glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular);
 
-	glEnable(GL_LIGHT0);
+		glEnable(GL_LIGHT1);
 
-	glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHTING);
 
-	GLfloat mat_ambient[] = { 0.4f,0.4f,0.4f,1.0f };
+		GLfloat mat_ambient[] = { 0.4f,0.4f,0.4f,1.0f };
 
-	GLfloat mat_diffuse[] = { 0.4f,0.4f,0.4f,1.0f };
+		GLfloat mat_diffuse[] = { 0.4f,0.4f,0.4f,1.0f };
 
-	GLfloat mat_specular[] = { 0.7f,0.7f,0.7f,1.0f };
+		GLfloat mat_specular[] = { 0.7f,0.7f,0.7f,1.0f };
 
-	GLfloat mat_emission[] = { 0.0f,0.0f,0.0f,1.f };
+		GLfloat mat_emission[] = { 0.0f,0.0f,0.0f,1.f };
 
-	GLfloat mat_shininess = 60.0f;
+		GLfloat mat_shininess = 60.0f;
 
-	glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
 
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+		glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
 
-	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 
-	glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
+		glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
 
-	glMaterialf(GL_FRONT, GL_SHININESS, mat_shininess);
+		glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
+
+		glMaterialf(GL_FRONT, GL_SHININESS, mat_shininess);
+
+	}
+	else {
+		glDisable(GL_LIGHTING);
+	}
 
 	glLoadIdentity();
 	updateRotation();
@@ -225,9 +312,7 @@ static void onRender() {
 		glEnd();
 	}
 
-
 	double ratio = 150.0;
-
 
 	glBegin(GL_TRIANGLES);
 
@@ -252,36 +337,60 @@ static void onRender() {
 		// counter += 1;
 	}
 
-	// int counter = 1;
-	for (auto i : fireLine) {
-		auto point = i.tPoint1;
-		glColor3d(point.r, point.g, point.b);
-		// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-		glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
+	if (!exploded) {
 
-		point = i.tPoint2;
-		glColor3d(point.r, point.g, point.b);
-		// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-		glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
+		GLfloat line_ambient[] = { 0.9f,0.5f,0.0f,1.0f };
 
-		point = i.tPoint3;
-		glColor3d(point.r, point.g, point.b);
-		// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-		glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
+		GLfloat line_diffuse[] = { 0.8f,0.4f,0.0f,1.0f };
 
-		// std::cout << "draw a triangle #" << counter << std::endl;
-		// counter += 1;
+		GLfloat line_specular[] = { 0.7f,0.7f,0.7f,1.0f };
+
+		GLfloat line_emission[] = { 0.0f,0.0f,0.0f,1.f };
+
+		GLfloat line_shininess = 0.0f;
+
+		glMaterialfv(GL_FRONT, GL_AMBIENT, line_ambient);
+
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, line_diffuse);
+
+		glMaterialfv(GL_FRONT, GL_SPECULAR, line_specular);
+
+		glMaterialfv(GL_FRONT, GL_EMISSION, line_emission);
+
+		glMaterialf(GL_FRONT, GL_SHININESS, line_shininess);
+
+		// int counter = 1;
+		for (auto i : fireLine) {
+			auto point = i.tPoint1;
+			glColor3d(point.r, point.g, point.b);
+			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
+
+			point = i.tPoint2;
+			glColor3d(point.r, point.g, point.b);
+			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
+
+			point = i.tPoint3;
+			glColor3d(point.r, point.g, point.b);
+			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
+
+			// std::cout << "draw a triangle #" << counter << std::endl;
+			// counter += 1;
+		}
+
 	}
-
 	glEnd();
 
 	glutSwapBuffers();
 }
 
+
 int main(int argc, char** argv)
 {
-	loadObject(true, "../../../models/bomb_body.obj", 0.0, 0.0, 0.0);
-	loadObject(false, "../../../models/bomb_line.obj", 0.3, 0.3, 0.0);
+	loadObject(true, "bomb_body.obj", 0.0, 0.0, 0.0);
+	loadObject(false, "bomb_line.obj", 0.3, 0.3, 0.0);
 
 	/* Draw triangles! */
 	glutInit(&argc, argv);
