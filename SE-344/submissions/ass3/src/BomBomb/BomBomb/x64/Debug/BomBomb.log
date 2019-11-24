@@ -1,3 +1,16 @@
-﻿  BomBomb.cpp
-LINK : warning LNK4076: 增量状态文件“Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\x64\Debug\BomBomb.ilk”无效(将删除)；正以非增量方式链接
+﻿  用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.23.28107 版
+  版权所有(C) Microsoft Corporation。保留所有权利。
+  cl /c /ZI /JMC /W3 /WX- /diagnostics:column /sdl /Od /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /permissive- /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"x64\Debug\\" /Fd"x64\Debug\vc142.pdb" /Gd /TP /FC /errorReport:prompt BomBomb.cpp
+  BomBomb.cpp
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\BomBomb\Triangle\Triangle.hpp(25,26): warning C4244: “=”: 从“double”转换到“tinyobj::real_t”，可能丢失数据
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\BomBomb\Triangle\Triangle.hpp(26,26): warning C4244: “=”: 从“double”转换到“tinyobj::real_t”，可能丢失数据
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\BomBomb\BomBomb.cpp(81,17): warning C4244: “=”: 从“double”转换到“tinyobj::real_t”，可能丢失数据
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\BomBomb\BomBomb.cpp(82,17): warning C4244: “=”: 从“double”转换到“tinyobj::real_t”，可能丢失数据
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\BomBomb\BomBomb.cpp(83,17): warning C4244: “=”: 从“double”转换到“tinyobj::real_t”，可能丢失数据
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\BomBomb\BomBomb.cpp(89,17): warning C4244: “=”: 从“double”转换到“tinyobj::real_t”，可能丢失数据
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\BomBomb\BomBomb.cpp(90,17): warning C4244: “=”: 从“double”转换到“tinyobj::real_t”，可能丢失数据
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\BomBomb\BomBomb.cpp(91,17): warning C4244: “=”: 从“double”转换到“tinyobj::real_t”，可能丢失数据
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\BomBomb\BomBomb.cpp(97,17): warning C4244: “=”: 从“double”转换到“tinyobj::real_t”，可能丢失数据
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\BomBomb\BomBomb.cpp(98,17): warning C4244: “=”: 从“double”转换到“tinyobj::real_t”，可能丢失数据
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\BomBomb\BomBomb.cpp(99,17): warning C4244: “=”: 从“double”转换到“tinyobj::real_t”，可能丢失数据
   BomBomb.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass3\src\BomBomb\x64\Debug\BomBomb.exe
