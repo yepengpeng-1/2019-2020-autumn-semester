@@ -5,6 +5,7 @@ from PySide2.QtGui import QIcon
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import mainwindow
+import maskdialog
 import controller.actions
 import utils.widget_helper
 import utils.qpixel_converter

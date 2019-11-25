@@ -122,6 +122,16 @@
              </item>
              <item>
               <property name="text">
+               <string>開操作</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>閉操作</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
                <string>形態學重構</string>
               </property>
              </item>

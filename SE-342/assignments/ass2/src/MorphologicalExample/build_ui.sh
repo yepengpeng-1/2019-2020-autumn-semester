@@ -3,3 +3,5 @@
 /usr/local/bin/pyuic5 mainwindow.ui -x -o mainwindow.py
 
 /usr/local/bin/pyuic5 kerneleditor.ui -x -o kerneleditor.py
+
+/usr/local/bin/pyuic5 maskdialog.ui -x -o maskdialog.py

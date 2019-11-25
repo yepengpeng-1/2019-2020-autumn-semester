@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QDialog
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot, QTimer
 from PySide2.QtWidgets import QFileDialog, QMessageBox
+from PIL import Image
 import utils.widget_helper
 import baseimage.imagesetter
 import baseio.input
@@ -11,6 +12,8 @@ import operations.conerosion
 import operations.edgedetection
 import operations.gsreconstruction
 import operations.morpgradient
+import operations.condopen
+import operations.condclose
 # import filters.gaussian
 # import filters.median
 # import filters.average
@@ -18,7 +21,79 @@ import operations.morpgradient
 # import convolutions.prewitt
 # import convolutions.sobel
 import kerneleditor
+import maskdialog
 import random
+
+def openMaskDialog():
+    varargs.varargs.maskSelectionType = 1
+
+    Dialog = QDialog()
+    utils.widget_helper.global_maskdlg_handler = Dialog
+    ui = maskdialog.Ui_Dialog()
+    utils.widget_helper.global_mask_dialog = ui
+    ui.setupUi(Dialog)
+
+    ui.cancelButton.clicked.connect(maskDialogCancelClicked)
+    ui.okButton.clicked.connect(maskDialogOkButtonClicked)
+    
+    ui.useDilatedButton.clicked.connect(maskDialogDilatedButtonClicked)
+    ui.useErodedButton.clicked.connect(maskDialogErodedButtonClicked)
+    ui.useNewImageButton.clicked.connect(maskDialogNewImageButtonClicked)
+
+    ui.useErodedButton.setChecked(True)
+
+    Dialog.exec_()
+    utils.widget_helper.global_mask_dialog = None
+    utils.widget_helper.global_maskdlg_handler = None
+
+def startMaskDetection():
+    maskType = varargs.varargs.maskSelectionType
+    maskObject = None
+    if maskType == 0:
+        fileName = QFileDialog.getOpenFileName(None, '匯入檔案', '', "圖像檔 (*.jpg *.jpeg *.gif *.png *.bmp);;任何檔案 (*)")
+        if len(fileName) >= 1:
+            if fileName[0] == '':
+                return
+            try:
+                maskObject = Image.open(fileName[0])
+            except BaseException as e:
+                utils.prompt.showWarning("PIL cannot open '%s'.\nDetailed Exception Message: %s" % (filename, e))
+                return
+
+            maskObject = maskObject.resize(baseimage.imagesetter.getImageObject().size)
+    
+    elif maskType == 1:
+        maskObject = operations.conerosion.ConditionalErosionKits(baseimage.imagesetter.getImageObject())
+    elif maskType == 2:
+        maskObject = operations.condilation.ConditionalDilationKits(baseimage.imagesetter.getImageObject())
+
+    operations.gsreconstruction.GrayScaleReconstruction(maskObject)
+
+@pyqtSlot()
+def maskDialogCancelClicked(self):
+    utils.widget_helper.global_maskdlg_handler.close()
+
+@pyqtSlot()
+def maskDialogOkButtonClicked(self):
+    startMaskDetection()
+    utils.widget_helper.global_maskdlg_handler.close()
+
+@pyqtSlot()
+def maskDialogDilatedButtonClicked(self):
+    print("mask selection type - 2")
+    varargs.varargs.maskSelectionType = 2
+
+@pyqtSlot()
+def maskDialogErodedButtonClicked(self):
+    print("mask selection type - 1")
+    varargs.varargs.maskSelectionType = 1
+
+@pyqtSlot()
+def maskDialogNewImageButtonClicked(self):
+    print("mask selection type - 0")
+    varargs.varargs.maskSelectionType = 0
+
+
 @pyqtSlot()
 def onAboutButtonClicked(self):
     QMessageBox.about(utils.widget_helper.global_widget, "關於程式",
@@ -59,10 +134,14 @@ def applyButtonClicked(index):
     elif feature_index == 2:
         operations.conerosion.ConditionalErosion()
     elif feature_index == 3:
-        pass
+        operations.condopen.ConditionalOpen()
     elif feature_index == 4:
+        operations.condclose.ConditionalClose()
+    elif feature_index == 5:
+        openMaskDialog()
+    elif feature_index == 6:
         pass
-
+    
 @pyqtSlot()
 def resetClicked(self):
     baseimage.imagesetter.clearImageObject()

@@ -17,3 +17,4 @@ def MorphologicalGradient():
     Welcome here.
     """
     raw_img = baseimage.imagesetter.getImageObject()
+    
