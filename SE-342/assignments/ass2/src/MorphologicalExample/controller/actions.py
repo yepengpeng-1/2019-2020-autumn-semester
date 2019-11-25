@@ -6,6 +6,10 @@ import baseimage.imagesetter
 import baseio.input
 import baseio.output
 import varargs.varargs
+import operations.condilation
+import operations.edgedetection
+import operations.gsreconstruction
+import operations.morpgradient
 # import filters.gaussian
 # import filters.median
 # import filters.average
@@ -45,6 +49,16 @@ def applyButtonClicked(index):
         utils.prompt.showWarning("Cannot apply morphological operation.\nNo image provided now.")
         return
     
+    feature_index = varargs.varargs.operationType
+    
+    if feature_index == 0:
+        operations.edgedetection.EdgeDetection()
+    elif feature_index == 1:
+        pass
+    elif feature_index == 2:
+        pass
+    elif feature_index == 3:
+        pass
 
 @pyqtSlot()
 def resetClicked(self):
