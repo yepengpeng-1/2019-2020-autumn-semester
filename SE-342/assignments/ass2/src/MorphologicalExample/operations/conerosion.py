@@ -11,9 +11,9 @@ import baseimage.imagesetter
 from scipy import ndimage
 from PIL import Image, ImageFilter
 
-def ConditionalDilation():
+def ConditionalErosion():
     """
-    Conditional Dilation.
+    Conditional Erosion.
     Welcome here.
     """
     pil_img = baseimage.imagesetter.getImageObject()
@@ -28,10 +28,10 @@ def ConditionalDilation():
         for j in range(varargs.varargs.kernelSize):
             kernel[i][j] = varargs.varargs.kernelValues[i][j]
 
-    dilated = cv2.dilate(oc_img, kernel)
+    eroded = cv2.erode(oc_img, kernel)
 
     # need to convert the color.
-    result_img = cv2.cvtColor(dilated, cv2.COLOR_BGR2RGB)
+    result_img = cv2.cvtColor(eroded, cv2.COLOR_BGR2RGB)
     im_pil = Image.fromarray(result_img)
 
     baseimage.imagesetter.setImageObject(im_pil)

@@ -7,6 +7,7 @@ import baseio.input
 import baseio.output
 import varargs.varargs
 import operations.condilation
+import operations.conerosion
 import operations.edgedetection
 import operations.gsreconstruction
 import operations.morpgradient
@@ -54,10 +55,12 @@ def applyButtonClicked(index):
     if feature_index == 0:
         operations.edgedetection.EdgeDetection()
     elif feature_index == 1:
-        pass
+        operations.condilation.ConditionalDilation()
     elif feature_index == 2:
-        pass
+        operations.conerosion.ConditionalErosion()
     elif feature_index == 3:
+        pass
+    elif feature_index == 4:
         pass
 
 @pyqtSlot()

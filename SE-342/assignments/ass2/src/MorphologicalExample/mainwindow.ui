@@ -112,12 +112,17 @@
              </item>
              <item>
               <property name="text">
-               <string>條件膨脹（二值圖）</string>
+               <string>條件膨脹</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>形態學重構（灰度圖）</string>
+               <string>條件腐蝕</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>形態學重構</string>
               </property>
              </item>
              <item>
