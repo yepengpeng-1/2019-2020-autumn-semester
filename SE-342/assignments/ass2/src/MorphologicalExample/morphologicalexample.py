@@ -65,8 +65,10 @@ class MorphologicalExample():
         ui.actionExportImage.triggered.connect(controller.actions.onExportButtonClicked)
 
         ui.typeSelection.currentIndexChanged.connect(controller.actions.typeChanged)
+        
         ui.editKernelButton.clicked.connect(controller.actions.editKernelButtonClicked)
         ui.previewKernelButton.clicked.connect(controller.actions.previewKernelButtonClicked)
+        ui.randomValueFillButton.clicked.connect(controller.actions.randomFillButtonClicked)
 
         ui.threeSizeRadioButton.clicked.connect(controller.actions.threeKernelSizeRadioButtonClicked)
         ui.fiveSizeRadioButton.clicked.connect(controller.actions.fiveKernelSizeRadioButtonClicked)

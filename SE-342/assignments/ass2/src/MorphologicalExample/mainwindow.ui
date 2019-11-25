@@ -193,7 +193,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="randomValueFillButton">
              <property name="text">
               <string>亂數填充</string>
              </property>
