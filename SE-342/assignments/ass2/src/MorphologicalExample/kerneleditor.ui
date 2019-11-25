@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>583</width>
-    <height>279</height>
+    <width>637</width>
+    <height>298</height>
    </rect>
   </property>
   <property name="cursor">
@@ -57,7 +57,8 @@
        <bool>true</bool>
       </property>
       <attribute name="icon">
-       <iconset theme="3"/>
+       <iconset theme="3">
+        <normaloff>.</normaloff>.</iconset>
       </attribute>
       <attribute name="title">
        <string>3×3</string>
@@ -1287,7 +1288,7 @@
      <item>
       <widget class="QPushButton" name="resetButton">
        <property name="text">
-        <string>歸零</string>
+        <string>置零</string>
        </property>
       </widget>
      </item>

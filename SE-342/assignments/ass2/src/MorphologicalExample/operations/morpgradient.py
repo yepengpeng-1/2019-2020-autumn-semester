@@ -1,3 +1,4 @@
+import cv2
 import PIL
 import math
 import numpy as np
@@ -15,3 +16,4 @@ def MorphologicalGradient():
     Morphological Gradient.
     Welcome here.
     """
+    raw_img = baseimage.imagesetter.getImageObject()

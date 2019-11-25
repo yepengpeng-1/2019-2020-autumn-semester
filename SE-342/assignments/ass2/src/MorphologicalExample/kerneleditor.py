@@ -14,7 +14,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.setWindowModality(QtCore.Qt.ApplicationModal)
-        Dialog.resize(583, 279)
+        Dialog.resize(637, 298)
         Dialog.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
         self.horizontalLayout = QtWidgets.QHBoxLayout(Dialog)
         self.horizontalLayout.setObjectName("horizontalLayout")
@@ -641,7 +641,7 @@ class Ui_Dialog(object):
         self.okButton.setText(_translate("Dialog", "確認"))
         self.okButton.setShortcut(_translate("Dialog", "Return"))
         self.cancelButton.setText(_translate("Dialog", "取消"))
-        self.resetButton.setText(_translate("Dialog", "歸零"))
+        self.resetButton.setText(_translate("Dialog", "置零"))
 
 
 if __name__ == "__main__":
