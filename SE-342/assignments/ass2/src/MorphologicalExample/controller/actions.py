@@ -140,7 +140,7 @@ def applyButtonClicked(index):
     elif feature_index == 5:
         openMaskDialog()
     elif feature_index == 6:
-        pass
+        operations.morpgradient.MorphologicalGradient()
     
 @pyqtSlot()
 def resetClicked(self):
