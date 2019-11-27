@@ -5,7 +5,7 @@
 
 namespace T {
 
-void PrintStmList(FILE *out, T::StmList stmList);
+void PrintStmList( FILE* out, T::StmList stmList );
 
 }  // namespace T
 

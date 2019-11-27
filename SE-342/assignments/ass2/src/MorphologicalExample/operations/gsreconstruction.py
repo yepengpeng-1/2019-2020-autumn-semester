@@ -11,6 +11,7 @@ import baseimage.imagesetter
 from scipy import ndimage
 from PIL import Image, ImageFilter
 
+
 def GrayScaleReconstruction(mask_img):
     """
     Grayscale Reconstruction.
@@ -19,8 +20,9 @@ def GrayScaleReconstruction(mask_img):
     raw_img = baseimage.imagesetter.getImageObject().convert('RGB')
     mask_img = mask_img.convert('RGB')
 
-    kernel = np.ones((varargs.varargs.kernelSize, varargs.varargs.kernelSize), np.uint8)
-    
+    kernel = np.ones((varargs.varargs.kernelSize,
+                      varargs.varargs.kernelSize), np.uint8)
+
     for i in range(varargs.varargs.kernelSize):
         for j in range(varargs.varargs.kernelSize):
             kernel[i][j] = 1 if varargs.varargs.kernelValues[i][j] != 0.0 else 0
@@ -40,8 +42,7 @@ def GrayScaleReconstruction(mask_img):
         last_end = marker
         marker = cv2.dilate(marker, kernel)
         marker = cv2.bitwise_and(marker, mask)
-    
-    result = Image.fromarray(marker).convert('L')
+
+    result = Image.fromarray(marker).convert('L').convert('RGB')
     baseimage.imagesetter.setImageObject(result)
     utils.widget_helper.global_ce.refreshDisplay()
-

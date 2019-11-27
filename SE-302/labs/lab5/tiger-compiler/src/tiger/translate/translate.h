@@ -17,7 +17,7 @@ class Level;
 
 Level* Outermost();
 
-F::FragList* TranslateProgram(A::Exp*);
+F::FragList* TranslateProgram( A::Exp* );
 
 }  // namespace TR
 

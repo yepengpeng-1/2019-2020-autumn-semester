@@ -457,7 +457,7 @@ void TypeDec::SemAnalyze( VEnvType venv, TEnvType tenv, int labelcount ) const {
         }
         std::cout << "declared type " << nt->name->Name() << std::endl;
     }
-}  // namespace A
+}
 
 TY::Ty* NameTy::SemAnalyze( TEnvType tenv ) const {
     std::cout << "Entered NameTy::SemAnalyse;" << std::endl;
