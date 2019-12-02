@@ -4,11 +4,11 @@
 namespace U {
 
 class BoolList {
- public:
-  bool head;
-  BoolList* tail;
+public:
+    bool      head;
+    BoolList* tail;
 
-  BoolList(bool head, BoolList* tail) : head(head), tail(tail) {}
+    BoolList( bool head, BoolList* tail ) : head( head ), tail( tail ) {}
 };
 
 }  // namespace U

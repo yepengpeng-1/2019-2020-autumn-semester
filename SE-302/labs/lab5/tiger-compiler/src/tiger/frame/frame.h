@@ -28,24 +28,31 @@ public:
     Access*     head;
     AccessList* tail;
 
+    AccessList() {}
     AccessList( Access* head, AccessList* tail ) : head( head ), tail( tail ) {}
 };
 
 class Frame {
 public:
-    Frame();
-    TEMP::Label name;
+    Frame( TEMP::Label name ) : name( name ) {}
+    TEMP::Label    name;
+    int            argCount, varCount;
+    F::AccessList *args, *vars;
 
-    F::AccessList* formals;
-    F::AccessList* locals;
+    enum Kind { ARGUMENT, VARIABLE };
 
-    int argumentCount;
-
-    int localVarCount;
-
-    TEMP::TempList* calleesaves;
-    TEMP::TempList* callersaves;
-    TEMP::TempList* specialregs;
+    inline void putInfo( F::Frame::Kind kind, int count, F::AccessList* list ) {
+        switch ( kind ) {
+        case F::Frame::Kind::VARIABLE:
+            this->varCount = count;
+            this->vars     = list;
+            break;
+        case F::Frame::Kind::ARGUMENT:
+            this->argCount = count;
+            this->args     = list;
+            break;
+        }
+    }
 };
 
 /*

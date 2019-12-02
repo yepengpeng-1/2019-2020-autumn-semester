@@ -20,7 +20,6 @@ public:
 
 class X64Frame : public Frame {
     // TODO: Put your codes here (lab6).
-    X64Frame() {}
 };
 
 F::Access* InFrame( int offset ) {
@@ -28,18 +27,14 @@ F::Access* InFrame( int offset ) {
 }
 
 F::Frame* newFrame( TEMP::Label name, U::BoolList* formals ) {
-    F::AccessList* accListHead = new F::AccessList( nullptr, nullptr );
-    F::AccessList* accListTail = new F::AccessList( nullptr, nullptr );
-    int            offset      = F::wordSize;
-    int            argCnt      = 0;
+    F::AccessList *accListHead = new F::AccessList(), *accListTail = new F::AccessList();
+    int            offset = F::wordSize;
+    int            argCnt = 0;
     while ( formals->tail ) {
         formals          = formals->tail;
-        F::AccessList* p = new F::AccessList( nullptr, nullptr );
-        p->head          = InFrame( offset );
-        p->tail          = NULL;
+        F::AccessList* p = new F::AccessList( InFrame( offset ), nullptr );
         if ( accListTail == nullptr ) {
-            accListHead = p;
-            accListTail = p;
+            accListHead = accListTail = p;
         }
         else {
             accListTail->tail = p;
@@ -48,11 +43,9 @@ F::Frame* newFrame( TEMP::Label name, U::BoolList* formals ) {
         offset += F::wordSize;
         ++argCnt;
     }
-    F::Frame* f      = new F::Frame();
-    f->name          = name;
-    f->formals       = accListHead;
-    f->argumentCount = argCnt;
-    f->localVarCount = 0;
+    F::Frame* f = new F::Frame( name );
+    f->putInfo( F::Frame::Kind::ARGUMENT, argCnt, accListHead );
+    f->putInfo( F::Frame::Kind::VARIABLE, 0, nullptr );
     return f;
 }
 
