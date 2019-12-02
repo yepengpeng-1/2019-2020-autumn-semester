@@ -11,8 +11,6 @@
 #include "tiger/semant/types.h"
 #include "tiger/util/util.h"
 
-extern EM::ErrorMsg errormsg;
-
 using VEnvType = S::Table< E::EnvEntry >*;
 using TEnvType = S::Table< TY::Ty >*;
 
@@ -25,7 +23,7 @@ static TY::TyList* make_formal_tylist( TEnvType tenv, A::FieldList* params ) {
 
     TY::Ty* ty = tenv->Look( params->head->typ );
     if ( ty == nullptr ) {
-        errormsg.Error( params->head->pos, "undefined type %s", params->head->typ->Name().c_str() );
+        std::cout << "undefined type %s" << params->head->typ->Name() << std::endl;
     }
 
     return new TY::TyList( ty->ActualTy(), make_formal_tylist( tenv, params->tail ) );
@@ -39,7 +37,7 @@ static TY::FieldList* make_fieldlist( TEnvType tenv, A::FieldList* fields ) {
     TY::Ty* ty = tenv->Look( fields->head->typ );
     std::cout << " make_fieldlist kind called. " << fields->head->name->Name() << std::endl;
     if ( !ty ) {
-        errormsg.Error( 0, " undefined type " + fields->head->typ->Name() );
+        std::cout << "undefined type " << fields->head->typ->Name() << std::endl;
     }
     return new TY::FieldList( new TY::Field( fields->head->name, ty ), make_fieldlist( tenv, fields->tail ) );
 }
@@ -54,6 +52,33 @@ static TY::FieldList* make_fieldlist_from_e( TEnvType tenv, A::EFieldList* field
 
     return new TY::FieldList( new TY::Field( fields->head->name, ty ), make_fieldlist_from_e( tenv, fields->tail ) );
 }
+
+static TR::ExExp find_static_link( TR::Level* curlevel, TR::Level* declevel ) {
+    while ( curlevel != declevel ) {
+        curlevel        = curlevel->parent;
+        TR::Access* acl = curlevel->Formals( curlevel )->head;
+    }
+}
+
+// assert( current != NULL );
+// T_exp result = T_Temp( F_FP() );
+// for ( ; current != declare; current = current->parent ) {
+//     assert( current != NULL );
+//     F_access sl = F_formals( current->frame )->head;  // must be inFrame(8) in x86
+//     // assert(sl->kind == inFrame && sl->u.offset == 8);
+//     result = F_exp( sl, result );
+// }
+// return Tr_Ex( result );
+// /*
+// assert(current != NULL);
+// if(current == declare) {
+//     return Tr_Ex(T_Temp(F_FP()));
+// }
+// F_access sl = F_staticLinkFormal(current->frame);    // must be inFrame(8) in x86
+// assert(sl->kind == inFrame);
+// return T_Ex(T_Mem(T_Binop(T_plus, unEx(Tr_staticLink(current->parent, declare)), sl->u.offset)));
+// */
+// }  // namespace TR
 
 class Access {
 public:
@@ -183,8 +208,7 @@ Level* Outermost() {
 }
 
 F::FragList* TranslateProgram( A::Exp* root ) {
-    // TODO: Put your codes here (lab5).
-    return nullptr;
+    root->Translate( E::BaseVEnv(), E::BaseTEnv(), Outermost(), TEMP::NewLabel() );
 }
 
 }  // namespace TR
@@ -192,12 +216,20 @@ F::FragList* TranslateProgram( A::Exp* root ) {
 namespace A {
 
 TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered SimpleVar::Translate." << std::endl;
+    E::EnvEntry* var = venv->Look( this->sym );
+    if ( var && var->kind == E::EnvEntry::Kind::VAR ) {
+        return TR::ExpAndTy( new TR::ExExp( new T::NameExp( label ) ), ( ( E::VarEntry* )var )->ty );
+    }
+
+    std::cout << "undefined variable " + this->sym->Name() << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+
+    // return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy FieldVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered SimpleVar::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
@@ -302,24 +334,18 @@ TR::Exp* TypeDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* 
 }
 
 TY::Ty* NameTy::Translate( S::Table< TY::Ty >* tenv ) const {
-    std::cout << "Entered NameTy::Translate;" << std::endl;
-    auto ty = tenv->Look( this->name );
-    if ( ty ) {
-        return ty;
-    }
-    else {
-        errormsg.Error( 0, " undefined type " + this->name->Name() );
-    }
+    // TODO: Put your codes here (lab5).
+    return TY::VoidTy::Instance();
 }
 
 TY::Ty* RecordTy::Translate( S::Table< TY::Ty >* tenv ) const {
-    std::cout << "Entered RecordTy::Translate;" << std::endl;
-    return new TY::RecordTy( TR::make_fieldlist( tenv, this->record ) );
+    // TODO: Put your codes here (lab5).
+    return TY::VoidTy::Instance();
 }
 
 TY::Ty* ArrayTy::Translate( S::Table< TY::Ty >* tenv ) const {
-    std::cout << "Entered ArrayTy::Translate;" << std::endl;
-    return tenv->Look( this->array );
+    // TODO: Put your codes here (lab5).
+    return TY::VoidTy::Instance();
 }
 
 }  // namespace A

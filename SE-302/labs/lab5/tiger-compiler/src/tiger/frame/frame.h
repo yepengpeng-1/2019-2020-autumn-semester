@@ -9,9 +9,7 @@
 
 namespace F {
 
-class Frame {
-    // Base class
-};
+static size_t wordSize = 8;
 
 class Access {
 public:
@@ -22,7 +20,7 @@ public:
     Access( Kind kind ) : kind( kind ) {}
 
     // Hints: You may add interface like
-    //        `virtual T::Exp* ToExp(T::Exp* framePtr) const = 0`
+    // virtual T::Exp* ToExp( T::Exp* framePtr ) const = 0;
 };
 
 class AccessList {
@@ -31,6 +29,23 @@ public:
     AccessList* tail;
 
     AccessList( Access* head, AccessList* tail ) : head( head ), tail( tail ) {}
+};
+
+class Frame {
+public:
+    Frame();
+    TEMP::Label name;
+
+    F::AccessList* formals;
+    F::AccessList* locals;
+
+    int argumentCount;
+
+    int localVarCount;
+
+    TEMP::TempList* calleesaves;
+    TEMP::TempList* callersaves;
+    TEMP::TempList* specialregs;
 };
 
 /*
