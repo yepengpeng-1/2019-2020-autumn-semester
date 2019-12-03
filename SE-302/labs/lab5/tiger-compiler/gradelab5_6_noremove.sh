@@ -56,7 +56,7 @@ fi
 for tcase in $(ls $TESTCASEDIR/); do
     if [ ${tcase##*.} = "tig" ]; then
         tfileName=${tcase##*/}
-        ./$BIN $TESTCASEDIR/$tfileName &>/dev/null
+        ./$BIN $TESTCASEDIR/$tfileName &>my_output.txt
         gcc -Wl,--wrap,getchar -m64 $TESTCASEDIR/${tfileName}.s $RUNTIMEPATH -o test.out &>/dev/null
         if [ ! -s test.out ]; then
             echo -e "${BLUE_COLOR}[*_*]$ite: Link error. [$tfileName]${RES}"

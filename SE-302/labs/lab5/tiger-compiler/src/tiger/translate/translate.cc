@@ -16,50 +16,6 @@ using TEnvType = S::Table< TY::Ty >*;
 
 namespace TR {
 
-static TY::TyList* make_formal_tylist( TEnvType tenv, A::FieldList* params ) {
-    if ( params == nullptr ) {
-        return nullptr;
-    }
-
-    TY::Ty* ty = tenv->Look( params->head->typ );
-    if ( ty == nullptr ) {
-        std::cout << "undefined type %s" << params->head->typ->Name() << std::endl;
-    }
-
-    return new TY::TyList( ty->ActualTy(), make_formal_tylist( tenv, params->tail ) );
-}
-
-static TY::FieldList* make_fieldlist( TEnvType tenv, A::FieldList* fields ) {
-    if ( fields == nullptr ) {
-        return nullptr;
-    }
-
-    TY::Ty* ty = tenv->Look( fields->head->typ );
-    std::cout << " make_fieldlist kind called. " << fields->head->name->Name() << std::endl;
-    if ( !ty ) {
-        std::cout << "undefined type " << fields->head->typ->Name() << std::endl;
-    }
-    return new TY::FieldList( new TY::Field( fields->head->name, ty ), make_fieldlist( tenv, fields->tail ) );
-}
-
-static TY::FieldList* make_fieldlist_from_e( TEnvType tenv, A::EFieldList* fields ) {
-    if ( fields == nullptr ) {
-        return nullptr;
-    }
-
-    TY::Ty* ty = fields->head->exp->SemAnalyze( nullptr, tenv, 0 );
-    std::cout << " make_fieldlist kind called. " << fields->head->name->Name() << std::endl;
-
-    return new TY::FieldList( new TY::Field( fields->head->name, ty ), make_fieldlist_from_e( tenv, fields->tail ) );
-}
-
-static TR::ExExp find_static_link( TR::Level* curlevel, TR::Level* declevel ) {
-    while ( curlevel != declevel ) {
-        curlevel        = curlevel->parent;
-        TR::Access* acl = curlevel->Formals( curlevel )->head;
-    }
-}
-
 // assert( current != NULL );
 // T_exp result = T_Temp( F_FP() );
 // for ( ; current != declare; current = current->parent ) {
@@ -109,7 +65,11 @@ public:
         return nullptr;
     }
 
-    static Level* NewLevel( Level* parent, TEMP::Label* name, U::BoolList* formals );
+    static Level* NewLevel( Level* parent, TEMP::Label* name, U::BoolList* formals ) {
+        std::cout << "called new level. label: " << name->Name() << std::endl;
+        auto frame = F::newFrame( *name, new U::BoolList( /* extra escaping param for static link */ true, formals ) );
+        return new Level( frame, parent );
+    }
 };
 
 class PatchList {
@@ -208,7 +168,52 @@ Level* Outermost() {
 }
 
 F::FragList* TranslateProgram( A::Exp* root ) {
+    std::cout << "Called TranslateProgram(A::Exp* root)." << std::endl;
     root->Translate( E::BaseVEnv(), E::BaseTEnv(), Outermost(), TEMP::NewLabel() );
+}
+
+static TY::TyList* make_formal_tylist( TEnvType tenv, A::FieldList* params ) {
+    if ( params == nullptr ) {
+        return nullptr;
+    }
+
+    TY::Ty* ty = tenv->Look( params->head->typ );
+    if ( ty == nullptr ) {
+        std::cout << "undefined type %s" << params->head->typ->Name() << std::endl;
+    }
+
+    return new TY::TyList( ty->ActualTy(), make_formal_tylist( tenv, params->tail ) );
+}
+
+static TY::FieldList* make_fieldlist( TEnvType tenv, A::FieldList* fields ) {
+    if ( fields == nullptr ) {
+        return nullptr;
+    }
+
+    TY::Ty* ty = tenv->Look( fields->head->typ );
+    std::cout << " make_fieldlist kind called. " << fields->head->name->Name() << std::endl;
+    if ( !ty ) {
+        std::cout << "undefined type " << fields->head->typ->Name() << std::endl;
+    }
+    return new TY::FieldList( new TY::Field( fields->head->name, ty ), make_fieldlist( tenv, fields->tail ) );
+}
+
+static TY::FieldList* make_fieldlist_from_e( TEnvType tenv, A::EFieldList* fields ) {
+    if ( fields == nullptr ) {
+        return nullptr;
+    }
+
+    TY::Ty* ty = fields->head->exp->SemAnalyze( nullptr, tenv, 0 );
+    std::cout << " make_fieldlist kind called. " << fields->head->name->Name() << std::endl;
+
+    return new TY::FieldList( new TY::Field( fields->head->name, ty ), make_fieldlist_from_e( tenv, fields->tail ) );
+}
+
+static TR::ExExp find_static_link( TR::Level* curlevel, TR::Level* declevel ) {
+    while ( curlevel != declevel ) {
+        curlevel        = curlevel->parent;
+        TR::Access* acl = curlevel->Formals( curlevel )->head;
+    }
 }
 
 }  // namespace TR
@@ -234,117 +239,171 @@ TR::ExpAndTy FieldVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::T
 }
 
 TR::ExpAndTy SubscriptVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered SubscriptVar::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy VarExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered VarExp::Translate." << std::endl;
+
+    if ( this->var->kind == A::Var::Kind::SIMPLE ) {
+        std::cout << "analyse a SIMPLE var" << std::endl;
+        A::SimpleVar* spvar = ( A::SimpleVar* )this->var;
+        return spvar->Translate( venv, tenv, level, label );
+    }
+    else if ( this->var->kind == A::Var::Kind::FIELD ) {
+        std::cout << "analyse a FIELD var" << std::endl;
+        A::FieldVar* fvar = ( A::FieldVar* )this->var;
+        return fvar->Translate( venv, tenv, level, label );
+    }
+    else if ( this->var->kind == A::Var::Kind::SUBSCRIPT ) {
+        std::cout << "analyse a SUBSCRIPT var" << std::endl;
+        A::SubscriptVar* svar = ( A::SubscriptVar* )this->var;
+        return svar->Translate( venv, tenv, level, label );
+    }
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy NilExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered NilExp::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy IntExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered IntExp::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy StringExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered StringExp::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered CallExp::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy OpExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered OpExp::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered RecordExp::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy SeqExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
-    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+    std::cout << "Entered SeqExp::Translate." << std::endl;
+    ExpList*      seq  = this->seq;
+    TR::ExpAndTy* last = reinterpret_cast< TR::ExpAndTy* >( calloc( 1, sizeof( TR::ExpAndTy ) ) );
+    while ( seq != nullptr ) {
+        *last = seq->head->Translate( venv, tenv, level, label );
+        seq   = seq->tail;
+    }
+    return *last;
 }
 
 TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered AssignExp::Translate." << std::endl;
+
+    auto varKind = this->var->Translate( venv, tenv, level, label );
+    auto expT    = this->exp->Translate( venv, tenv, level, label );
+
+    if ( varKind.ty->kind == TY::Ty::Kind::VOID ) {
+    }
+    else if ( varKind.ty->kind == TY::Ty::Kind::RECORD ) {
+        if ( !expT.ty->IsSameType( varKind.ty ) ) {
+            std::cout << "type mismatch" << std::endl;
+        }
+    }
+    else {
+        if ( !this->exp->Translate( venv, tenv, level, label ).ty->IsSameType( varKind.ty ) ) {
+            std::cout << "unmatched assign exp" << std::endl;
+        }
+    }
+
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered IfExp::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy WhileExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
-    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+    std::cout << "Entered WhileExp::Translate." << std::endl;
+
+    auto expAndTy = this->body->Translate( venv, tenv, level, label );
+    if ( expAndTy.ty->kind != TY::Ty::Kind::VOID ) {
+        std::cout << "while body must produce no value" << std::endl;
+    }
+    return expAndTy;
 }
 
 TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered ForExp::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy BreakExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered BreakExp::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy LetExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
-    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+    std::cout << "Entered LetExp::Translate." << std::endl;
+
+    A::DecList* node = this->decs;
+    while ( node ) {
+        // std::cout << "while!" << std::endl;
+        node->head->Translate( venv, tenv, TR::Level::NewLevel( level, label, nullptr ), TEMP::NewLabel() );
+        node = node->tail;
+    }
+
+    return this->body->Translate( venv, tenv, TR::Level::NewLevel( level, label, nullptr ), TEMP::NewLabel() );
+
+    // return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy ArrayExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered ArrayExp::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy VoidExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered VoidExp::Translate." << std::endl;
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered FunctionExp::Translate." << std::endl;
     return nullptr;
 }
 
 TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered VarDec::Translate." << std::endl;
     return nullptr;
 }
 
 TR::Exp* TypeDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered TypeDec::Translate." << std::endl;
     return nullptr;
 }
 
 TY::Ty* NameTy::Translate( S::Table< TY::Ty >* tenv ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered NameTy::Translate." << std::endl;
     return TY::VoidTy::Instance();
 }
 
 TY::Ty* RecordTy::Translate( S::Table< TY::Ty >* tenv ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered RecordTy::Translate." << std::endl;
     return TY::VoidTy::Instance();
 }
 
 TY::Ty* ArrayTy::Translate( S::Table< TY::Ty >* tenv ) const {
-    // TODO: Put your codes here (lab5).
+    std::cout << "Entered ArrayTy::Translate." << std::endl;
     return TY::VoidTy::Instance();
 }
 

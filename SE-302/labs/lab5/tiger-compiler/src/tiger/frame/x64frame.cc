@@ -27,24 +27,16 @@ F::Access* InFrame( int offset ) {
 }
 
 F::Frame* newFrame( TEMP::Label name, U::BoolList* formals ) {
-    F::AccessList *accListHead = new F::AccessList(), *accListTail = new F::AccessList();
-    int            offset = F::wordSize;
-    int            argCnt = 0;
+    F::AccessList* formalAcList = nullptr;
+    int            argCount     = 0;
     while ( formals->tail ) {
-        formals          = formals->tail;
-        F::AccessList* p = new F::AccessList( InFrame( offset ), nullptr );
-        if ( accListTail == nullptr ) {
-            accListHead = accListTail = p;
-        }
-        else {
-            accListTail->tail = p;
-            accListTail       = p;
-        }
-        offset += F::wordSize;
-        ++argCnt;
+        ++argCount;
+        formalAcList = new F::AccessList( new F::InFrameAccess( /* offset: */ argCount * F::wordSize ), formalAcList );
+        formals      = formals->tail;
     }
+
     F::Frame* f = new F::Frame( name );
-    f->putInfo( F::Frame::Kind::ARGUMENT, argCnt, accListHead );
+    f->putInfo( F::Frame::Kind::ARGUMENT, argCount, formalAcList );
     f->putInfo( F::Frame::Kind::VARIABLE, 0, nullptr );
     return f;
 }

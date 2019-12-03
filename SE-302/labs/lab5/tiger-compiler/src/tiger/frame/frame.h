@@ -35,6 +35,7 @@ public:
 class Frame {
 public:
     Frame( TEMP::Label name ) : name( name ) {}
+
     TEMP::Label    name;
     int            argCount, varCount;
     F::AccessList *args, *vars;
@@ -91,6 +92,8 @@ public:
 
     FragList( Frag* head, FragList* tail ) : head( head ), tail( tail ) {}
 };
+
+Frame* newFrame( TEMP::Label name, U::BoolList* formals );
 
 }  // namespace F
 
