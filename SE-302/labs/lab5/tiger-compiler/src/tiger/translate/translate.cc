@@ -286,7 +286,39 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
 
 TR::ExpAndTy OpExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered OpExp::Translate." << std::endl;
-    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+
+    auto leftT  = left->Translate( venv, tenv, level, label );
+    auto rightT = right->Translate( venv, tenv, level, label );
+    std::cout << "  making a comparison between <type> " << leftT.ty->ActualTy()->kind << " and <type> " << rightT.ty->ActualTy()->kind << std::endl;
+    if ( leftT.ty->kind == TY::Ty::Kind::INT && rightT.ty->kind == TY::Ty::Kind::VOID ) {
+        std::cout << "integer required" << std::endl;
+        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+    }
+    else if ( rightT.ty->kind == TY::Ty::Kind::INT && leftT.ty->kind == TY::Ty::Kind::VOID ) {
+        std::cout << "integer required" << std::endl;
+        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+    }
+    else if ( this->oper == A::Oper::PLUS_OP && leftT.ty->kind == TY::Ty::Kind::INT && rightT.ty->kind == TY::Ty::Kind::STRING ) {
+        std::cout << "integer required" << std::endl;
+        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+    }
+    else if ( this->oper == A::Oper::NEQ_OP && !leftT.ty->IsSameType( rightT.ty ) ) {
+        std::cout << "same type required" << std::endl;
+        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+    }
+    else if ( leftT.ty->kind == TY::Ty::Kind::RECORD && !leftT.ty->IsSameType( rightT.ty ) ) {
+        std::cout << "type mismatch" << std::endl;
+        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+    }
+    else if ( !leftT.ty->IsSameType( rightT.ty ) ) {
+        std::cout << "same type required" << std::endl;
+        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+    }
+    else if ( leftT.ty->kind == TY::Ty::Kind::INT && rightT.ty->kind != TY::Ty::Kind::INT ) {
+        std::cout << "integer required" << std::endl;
+        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+    }
+    return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
 }
 
 TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -329,7 +361,24 @@ TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
 
 TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered IfExp::Translate." << std::endl;
-    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+    if ( this->test->Translate( venv, tenv, level, label ).ty->kind != TY::Ty::Kind::INT ) {
+        return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+    }
+
+    if ( !this->elsee ) {
+        if ( this->then->Translate( venv, tenv, level, label ).ty->kind != TY::Ty::Kind::VOID ) {
+            std::cout << "if-then exp's body must produce no value" << std::endl;
+        }
+        return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+    }
+    else {
+        auto thenT = this->then->Translate( venv, tenv, level, label );
+        auto elseT = this->elsee->Translate( venv, tenv, level, label );
+        if ( !thenT.ty->IsSameType( elseT.ty ) ) {
+            std::cout << "then exp and else exp type mismatch" << std::endl;
+        }
+        return thenT;
+    }
 }
 
 TR::ExpAndTy WhileExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
