@@ -393,6 +393,13 @@ TR::ExpAndTy WhileExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::T
 
 TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered ForExp::Translate." << std::endl;
+
+    if ( this->hi->Translate( venv, tenv, level, label ).ty->kind != TY::Ty::Kind::INT ) {
+        std::cout << "for exp's range type is not integer" << std::endl;
+    }
+    if ( this->body->kind == A::Exp::Kind::ASSIGN ) {
+        std::cout << "loop variable can't be assigned" << std::endl;
+    }
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
@@ -433,7 +440,29 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
 
 TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered VarDec::Translate." << std::endl;
-    return nullptr;
+    auto initT = this->init->Translate( venv, tenv, level, label );
+    if ( this->typ ) {
+        std::cout << "explicit type" << tenv->Look( this->typ ) << std::endl;
+        std::cout << "implicit type: " << initT.ty << std::endl;
+        venv->Enter( this->var, new E::VarEntry( tenv->Look( this->typ ) ) );
+        // if ( this->typ->name != this->init->SemAnalyze( venv, tenv, labelcount ) ) {
+        if ( !tenv->Look( this->typ )->IsSameType( initT.ty ) ) {
+            // if ( tenv->Look( this->typ )->kind == TY::Ty::Kind::RECORD || tenv->Look( this->typ )->kind == TY::Ty::Kind::ARRAY ) {
+            std::cout << "type mismatch" << std::endl;
+            // }
+            // else {
+            // errormsg.Error( labelcount, "same type required" );
+            // }
+        }
+        // }
+    }
+    else {
+        std::cout << "implicit type: " << initT.ty << std::endl;
+        if ( initT.ty->kind == TY::Ty::Kind::NIL ) {
+            std::cout << "init should not be nil without type specified" << std::endl;
+        }
+        venv->Enter( this->var, new E::VarEntry( initT.ty ) );
+    }
 }
 
 TR::Exp* TypeDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {

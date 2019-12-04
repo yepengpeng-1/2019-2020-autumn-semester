@@ -56,7 +56,7 @@ fi
 for tcase in $(ls $TESTCASEDIR/); do
     if [ ${tcase##*.} = "tig" ]; then
         tfileName=${tcase##*/}
-        ./$BIN $TESTCASEDIR/$tfileName &>my_output.txt
+        ./$BIN $TESTCASEDIR/$tfileName &>my_output_${tfileName}.txt
         gcc -Wl,--wrap,getchar -m64 $TESTCASEDIR/${tfileName}.s $RUNTIMEPATH -o test.out &>/dev/null
         if [ ! -s test.out ]; then
             echo -e "${BLUE_COLOR}[*_*]$ite: Link error. [$tfileName]${RES}"
@@ -82,6 +82,35 @@ for tcase in $(ls $TESTCASEDIR/); do
                 count=$((count + 1))
                 echo "pass Merge"
                 # rm -f _tmp.txt _ref.txt
+                # 煙臺蓬萊國際機場
+                # Narita
+                # Haneda
+                # 上海浦東國際機場
+                # 上海虹橋國際機場
+                # 北京大興國際機場
+                # 北京首都國際機場
+                # 成都雙流國際機場
+                # 重慶江北國際機場
+                # 瀋陽桃仙國際機場
+                # 南寧吳圩國際機場
+                # 武漢天河國際機場
+                # 西安咸陽國際機場
+                # 青島流亭國際機場
+                # 大連周水子國際機場
+                # 蘇南碩放國際機場
+                # 南京祿口國際機場
+                # 杭州蕭山國際機場
+                # 臺北中正國際機場
+                # 海口美蘭國際機場
+                # 三亞鳳凰國際機場
+                # 南陽姜營國際機場
+                # 拉薩貢嘎機場
+                # 烏魯木齊地窩堡國際機場
+                # 深圳寶安國際機場
+                # 香港赤臘角國際機場
+                # 溫州龍灣國際機場
+                # JFK     <- Ross & Phoebe
+                # Atlanta <- Rachel
             done
             score=$((score + result + count / 2))
             rm -f test.out $TESTCASEDIR/${tfileName}.s
