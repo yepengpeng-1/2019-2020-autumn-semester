@@ -1069,3 +1069,268 @@ frag 数据类型专门用来描述片段。
 >   在 `F_procEntryExit1` 的返回值中，第二条就是函数名的标号定义。
 
 最後，调用 `Tr_getResult` 就可以得到全部的 Fragments 了。在生成代码的时候，把它们放在边缘就好了。
+
+## Chapter 8: Basic Blocks & Trace
+
+基本塊和軌跡⋯⋯那是什麼意思？
+
+本章的關鍵字是 Ca-non-i-cal。正規的，被儘可能簡化到最簡單或最清楚的。
+
+好好回憶一下上一章（Translation）幹了什麼。我們把所有語言翻譯成了 Tree 語言：那一堆基本 Ex（Cx、Ex、Nx）的組合。然而，這種 Tree 語言本身並非和機器語言一一對應的。
+
+主要問題是：一個表達式的子表達式計算順序（有時候）是敏感的。也就是說，Tree 語言的部分 Exp 子句含有副作用。例如，ESEQ 和 CALL 兩個字句可能含有賦值且執行輸入輸出。這就是說，按照不同的順序計算他們有可能會產生不同的結果。
+
+反過來說，假如一個節點所有的子樹都不包含 ESEQ 和 CALL 節點，那麼我們就可以按照任何順序對他們進行計算。
+
+>   簡而言之，就是在一個節點的子樹中沒有 ESEQ（他強行要求了賦值和返回值的順序）和 CALL（這就是直接開了一個新棧幀了）的話，我們就可以任意交換子樹求值的順序。
+
+另外，TreeIR 和機器語言還存在這麼一些區別。
+
+*   CJUMP 的跳轉位置為兩個（一真一假）；然而很遺憾實際機器語言在條件為假的時候默認跳轉到下一條指令。
+
+>   其實也還是能理解的⋯畢竟 Treelang 這個等級還沒有實際出現「上一條下一條」逐條指令的概念；結果只能是用樹來實現。因此同時指定 t 和 f 是必須的。並非故意如此增大難度。
+
+*   CALL 函數的參數列表中存在 CALL 的時候，會產生寄存器混淆的問題。
+
+*   ESEQ 節點出現在表達式中不太好；他會引起不同計算順序帶來不同結果。
+*   CALL 節點也是這樣的；計算順序相關。
+
+為了處理 ESEQ 和 CALL 的問題，我們決定把 ESEQ 去除。
+
+換一句話說，我們就是要把原树改写成这样：
+
+1.  SEQ 的父亲只可能是 SEQ。
+2.  根据 1.，要么这棵树没有 SEQ（which is very unlikely），要么树的根一定是 SEQ。
+3.  根据 1.、2.，所有的 SEQ 都会聚集在树的根部。
+
+因此，前面那一串 SEQ 实际上并没有什么意义；他们只是一串要求顺序的 Statement 而已。
+
+所以我们何不干脆直接把所有的 SEQ 拿走，换成一串 Statement？
+
+这就是我们要做的：在所有的 SEQ 都被提前之后，清除所有无用的 SEQ 并将其使用 C::StmList 代替。
+
+---
+
+#### 大体步骤
+
+正规化步骤分为以下步骤：
+
+第一步，将树的 ESEQ 都转化成聚集在树根部的 SEQ。
+
+第二步，清除根部的 SEQ，用 StmList 代替它们。
+
+第三步，将这个数分拆成不包含转移和标号的基本块集合。
+
+第四步，对基本块进行排序形成一组轨迹，而且保证每个 CJUMP 後面紧跟着的都是她的 False 标号。
+
+---
+
+>   总的来说，每一步说的都不清不楚。
+>
+>   就当作者和译者不会说人话好了。心平气和。
+
+---
+
+书也好心提供了 C 的 API。很可惜，天才助教们把 Lab 改写成了 C++，因此只能连蒙带猜了。
+
+```c++
+typedef struct C_stmListList_ *C_stmListList;
+struct C_block {
+    C_stmListList stmLists;
+    Temp_label label;
+};
+
+struct C_stmListList_ {
+    T_stmList head;
+    C_stmListList tail;
+}
+
+T_stmList C_linearize(T_stm stm);
+struct C_block C_basicBlocks(T_stmList stmList);
+T_stmList C_traceSchedule(struct C_block b);
+```
+
+留意 stmList 是一般的 Statement List；而为了保存每个块里的（每棵树开头的那一串 stmList），我们得用 stmListList 来存储这些 stmList……
+
+>   更加想死了。
+
+Linearize 函数做的事情是对每一棵树，删除其中的 ESEQ 并且将 CALL 移动到顶层。
+
+BasicBlocks 把语句分成一组组的直线型代码序列。
+
+traceSchedule 对基本块进行排序形成一组轨迹，而且保证 False 标号紧贴。
+
+---
+
+#### 规范树
+
+上面都是领导安排工作。下面就是苦力进行实现。
+
+领导这一章的目标是：
+
+*   不包含 SEQ 或 ESEQ。
+*   每一个 CALL 的父亲要么是 EXP（<CALL>），要么是 MOVE（TEMP t，<CALL>）。
+
+>   EXP <CALL> 意为调用函数但是放弃其值。
+>
+>   MOVE t, <CALL> 意为将函数返回值放在临时寄存器里。
+
+要做转化，我们只有下面一些等式可以用：
+
+---
+
+##### 等式 1
+
+ESEQ(s1, ESEQ(s2, e)) => ESEQ(SEQ(s1, s2), e)
+
+留意 SEQ 的语义是：翻译 s1，然后翻译 s2。
+
+##### 等式 2
+
+BINOP(op, ESEQ(s, e1), e2) => ESEQ(s, BINOP(op, e1, e2))
+
+副作用 s 在 e1 之前产生作用就可以了。所以把他从 BINOP 里提升出来当然没问题。
+
+MEM(ESEQ(s, e)) => ESEQ(s, MEM(e))
+
+JUMP(ESEQ(s, e)) => ESEQ(s, JUMP(e))
+
+CJUMP(op, ESEQ(s, e1), e2, l1, l2) => SEQ(s, CJUMP(op, e1, e2, l1, l2))
+
+也都是当然。
+
+##### 等式 3
+
+针对一个指令有两个 Expression 的情况下，副作用在第二求值位的时候：
+
+BINOP(op, e1, ESEQ(s, e2)) 比较复杂一点：因为 s 副作用应该在 e1 之后、e2 之前产生。
+
+所以我们必须先行计算 e1，然后执行副作用，最后抽离出 ESEQ。
+
+BINOP(op, e1, ESEQ(s, e2)) => ESEQ(MOVE(TEMP t, e1), ESEQ(s, BINOP(op, TEMP t, e2)))
+
+同理，
+
+CJUMP(op, e1, ESEQ(s, e2), l1, l2) => SEQ(MOVE(TEMP t, e1), SEQ(s, CJUMP(op, TEMP t, e2, l1, l2))
+
+本质上就是先计算无副作用的一号位表达式，然后把副作用表达式从基础语句中抽离。
+
+消耗一个新的临时变量。而已。
+
+##### 等式 4（特别情况）
+
+是等式 3 的特殊情况。在 s 不对 e1 的计算造成影响的情况下，我们可以直接抽离副作用表达式，而不用提前保存 e1。
+
+也就是，
+
+BINOP(op, e1, ESEQ(s, e2)) =?> ESEQ(s, BINOP(op, e1, e2))
+
+（CJUMP 懒得写了）
+
+但是这个等式一定要 s & e1 is commute 作为条件。怎么判断 s 不对 e1 产生副作用啊？这个判断一定要很保守，因为如果犯错，结果就是错误的。
+
+>   我们说 Stm & Exp is commute，也就是 s 跟 e 可交换，也就是说他们在最终的汇编中的顺序可以交换出现。也就是 Statement 的副作用不会影响到 Expression。
+
+因此我们的特殊情况是：if e1 == CONST，则直接将其抽离。否则，一律不抽离。
+
+保守一点总归不容易犯错。
+
+---
+
+#### 一般重写规则
+
+上面这些东西给人来做或许能勉强改写完。那对于一台计算机，它该遵循什么规则来*利用*这些规则等式呢？
+
+一般化的规则，还是基于要求的求值顺序和副作用所产生的时间点。
+
+一般化地，在
+
+Op[e1, e2, ESEQ(s, e3)] 之中，我们的目的是将其化为 ESEQ(s, Op(e1', e2', e3')) 的样子。
+
+但是，留意到原来的执行顺序是 e1 -> e2 -> s -> e3。因此如果我们直接暴力将其抽出，求值顺序就变成了 s -> e1 -> e2 -> e3。因此，这件事情跟 e3 无关，我们要考虑的事情是 s 的提前求值会不会对 e1 和 e2 的求值产生影响（未预料的副作用）。
+
+假如 e1 和 s 不可交换（也就是 s 的副作用会影响到 e1 的计算），那么就需要加一句
+
+SEQ(MOVE(t1, e1), s);
+
+然后用 t1 假借 e1（副作用产生前）来做最终计算。e2 同理。
+
+因此整件事情都是可以规范化的。
+
+>   根据我们之前保守的算法，只要 e 不是常数（Constant），我们就都认为它跟 s 是不可交换的。
+
+---
+
+#### Reorderer
+
+Reorder Master 可以接受一个表达式表，并且返回（语句，表达式表）构成的偶对。
+
+「语句」表示的就是在表达式表之前必须发生的事情，根据我们之前的讨论，那基本上就是表达式的求值并放到虚拟寄存器里。
+
+>   注意：表达式的求值之间（例如上面的 e1 和 e2）也可能会产生副作用…所以我们仍然保留原有的顺序，并使用一个大 T_stm 来存储他们。
+>
+>   抽离出来这些所有的副作用後，事情就变得简单了；留下来的那个 Exp 就已经是求值顺序无关的了。
+
+##### 算法
+
+Reorder 的算法是这样的：
+
+```c++
+typedef struct expRefList_ *expRefList;
+struct expRefList_ {
+    T_exp *head;
+    expRefList tail;
+};
+
+struct stmExp {
+    T_stm s;
+    T_exp e;
+}
+
+static T_stm reorder(expRefList rlist);
+
+static T_stm do_stm(T_stm stm);
+static struct stmExp do_exp(T_exp exp);
+```
+
+我们要传递给 Reorderer 的是一个 expRefList，也就是一串 T_exp 而已。
+
+这一串 T_exp 就是目标节点（需要净化的节点）所有子表达式的指针。
+
+以 BINOP(CONST, MEM) 为例子，我们将其标记为
+
+e2(e1, e3)，其中 e2 对应 BINOP；e1 对应 CONST，e3 对应 MEM。
+
+那么传入 reorder 的链表实际上就是 (&e1, &e3)。
+
+Reorder 会抽取其中所有的 ESEQ，并且把他们合并成一个 T_stm（顺序需要保留，当然）。
+
+为了达到这个目的，我们对每个传入的子表达式（这里是 e1 和 e3）依次调用 do_exp 函数。这个函数干什么呢？观察我们可以得到，它的返回值是（T_stm, T_exp）偶对。
+
+T_exp 会仅仅包含类似于 MEM(TEMP a) 这样的从寄存器／栈帧中取值的语句；而原来的 e1/e3 会出现在 T_stm 里；包括了将其放入内存的 Statement。
+
+对于不包含 ESEQ 的语句，我们完全无需进行任何处理；只需要构造出它的子表达式链表，并且递归地调用 reorder。而在遇到 ESEQ 的时候，我们必须抽出其中全部的 ESEQ。
+
+为了实现找出 ESEQ 的功能，我们又加入了一个 do_stm……
+
+>   或许编译器本身就不是人可以写出来的代码。
+>
+>   要有一些不写代码的人来构造这个大而无当的架构，然后由写代码的人一点点实现它。
+>
+>   当然，这个 Tiger Compiler Lab 是垃圾到不能称之为编译器的了。
+
+MOVE 左边的操作数，也就是 MOVE 的 Destination 我们需要特别说明：我们不把它看作一个子表达式，因为那是这个语句的目的操作数，而这个语句是不使用它的。
+
+但是，假如左边的操作数是一个 Memory Location…
+
+>   很难想象中文书把 Memory Location 翻译成了前不着村后不着店的「存储单元」……惊讶到我去翻了前言发现这章是赵克佳翻译的。这位互联网上找不到任何信息的人的作品，跟陈昊鹏有的一拼。
+
+…也就是一个内存地址的话，我们就该把它当作一个「计算所得」了。
+
+这很好理解：你不可能动态计算出一个寄存器编号来作为 MOVE 的 destination，但有可能动态计算出一个内存地址来作为 destination。事实上，这挺常见的。
+
+因此，我们有必要对这两种情况分开处理。
+
+……
+
+书上给出了 reorder 的 C 实现。所以不出意外，我们要做的也就仅仅是 Translate 成 C++ 而已。
