@@ -20,7 +20,8 @@ namespace TR {
 
 class Access {
 public:
-    Level*     level;
+    Level* level;
+
     F::Access* access;
 
     Access( Level* level, F::Access* access ) : level( level ), access( access ) {}
@@ -163,12 +164,13 @@ void do_patch( PatchList* tList, TEMP::Label* label ) {
         *( tList->head ) = label;
 }
 
-static Access* AllocLocal( Level* level, bool escape ) {
+static Access* AllocLocal( Level* level, bool escape, std::string sym ) {
     std::cout << "Entered AllocLocal. escape? " << escape << std::endl;
     F::Access* newAcc;
     if ( escape ) {
         level->frame->varCount += 1;
-        newAcc = level->frame->InFrame( -( level->frame->varCount * F::wordSize ) );
+        newAcc      = level->frame->InFrame( -( level->frame->varCount * F::wordSize ) );
+        newAcc->sym = sym;
     }
     else {
         // never happens in lab5.
@@ -176,7 +178,7 @@ static Access* AllocLocal( Level* level, bool escape ) {
     }
     std::cout << "create newAcc fine" << std::endl;
     level->frame->vars = new F::AccessList( newAcc, level->frame->vars );
-    return new Access( level, newAcc );
+    auto finAccess     = new Access( level, newAcc );
 }
 
 PatchList* join_patch( PatchList* first, PatchList* second ) {
@@ -261,9 +263,28 @@ TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
     std::cout << "Entered SimpleVar::Translate." << std::endl;
     E::EnvEntry* var = venv->Look( this->sym );
 
+    auto accessList = level->frame->vars;
+
+    F::Access* accessObj = nullptr;
+    while ( accessList ) {
+        auto access = accessList->head;
+
+        if ( access->kind == F::Access::Kind::INFRAME ) {
+            if ( access->sym == this->sym->Name() ) {
+                accessObj = access;
+                break;
+            }
+        }
+        else if ( access->kind == F::Access::Kind::INREG ) {
+            // not going to do this in lab5
+        }
+
+        accessList = accessList->tail;
+    }
+
     if ( var && var->kind == E::EnvEntry::Kind::VAR ) {
-        auto exp = new TR::ExExp();
-        return TR::ExpAndTy( nullptr, ( ( E::VarEntry* )var )->ty );
+        auto exp = new TR::ExExp( getExp( accessObj, new T::TempExp( F::Frame::framePointer() ) ) );
+        return TR::ExpAndTy( exp, ( ( E::VarEntry* )var )->ty );
     }
 
     std::cout << "undefined variable " + this->sym->Name() << std::endl;
@@ -634,7 +655,7 @@ TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* t
     else if ( initT.ty->kind == TY::Ty::Kind::RECORD ) {
     }
     else {
-        TR::Access* new_acc = TR::AllocLocal( level, true );
+        TR::Access* new_acc = TR::AllocLocal( level, true, this->var->Name() );
         std::cout << "AllocLocal fine" << std::endl;
         auto resultExp = new TR::NxExp( new T::MoveStm( new_acc->access->ToExp( new T::TempExp( level->frame->framePointer() ) ), initT.exp->UnEx() ) );
         std::cout << "successfully generated resultExp" << resultExp << std::endl;

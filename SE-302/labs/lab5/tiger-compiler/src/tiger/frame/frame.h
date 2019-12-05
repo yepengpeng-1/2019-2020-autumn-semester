@@ -17,6 +17,8 @@ public:
 
     Kind kind;
 
+    std::string sym;
+
     Access( Kind kind ) : kind( kind ) {}
 
     // Hints: You may add interface like
@@ -68,7 +70,7 @@ public:
         return new F::InFrameAccess( offset );
     }  // namespace F
 
-    TEMP::Temp* framePointer() {
+    static TEMP::Temp* framePointer() {
         std::cout << "framePointer requested" << std::endl;
         static TEMP::Temp* fp = nullptr;
         if ( !fp ) {
