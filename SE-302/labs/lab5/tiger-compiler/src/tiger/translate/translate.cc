@@ -18,35 +18,12 @@ namespace {}  // namespace
 
 namespace TR {
 
-// assert( current != NULL );
-// T_exp result = T_Temp( F_FP() );
-// for ( ; current != declare; current = current->parent ) {
-//     assert( current != NULL );
-//     F_access sl = F_formals( current->frame )->head;  // must be inFrame(8) in x86
-//     // assert(sl->kind == inFrame && sl->u.offset == 8);
-//     result = F_exp( sl, result );
-// }
-// return Tr_Ex( result );
-// /*
-// assert(current != NULL);
-// if(current == declare) {
-//     return Tr_Ex(T_Temp(F_FP()));
-// }
-// F_access sl = F_staticLinkFormal(current->frame);    // must be inFrame(8) in x86
-// assert(sl->kind == inFrame);
-// return T_Ex(T_Mem(T_Binop(T_plus, unEx(Tr_staticLink(current->parent, declare)), sl->u.offset)));
-// */
-// }  // namespace TR
-
 class Access {
 public:
     Level*     level;
     F::Access* access;
 
     Access( Level* level, F::Access* access ) : level( level ), access( access ) {}
-    static Access* AllocLocal( Level* level, bool escape ) {
-        return nullptr;
-    }
 };
 
 class AccessList {
@@ -118,9 +95,21 @@ public:
 
     ExExp( T::Exp* exp ) : Exp( EX ), exp( exp ) {}
 
-    T::Exp* UnEx() const override {}
-    T::Stm* UnNx() const override {}
-    Cx      UnCx() const override {}
+    T::Exp* UnEx() const override {
+        return this->exp;
+    }
+    T::Stm* UnNx() const override {
+        // special condition: if the second part of the eseq is constant, then let's just put the first part as Statement.
+        if ( this->exp->kind == T::Exp::Kind::ESEQ && reinterpret_cast< T::EseqExp* >( this->exp )->exp->kind == T::Exp::Kind::CONST ) {
+            return reinterpret_cast< T::EseqExp* >( this->exp )->stm;
+        }
+
+        return new T::ExpStm( this->exp );
+    }
+    Cx UnCx() const override {
+        Cx cx = Cx( nullptr, nullptr, nullptr );
+        return cx;
+    }
 };
 
 class NxExp : public Exp {
@@ -129,9 +118,16 @@ public:
 
     NxExp( T::Stm* stm ) : Exp( NX ), stm( stm ) {}
 
-    T::Exp* UnEx() const override {}
-    T::Stm* UnNx() const override {}
-    Cx      UnCx() const override {}
+    T::Exp* UnEx() const override {
+        return nullptr;
+    }
+    T::Stm* UnNx() const override {
+        return nullptr;
+    }
+    Cx UnCx() const override {
+        Cx cx = Cx( nullptr, nullptr, nullptr );
+        return cx;
+    }
 };
 
 class CxExp : public Exp {
@@ -141,14 +137,37 @@ public:
     CxExp( struct Cx cx ) : Exp( CX ), cx( cx ) {}
     CxExp( PatchList* trues, PatchList* falses, T::Stm* stm ) : Exp( CX ), cx( trues, falses, stm ) {}
 
-    T::Exp* UnEx() const override {}
-    T::Stm* UnNx() const override {}
-    Cx      UnCx() const override {}
+    T::Exp* UnEx() const override {
+        return nullptr;
+    }
+    T::Stm* UnNx() const override {
+        return nullptr;
+    }
+    Cx UnCx() const override {
+        Cx cx = Cx( nullptr, nullptr, nullptr );
+        return cx;
+    }
 };
 
 void do_patch( PatchList* tList, TEMP::Label* label ) {
     for ( ; tList; tList = tList->tail )
         *( tList->head ) = label;
+}
+
+static Access* AllocLocal( Level* level, bool escape ) {
+    std::cout << "Entered AllocLocal. escape? " << escape << std::endl;
+    F::Access* newAcc;
+    if ( escape ) {
+        level->frame->varCount += 1;
+        newAcc = level->frame->InFrame( -( level->frame->varCount * F::wordSize ) );
+    }
+    else {
+        // never happens in lab5.
+        // everything is escape
+    }
+    std::cout << "create newAcc fine" << std::endl;
+    level->frame->vars = new F::AccessList( newAcc, level->frame->vars );
+    return new Access( level, newAcc );
 }
 
 PatchList* join_patch( PatchList* first, PatchList* second ) {
@@ -165,7 +184,8 @@ Level* Outermost() {
     if ( lv != nullptr )
         return lv;
 
-    lv = new Level( nullptr, nullptr );
+    auto label = TEMP::NewLabel();
+    lv         = new Level( new F::Frame( *label ), nullptr );
     return lv;
 }
 
@@ -223,7 +243,9 @@ TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
     }
 
     std::cout << "undefined variable " + this->sym->Name() << std::endl;
-    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+
+    auto exp = new TR::ExExp( new T::MemExp( new T::BinopExp( T::PLUS_OP, nullptr, nullptr ) ) );
+    return TR::ExpAndTy( exp, TY::VoidTy::Instance() );
 
     // return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
@@ -302,7 +324,7 @@ TR::ExpAndTy NilExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
 
 TR::ExpAndTy IntExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered IntExp::Translate." << std::endl;
-    return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+    return TR::ExpAndTy( new TR::ExExp( new T::ConstExp( this->i ) ), TY::IntTy::Instance() );
 }
 
 TR::ExpAndTy StringExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -580,7 +602,11 @@ TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* t
         }
         venv->Enter( this->var, new E::VarEntry( initT.ty ) );
     }
-    return nullptr;
+
+    TR::Access* new_acc = TR::AllocLocal( level, true );
+    std::cout << "AllocLocal fine" << std::endl;
+    return new TR::NxExp( new T::MoveStm( new_acc->access->ToExp( new T::TempExp( level->frame->framePointer() ) ), initT.exp->UnEx() ) );
+    // Tr_Nx(T_Move(Tr_simpleVar(new_acc, level), unEx(e.exp)));
 }
 
 TR::Exp* TypeDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {

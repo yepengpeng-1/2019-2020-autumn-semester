@@ -10,7 +10,6 @@
 namespace F {
 
 static size_t wordSize = 8;
-
 class Access {
 public:
     enum Kind { INFRAME, INREG };
@@ -21,6 +20,25 @@ public:
 
     // Hints: You may add interface like
     // virtual T::Exp* ToExp( T::Exp* framePtr ) const = 0;
+    T::Exp* ToExp( T::Exp* framePtr ) const {};
+};
+
+class InFrameAccess : public Access {
+public:
+    int offset;
+
+    InFrameAccess( int offset ) : Access( INFRAME ), offset( offset ) {}
+
+    T::Exp* ToExp( T::Exp* framePtr ) const {
+        return new T::MemExp( new T::BinopExp( T::BinOp::PLUS_OP, framePtr, new T::ConstExp( offset ) ) );
+    };
+};
+
+class InRegAccess : public Access {
+public:
+    TEMP::Temp* reg;
+
+    InRegAccess( TEMP::Temp* reg ) : Access( INREG ), reg( reg ) {}
 };
 
 class AccessList {
@@ -34,13 +52,27 @@ public:
 
 class Frame {
 public:
+    enum Kind { ARGUMENT, VARIABLE };
+
     Frame( TEMP::Label name ) : name( name ) {}
 
     TEMP::Label    name;
     int            argCount, varCount;
     F::AccessList *args, *vars;
 
-    enum Kind { ARGUMENT, VARIABLE };
+    F::Frame* lastFrame;
+
+    F::Access* InFrame( int offset ) {
+        return new F::InFrameAccess( offset );
+    }  // namespace F
+
+    TEMP::Temp* framePointer() {
+        static TEMP::Temp* fp = nullptr;
+        if ( !fp ) {
+            fp = TEMP::Temp::NewTemp();
+        }
+        return fp;
+    }
 
     inline void putInfo( F::Frame::Kind kind, int count, F::AccessList* list ) {
         switch ( kind ) {
