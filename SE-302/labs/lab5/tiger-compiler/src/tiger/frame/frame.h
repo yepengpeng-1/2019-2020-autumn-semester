@@ -74,8 +74,10 @@ public:
         std::cout << "framePointer requested" << std::endl;
         static TEMP::Temp* fp = nullptr;
         if ( !fp ) {
+            std::cout << "gonna return new framePointer" << std::endl;
             fp = TEMP::Temp::NewTemp();
         }
+        std::cout << "gonna return existed framePointer" << std::endl;
         return fp;
     }
 

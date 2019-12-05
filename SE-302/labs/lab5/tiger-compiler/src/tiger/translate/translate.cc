@@ -247,15 +247,19 @@ static TY::FieldList* make_fieldlist_from_e( TEnvType tenv, A::EFieldList* field
 namespace A {
 
 T::Exp* getExp( F::Access* acc, T::Exp* framePtr ) {
+    std::cout << "called getExp ";
     switch ( acc->kind ) {
     case F::Access::Kind::INFRAME: {
+        std::cout << "with a INFRAME access" << std::endl;
         return new T::MemExp( new T::BinopExp( T::BinOp::PLUS_OP, framePtr, new T::ConstExp( reinterpret_cast< F::InFrameAccess* >( acc )->offset ) ) );
     }
 
     case F::Access::Kind::INREG: {
+        std::cout << "with a INREG access" << std::endl;
         return new T::TempExp( reinterpret_cast< F::InRegAccess* >( acc )->reg );
     }
     }
+    std::cout << "with nothing! dead" << std::endl;
     assert( 0 );
 }
 
@@ -282,8 +286,26 @@ TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
         accessList = accessList->tail;
     }
 
+    accessList = level->frame->args;
+    while ( accessList ) {
+        auto access = accessList->head;
+
+        if ( access->kind == F::Access::Kind::INFRAME ) {
+            if ( access->sym == this->sym->Name() ) {
+                accessObj = access;
+                break;
+            }
+        }
+        else if ( access->kind == F::Access::Kind::INREG ) {
+            // not going to do this in lab5
+        }
+
+        accessList = accessList->tail;
+    }
+
     if ( var && var->kind == E::EnvEntry::Kind::VAR ) {
         auto exp = new TR::ExExp( getExp( accessObj, new T::TempExp( F::Frame::framePointer() ) ) );
+        std::cout << "successfully generated exp " << exp << std::endl;
         return TR::ExpAndTy( exp, ( ( E::VarEntry* )var )->ty );
     }
 
@@ -497,7 +519,7 @@ TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
 }
 
 TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    std::cout << "Entered IfExp::Translate. sign: " << std::endl;
+    std::cout << "Entered IfExp::Translate" << std::endl;
     if ( this->test->Translate( venv, tenv, level, label ).ty->kind != TY::Ty::Kind::INT ) {
         return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
     }
@@ -577,10 +599,12 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
 
     FunDecList* func = this->functions;
     while ( func ) {
+        // std::cout << "Analyse FunDecList. this time, func = " << func << std::endl;
         auto head = func->head;
-        if ( venv->Look( head->name ) ) {
-            std::cout << "two functions have the same name" << std::endl;
-        }
+        std::cout << "To-declare function name: " << head->name->Name() << std::endl;
+        // if ( venv->Look( head->name ) ) {
+        //     std::cout << "two functions have the same name" << std::endl;
+        // }
         if ( head->result ) {
             venv->Enter( head->name, new E::FunEntry( TR::make_formal_tylist( tenv, head->params ), tenv->Look( head->result ) ) );
         }
