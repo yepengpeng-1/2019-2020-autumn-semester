@@ -71,14 +71,25 @@ public:
     }  // namespace F
 
     static TEMP::Temp* framePointer() {
-        std::cout << "framePointer requested" << std::endl;
+        std::cout << "framePointer register requested" << std::endl;
         static TEMP::Temp* fp = nullptr;
         if ( !fp ) {
-            std::cout << "gonna return new framePointer" << std::endl;
+            std::cout << "gonna return new framePointer register" << std::endl;
             fp = TEMP::Temp::NewTemp();
         }
-        std::cout << "gonna return existed framePointer" << std::endl;
+        std::cout << "gonna return existed framePointer register" << std::endl;
         return fp;
+    }
+
+    static TEMP::Temp* returnValue() {
+        std::cout << "returnValue register requested" << std::endl;
+        static TEMP::Temp* rp = nullptr;
+        if ( !rp ) {
+            std::cout << "gonna return new returnValue register" << std::endl;
+            rp = TEMP::Temp::NewTemp();
+        }
+        std::cout << "gonna return existed returnValue register" << std::endl;
+        return rp;
     }
 
     inline void putInfo( F::Frame::Kind kind, int count, F::AccessList* list ) {
@@ -132,7 +143,7 @@ public:
     FragList( Frag* head, FragList* tail ) : head( head ), tail( tail ) {}
 };
 
-Frame* newFrame( TEMP::Label name, U::BoolList* formals );
+// Frame* newFrame( TEMP::Label name, U::BoolList* formals );
 
 }  // namespace F
 

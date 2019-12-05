@@ -14,7 +14,26 @@
 using VEnvType = S::Table< E::EnvEntry >*;
 using TEnvType = S::Table< TY::Ty >*;
 
-namespace {}  // namespace
+namespace FRM {
+F::Frame* newFrame( TEMP::Label name, U::BoolList* formals, F::Frame* lastFrame ) {
+    std::cout << "called newFrame" << std::endl;
+    F::AccessList* formalAcList = nullptr;
+    int            argCount     = 0;
+    while ( formals->tail ) {
+        ++argCount;
+        auto access = new F::InFrameAccess( /* offset: */ argCount * F::wordSize );
+        std::cout << "created new InFrameAccess. sym: " << access->sym << std::endl;
+        formalAcList = new F::AccessList( access, formalAcList );
+        formals      = formals->tail;
+    }
+
+    F::Frame* f = new F::Frame( name );
+    f->putInfo( F::Frame::Kind::ARGUMENT, argCount, formalAcList );
+    f->putInfo( F::Frame::Kind::VARIABLE, 0, nullptr );
+    f->lastFrame = lastFrame;
+    return f;
+}
+}  // namespace FRM
 
 namespace TR {
 
@@ -45,10 +64,10 @@ public:
         return nullptr;
     }
 
-    static Level* NewLevel( Level* parent, TEMP::Label* name, U::BoolList* formals ) {
+    Level* NewLevel( Level* parent, TEMP::Label* name, U::BoolList* formals ) {
         std::cout << "called new level. label: " << name->Name() << std::endl;
-        auto frame = F::newFrame( *name, new U::BoolList( /* extra escaping param for static link */ true, formals ) );
-        return new Level( frame, parent );
+        auto frame = FRM::newFrame( *name, new U::BoolList( /* extra escaping param for static link */ true, formals ), this->frame );
+        return new Level( frame, this );
     }
 };
 
@@ -247,7 +266,7 @@ static TY::FieldList* make_fieldlist_from_e( TEnvType tenv, A::EFieldList* field
 namespace A {
 
 T::Exp* getExp( F::Access* acc, T::Exp* framePtr ) {
-    std::cout << "called getExp ";
+    std::cout << "called getExp " << std::endl;
     switch ( acc->kind ) {
     case F::Access::Kind::INFRAME: {
         std::cout << "with a INFRAME access" << std::endl;
@@ -260,37 +279,51 @@ T::Exp* getExp( F::Access* acc, T::Exp* framePtr ) {
     }
     }
     std::cout << "with nothing! dead" << std::endl;
-    assert( 0 );
 }
 
 TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    std::cout << "Entered SimpleVar::Translate." << std::endl;
+    std::cout << "Entered SimpleVar::Translate. this level: " << level << "; parent level: " << level->parent << std::endl;
     E::EnvEntry* var = venv->Look( this->sym );
 
-    auto accessList = level->frame->vars;
+    F::Access* accessObj    = nullptr;
+    auto       currentLevel = level;
 
-    F::Access* accessObj = nullptr;
-    while ( accessList ) {
-        auto access = accessList->head;
-
-        if ( access->kind == F::Access::Kind::INFRAME ) {
-            if ( access->sym == this->sym->Name() ) {
-                accessObj = access;
-                break;
+    while ( accessObj == nullptr ) {
+        auto accessList = currentLevel->frame->vars;
+        while ( accessList ) {
+            auto access = accessList->head;
+            if ( access->kind == F::Access::Kind::INFRAME ) {
+                std::cout << "  compare access sym " << access->sym << ", " << this->sym->Name() << std::endl;
+                if ( access->sym == this->sym->Name() ) {
+                    accessObj = access;
+                    break;
+                }
             }
-        }
-        else if ( access->kind == F::Access::Kind::INREG ) {
-            // not going to do this in lab5
-        }
+            else if ( access->kind == F::Access::Kind::INREG ) {
+                // not going to do this in lab5
+            }
 
-        accessList = accessList->tail;
+            accessList = accessList->tail;
+        }
+        std::cout << "accessList traverse over" << std::endl;
+        if ( accessObj ) {
+            std::cout << "Already found~" << std::endl;
+            break;
+        }
+        if ( currentLevel->parent == nullptr ) {
+            std::cout << "No... I can't find anything anywhere. " << std::endl;
+            break;
+        }
+        std::cout << "I'll go one layer above. " << std::endl;
+        currentLevel = currentLevel->parent;
     }
 
-    accessList = level->frame->args;
+    auto accessList = level->frame->args;
     while ( accessList ) {
         auto access = accessList->head;
 
         if ( access->kind == F::Access::Kind::INFRAME ) {
+            std::cout << "  compare access sym " << access->sym << ", " << this->sym->Name() << std::endl;
             if ( access->sym == this->sym->Name() ) {
                 accessObj = access;
                 break;
@@ -304,7 +337,12 @@ TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
     }
 
     if ( var && var->kind == E::EnvEntry::Kind::VAR ) {
-        auto exp = new TR::ExExp( getExp( accessObj, new T::TempExp( F::Frame::framePointer() ) ) );
+        auto tempExp = new T::TempExp( F::Frame::framePointer() );
+        std::cout << "successfully build tempExp" << std::endl;
+        std::cout << "going to call getExp with access: " << accessObj << std::endl;
+        auto targetExp = A::getExp( accessObj, tempExp );
+        std::cout << "successfully build targetExp " << targetExp << std::endl;
+        auto exp = new TR::ExExp( targetExp );
         std::cout << "successfully generated exp " << exp << std::endl;
         return TR::ExpAndTy( exp, ( ( E::VarEntry* )var )->ty );
     }
@@ -435,7 +473,16 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
 
     auto result = ( ( E::FunEntry* )fun )->result;
     std::cout << "Call operation returns an " << result->kind << std::endl;
-    return TR::ExpAndTy( nullptr, result );
+
+    auto        rawExps = arg;
+    T::ExpList* finExps = nullptr;
+    while ( rawExps ) {
+        finExps = new T::ExpList( rawExps->head->Translate( venv, tenv, level, label ).exp->UnEx(), finExps );
+        rawExps = rawExps->tail;
+    }
+
+    auto finExp = new TR::ExExp( new T::CallExp( new T::NameExp( TEMP::NamedLabel( this->func->Name() ) ), finExps ) );
+    return TR::ExpAndTy( finExp, result );
 }
 
 TR::ExpAndTy OpExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -605,6 +652,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         // if ( venv->Look( head->name ) ) {
         //     std::cout << "two functions have the same name" << std::endl;
         // }
+
         if ( head->result ) {
             venv->Enter( head->name, new E::FunEntry( TR::make_formal_tylist( tenv, head->params ), tenv->Look( head->result ) ) );
         }
@@ -616,14 +664,21 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         }
         auto   field           = head->params;
         size_t inputParamCount = 0;
+
+        auto blist = new U::BoolList( true, nullptr );
         while ( field ) {
             auto fh = field->head;
-            venv->Enter( fh->name, new E::VarEntry( tenv->Look( fh->typ ) ) );
+            // venv->Enter( fh->name, new E::VarEntry( tenv->Look( fh->typ ) ) );
             std::cout << "constructing formal: " << fh->name->Name() << ", type: " << fh->typ->Name() << ", id: " << tenv->Look( fh->typ ) << std::endl;
-            field = field->tail;
+            field       = field->tail;
+            blist->tail = new U::BoolList( true, nullptr );
+            blist       = blist->tail;
+            std::cout << " param +1" << std::endl;
             ++inputParamCount;
         }
-        auto retType = head->body->Translate( venv, tenv, level, label ).ty;
+        auto newlabel      = TEMP::NamedLabel( head->name->Name() );
+        auto bodyTranslate = head->body->Translate( venv, tenv, level->NewLevel( level, newlabel, blist ), newlabel );
+        auto retType       = bodyTranslate.ty;
 
         field = head->params;
         while ( inputParamCount > 0 ) {
@@ -638,9 +693,10 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         }
         std::cout << "head->result: " << head->result << ", retType->kind: " << retType->kind << std::endl;
 
+        // Tr_Nx( T_Move( T_Temp( F_RV() ), unEx( body ) ) );
+        new TR::NxExp( new T::MoveStm( new T::TempExp( F::Frame::returnValue() ), bodyTranslate.exp->UnEx() ) );
         func = func->tail;
     }
-    return new TR::NxExp( nullptr );
 }
 
 TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
