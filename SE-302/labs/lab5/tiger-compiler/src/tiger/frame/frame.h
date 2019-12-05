@@ -1,6 +1,7 @@
 #ifndef TIGER_FRAME_FRAME_H_
 #define TIGER_FRAME_FRAME_H_
 
+#include <iostream>
 #include <string>
 
 #include "tiger/codegen/assem.h"
@@ -20,7 +21,7 @@ public:
 
     // Hints: You may add interface like
     // virtual T::Exp* ToExp( T::Exp* framePtr ) const = 0;
-    T::Exp* ToExp( T::Exp* framePtr ) const {};
+    virtual T::Exp* ToExp( T::Exp* framePtr ) const = 0;
 };
 
 class InFrameAccess : public Access {
@@ -30,6 +31,7 @@ public:
     InFrameAccess( int offset ) : Access( INFRAME ), offset( offset ) {}
 
     T::Exp* ToExp( T::Exp* framePtr ) const {
+        std::cout << "ToExp called" << std::endl;
         return new T::MemExp( new T::BinopExp( T::BinOp::PLUS_OP, framePtr, new T::ConstExp( offset ) ) );
     };
 };
@@ -67,6 +69,7 @@ public:
     }  // namespace F
 
     TEMP::Temp* framePointer() {
+        std::cout << "framePointer requested" << std::endl;
         static TEMP::Temp* fp = nullptr;
         if ( !fp ) {
             fp = TEMP::Temp::NewTemp();

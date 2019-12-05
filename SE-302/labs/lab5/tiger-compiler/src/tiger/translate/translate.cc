@@ -96,9 +96,11 @@ public:
     ExExp( T::Exp* exp ) : Exp( EX ), exp( exp ) {}
 
     T::Exp* UnEx() const override {
+        std::cout << "Ex's UnEx() called" << std::endl;
         return this->exp;
     }
     T::Stm* UnNx() const override {
+        std::cout << "Ex's UnNx() called" << std::endl;
         // special condition: if the second part of the eseq is constant, then let's just put the first part as Statement.
         if ( this->exp->kind == T::Exp::Kind::ESEQ && reinterpret_cast< T::EseqExp* >( this->exp )->exp->kind == T::Exp::Kind::CONST ) {
             return reinterpret_cast< T::EseqExp* >( this->exp )->stm;
@@ -107,6 +109,7 @@ public:
         return new T::ExpStm( this->exp );
     }
     Cx UnCx() const override {
+        std::cout << "Ex's UnCx() called" << std::endl;
         Cx cx = Cx( nullptr, nullptr, nullptr );
         return cx;
     }
@@ -119,12 +122,15 @@ public:
     NxExp( T::Stm* stm ) : Exp( NX ), stm( stm ) {}
 
     T::Exp* UnEx() const override {
+        std::cout << "Nx's UnEx() called" << std::endl;
         return nullptr;
     }
     T::Stm* UnNx() const override {
+        std::cout << "Nx's UnNx() called" << std::endl;
         return nullptr;
     }
     Cx UnCx() const override {
+        std::cout << "Nx's UnCx() called" << std::endl;
         Cx cx = Cx( nullptr, nullptr, nullptr );
         return cx;
     }
@@ -138,12 +144,15 @@ public:
     CxExp( PatchList* trues, PatchList* falses, T::Stm* stm ) : Exp( CX ), cx( trues, falses, stm ) {}
 
     T::Exp* UnEx() const override {
+        std::cout << "Cx's UnEx() called" << std::endl;
         return nullptr;
     }
     T::Stm* UnNx() const override {
+        std::cout << "Cx's UnNx() called" << std::endl;
         return nullptr;
     }
     Cx UnCx() const override {
+        std::cout << "Cx's UnCx() called" << std::endl;
         Cx cx = Cx( nullptr, nullptr, nullptr );
         return cx;
     }
@@ -235,17 +244,31 @@ static TY::FieldList* make_fieldlist_from_e( TEnvType tenv, A::EFieldList* field
 
 namespace A {
 
+T::Exp* getExp( F::Access* acc, T::Exp* framePtr ) {
+    switch ( acc->kind ) {
+    case F::Access::Kind::INFRAME: {
+        return new T::MemExp( new T::BinopExp( T::BinOp::PLUS_OP, framePtr, new T::ConstExp( reinterpret_cast< F::InFrameAccess* >( acc )->offset ) ) );
+    }
+
+    case F::Access::Kind::INREG: {
+        return new T::TempExp( reinterpret_cast< F::InRegAccess* >( acc )->reg );
+    }
+    }
+    assert( 0 );
+}
+
 TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered SimpleVar::Translate." << std::endl;
     E::EnvEntry* var = venv->Look( this->sym );
+
     if ( var && var->kind == E::EnvEntry::Kind::VAR ) {
+        auto exp = new TR::ExExp();
         return TR::ExpAndTy( nullptr, ( ( E::VarEntry* )var )->ty );
     }
 
     std::cout << "undefined variable " + this->sym->Name() << std::endl;
 
-    auto exp = new TR::ExExp( new T::MemExp( new T::BinopExp( T::PLUS_OP, nullptr, nullptr ) ) );
-    return TR::ExpAndTy( exp, TY::VoidTy::Instance() );
+    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 
     // return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
@@ -440,7 +463,7 @@ TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
     }
     else if ( varKind.ty->kind == TY::Ty::Kind::RECORD ) {
         if ( !expT.ty->IsSameType( varKind.ty ) ) {
-            std::cout << "type mismatch" << std::endl;
+            std::cout << "type mismatch: " << expT.ty << " and " << varKind.ty << std::endl;
         }
     }
     else {
@@ -518,11 +541,9 @@ TR::ExpAndTy LetExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
 
 TR::ExpAndTy ArrayExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered ArrayExp::Translate." << std::endl;
+    auto rightTsl = this->init->Translate( venv, tenv, level, label );
 
-    if ( !tenv->Look( this->typ )->IsSameType( this->init->Translate( venv, tenv, level, label ).ty ) ) {
-        std::cout << "type mismatch" << std::endl;
-    }
-    return TR::ExpAndTy( nullptr, new TY::ArrayTy( tenv->Look( this->typ ) ) );
+    return TR::ExpAndTy( nullptr, tenv->Look( this->typ ) );
 }
 
 TR::ExpAndTy VoidExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -574,7 +595,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
 
         func = func->tail;
     }
-    return nullptr;
+    return new TR::NxExp( nullptr );
 }
 
 TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -603,9 +624,22 @@ TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* t
         venv->Enter( this->var, new E::VarEntry( initT.ty ) );
     }
 
-    TR::Access* new_acc = TR::AllocLocal( level, true );
-    std::cout << "AllocLocal fine" << std::endl;
-    return new TR::NxExp( new T::MoveStm( new_acc->access->ToExp( new T::TempExp( level->frame->framePointer() ) ), initT.exp->UnEx() ) );
+    if ( initT.ty->kind == TY::Ty::Kind::ARRAY && this->init->kind == A::Exp::Kind::ARRAY ) {
+        std::cout << "VarDec a new Array type" << std::endl;
+        auto arrayExp = ( reinterpret_cast< ArrayExp* >( this->init ) );
+        auto initExp  = arrayExp->init->Translate( venv, tenv, level, label ).exp->UnEx();
+        auto sizeExp  = arrayExp->size->Translate( venv, tenv, level, label ).exp->UnEx();
+        return new TR::ExExp( new T::CallExp( new T::NameExp( TEMP::NamedLabel( "initArray" ) ), new T::ExpList( sizeExp, new T::ExpList( initExp, nullptr ) ) ) );
+    }
+    else if ( initT.ty->kind == TY::Ty::Kind::RECORD ) {
+    }
+    else {
+        TR::Access* new_acc = TR::AllocLocal( level, true );
+        std::cout << "AllocLocal fine" << std::endl;
+        auto resultExp = new TR::NxExp( new T::MoveStm( new_acc->access->ToExp( new T::TempExp( level->frame->framePointer() ) ), initT.exp->UnEx() ) );
+        std::cout << "successfully generated resultExp" << resultExp << std::endl;
+        return resultExp;
+    }
     // Tr_Nx(T_Move(Tr_simpleVar(new_acc, level), unEx(e.exp)));
 }
 
@@ -674,7 +708,7 @@ TR::Exp* TypeDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* 
         std::cout << "declared type " << nt->name->Name() << ", id: " << tenv->Look( nt->name ) << std::endl;
     }
 
-    return nullptr;
+    return new TR::NxExp( nullptr );
 }
 
 TY::Ty* NameTy::Translate( S::Table< TY::Ty >* tenv ) const {
