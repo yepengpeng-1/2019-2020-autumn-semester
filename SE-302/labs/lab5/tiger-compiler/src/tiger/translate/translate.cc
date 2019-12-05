@@ -318,6 +318,8 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         std::cout << "undefined function " + this->func->Name() << std::endl;
         return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
     }
+
+    std::cout << "found function " + this->func->Name() << std::endl;
     auto        formals = ( ( E::FunEntry* )fun )->formals;
     A::ExpList* arg     = this->args;
     TY::Ty*     retType;
@@ -326,6 +328,7 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
             std::cout << "comparing arg->head and formals->head" << std::endl;
             if ( !arg->head->Translate( venv, tenv, level, label ).ty->IsSameType( formals->head ) ) {
                 std::cout << "para type mismatch" << std::endl;
+                std::cout << "ty1: " << arg->head->Translate( venv, tenv, level, label ).ty << "; ty2:" << formals->head << std::endl;
                 break;
             }
             arg     = arg->tail;
@@ -391,7 +394,7 @@ TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
     if ( !recT ) {
         std::cout << "undefined type rectype" << std::endl;
     }
-    return TR::ExpAndTy( nullptr, new TY::RecordTy( make_fieldlist_from_e( tenv, this->fields, level, label ) ) );
+    return TR::ExpAndTy( nullptr, recT /*new TY::RecordTy( make_fieldlist_from_e( tenv, this->fields, level, label ) ) */ );
 }
 
 TR::ExpAndTy SeqExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -528,7 +531,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         while ( field ) {
             auto fh = field->head;
             venv->Enter( fh->name, new E::VarEntry( tenv->Look( fh->typ ) ) );
-            std::cout << "constructing formal: " << fh->name->Name() << ", type: " << fh->typ->Name() << std::endl;
+            std::cout << "constructing formal: " << fh->name->Name() << ", type: " << fh->typ->Name() << ", id: " << tenv->Look( fh->typ ) << std::endl;
             field = field->tail;
             ++inputParamCount;
         }
@@ -624,7 +627,7 @@ TR::Exp* TypeDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* 
                 queue.push_back( nt );
                 unmovedTimes += 1;
             }
-            std::cout << "declared type " << nt->name->Name() << std::endl;
+            std::cout << "declared type " << nt->name->Name() << ", id: " << tenv->Look( nt->name ) << std::endl;
         }
         if ( queue.size() ) {
             std::cout << "illegal type cycle" << std::endl;
@@ -642,7 +645,7 @@ TR::Exp* TypeDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* 
         else {
             std::cout << " undefined type " << std::endl;
         }
-        std::cout << "declared type " << nt->name->Name() << std::endl;
+        std::cout << "declared type " << nt->name->Name() << ", id: " << tenv->Look( nt->name ) << std::endl;
     }
 
     return nullptr;
@@ -652,7 +655,7 @@ TY::Ty* NameTy::Translate( S::Table< TY::Ty >* tenv ) const {
     std::cout << "Entered NameTy::Translate." << std::endl;
     auto ty = tenv->Look( this->name );
     if ( ty ) {
-        return ty;
+        return new TY::NameTy( this->name, ty );
     }
     else {
         std::cout << " undefined type " + this->name->Name() << std::endl;
@@ -666,7 +669,7 @@ TY::Ty* RecordTy::Translate( S::Table< TY::Ty >* tenv ) const {
 
 TY::Ty* ArrayTy::Translate( S::Table< TY::Ty >* tenv ) const {
     std::cout << "Entered ArrayTy::Translate." << std::endl;
-    return tenv->Look( this->array );
+    return new TY::ArrayTy( tenv->Look( this->array ) );
 }
 
 }  // namespace A
