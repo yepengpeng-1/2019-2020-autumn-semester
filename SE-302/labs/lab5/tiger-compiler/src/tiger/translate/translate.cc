@@ -246,7 +246,8 @@ TEMP::Label* lastLoop( TEMP::Label* set = nullptr ) {
 
 F::FragList* TranslateProgram( A::Exp* root ) {
     std::cout << "Called TranslateProgram(A::Exp* root)." << std::endl;
-    root->Translate( E::BaseVEnv(), E::BaseTEnv(), Outermost(), TEMP::NewLabel() );
+    auto totalProgram = root->Translate( E::BaseVEnv(), E::BaseTEnv(), Outermost(), TEMP::NewLabel() );
+    addFragment(new F::ProcFrag(totalProgram.exp->UnNx(), Outermost()->frame));
     std::cout << " ~~~~ Completed Translation ~~~~" << std::endl;
     return addFragment();
 }
