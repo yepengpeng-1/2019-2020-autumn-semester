@@ -80,6 +80,11 @@ public:
     PatchList( TEMP::Label** head, PatchList* tail ) : head( head ), tail( tail ) {}
 };
 
+void do_patch( PatchList* tList, TEMP::Label* label ) {
+    for ( ; tList; tList = tList->tail )
+        *( tList->head ) = label;
+}
+
 class Cx {
 public:
     PatchList* trues;
@@ -131,8 +136,10 @@ public:
     }
     Cx UnCx() const override {
         std::cout << "Ex's UnCx() called" << std::endl;
-        Cx cx = Cx( nullptr, nullptr, nullptr );
-        return cx;
+        auto stm    = new T::CjumpStm( T::NE_OP, this->exp, new T::ConstExp( 0 ), nullptr, nullptr );
+        auto trues  = new PatchList( &stm->true_label, nullptr );
+        auto falses = new PatchList( &stm->true_label, nullptr );
+        return TR::Cx( trues, falses, stm );
     }
 };
 
@@ -144,16 +151,15 @@ public:
 
     T::Exp* UnEx() const override {
         std::cout << "Nx's UnEx() called" << std::endl;
-        return nullptr;
+        return new T::EseqExp( this->stm, new T::ConstExp( 0 ) );
     }
     T::Stm* UnNx() const override {
-        std::cout << "Nx's UnNx() called" << std::endl;
-        return nullptr;
+        return this->stm;
     }
     Cx UnCx() const override {
-        std::cout << "Nx's UnCx() called" << std::endl;
-        Cx cx = Cx( nullptr, nullptr, nullptr );
-        return cx;
+        std::cout << "!![unpermitted]!!\n Nx's UnCx() called" << std::endl;
+        assert( 0 );
+        TR::Cx( nullptr, nullptr, nullptr );
     }
 };
 
@@ -166,23 +172,24 @@ public:
 
     T::Exp* UnEx() const override {
         std::cout << "Cx's UnEx() called" << std::endl;
-        return nullptr;
+        auto r = TEMP::Temp::NewTemp();
+        auto t = TEMP::NewLabel();
+        auto f = TEMP::NewLabel();
+        TR::do_patch( this->cx.trues, t );
+        TR::do_patch( this->cx.falses, f );
+        return new T::EseqExp( new T::MoveStm( new T::TempExp( r ), new T::ConstExp( 1 ) ),
+                               new T::EseqExp( this->cx.stm, new T::EseqExp( new T::LabelStm( f ), new T::EseqExp( new T::MoveStm( new T::TempExp( r ), new T::ConstExp( 0 ) ),
+                                                                                                                   new T::EseqExp( new T::LabelStm( t ), new T::TempExp( r ) ) ) ) ) );
     }
     T::Stm* UnNx() const override {
         std::cout << "Cx's UnNx() called" << std::endl;
-        return nullptr;
+        return this->cx.stm;
     }
     Cx UnCx() const override {
         std::cout << "Cx's UnCx() called" << std::endl;
-        Cx cx = Cx( nullptr, nullptr, nullptr );
-        return cx;
+        return this->cx;
     }
 };
-
-void do_patch( PatchList* tList, TEMP::Label* label ) {
-    for ( ; tList; tList = tList->tail )
-        *( tList->head ) = label;
-}
 
 static Access* AllocLocal( Level* level, bool escape, std::string sym ) {
     std::cout << "Entered AllocLocal. escape? " << escape << std::endl;
@@ -664,23 +671,59 @@ TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
 
 TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered IfExp::Translate" << std::endl;
-    if ( this->test->Translate( venv, tenv, level, label ).ty->kind != TY::Ty::Kind::INT ) {
+
+    auto testT = this->test->Translate( venv, tenv, level, label );
+    if ( testT.ty->kind != TY::Ty::Kind::INT ) {
         return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
     }
+    // randomly initialize anyway
+    TR::ExpAndTy thenT( nullptr, nullptr ), elseT( nullptr, nullptr );
+    TY::Ty*      ifReturnType = nullptr;
 
     if ( !this->elsee ) {
-        if ( this->then->Translate( venv, tenv, level, label ).ty->kind != TY::Ty::Kind::VOID ) {
+        thenT = this->then->Translate( venv, tenv, level, label );
+        if ( thenT.ty->kind != TY::Ty::Kind::VOID ) {
             std::cout << "if-then exp's body must produce no value" << std::endl;
+            assert( 0 );
         }
-        return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+        ifReturnType = nullptr;
     }
     else {
-        auto thenT = this->then->Translate( venv, tenv, level, label );
-        auto elseT = this->elsee->Translate( venv, tenv, level, label );
+        thenT = this->then->Translate( venv, tenv, level, label );
+        elseT = this->elsee->Translate( venv, tenv, level, label );
         if ( !thenT.ty->IsSameType( elseT.ty ) ) {
             std::cout << "then exp and else exp type mismatch" << std::endl;
+            assert( 0 );
         }
-        return thenT;
+        ifReturnType = elseT.ty;
+    }
+
+    auto t = TEMP::NewLabel(), f = TEMP::NewLabel(), done = TEMP::NewLabel();
+    if ( ifReturnType ) {
+        auto access = TR::AllocLocal( level, true, "__RETURN__" );
+        getExp( access->access, new T::TempExp( level->frame->framePointer() ) );
+    }
+    auto cx = testT.exp->UnCx();
+    TR::do_patch( cx.trues, t );
+    TR::do_patch( cx.falses, f );
+
+    TR::Exp* finExp;
+    if ( ifReturnType ) {
+        /* if exp has a return value */
+        auto seq = new T::SeqStm(
+            cx.stm, new T::SeqStm( new T::LabelStm( t ),
+                                   new T::SeqStm( new T::MoveStm( nullptr, thenT.exp->UnEx() ),
+                                                  new T::SeqStm( new T::JumpStm( new T::NameExp( done ), new TEMP::LabelList( done, nullptr ) ),
+                                                                 new T::SeqStm( new T::LabelStm( f ), new T::SeqStm( new T::MoveStm( nullptr, elseT.exp->UnEx() ), new T::LabelStm( done ) ) ) ) ) ) );
+
+        finExp = new TR::ExExp( new T::EseqExp( seq, nullptr ) );
+
+        return TR::ExpAndTy( finExp, ifReturnType );
+    }
+    else {
+        /* if exp has no return value */
+        finExp = new TR::NxExp( new T::SeqStm( cx.stm, new T::SeqStm( new T::LabelStm( t ), new T::SeqStm( thenT.exp->UnNx(), new T::LabelStm( f ) ) ) ) );
+        return TR::ExpAndTy(finExp, TY::VoidTy::Instance());
     }
 }
 
@@ -820,7 +863,9 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         auto newlabel = TEMP::NamedLabel( head->name->Name() );
         std::cout << "I'm entering the evil part of translate, which didn't give me a good exp " << std::endl;
         auto bodyTranslate = head->body->Translate( venv, tenv, level->NewLevel( level, newlabel, originBlist ), newlabel );
-        auto retType       = bodyTranslate.ty;
+        std::cout << "bodyTranslate success. which .exp = " << bodyTranslate.exp << std::endl;
+        ;
+        auto retType = bodyTranslate.ty;
 
         field = head->params;
         while ( inputParamCount > 0 ) {
