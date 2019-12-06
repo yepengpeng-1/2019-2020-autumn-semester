@@ -19,7 +19,7 @@ F::Frame* newFrame( TEMP::Label name, U::BoolList* formals, F::Frame* lastFrame 
     std::cout << "called newFrame" << std::endl;
     F::AccessList* formalAcList = nullptr;
     int            argCount     = 0;
-    while ( formals->tail ) {
+    while ( formals ) {
         ++argCount;
         auto access = new F::InFrameAccess( /* offset: */ argCount * F::wordSize );
         access->sym = formals->symbol;
@@ -67,7 +67,7 @@ public:
 
     Level* NewLevel( Level* parent, TEMP::Label* name, U::BoolList* formals ) {
         std::cout << "called new level. label: " << name->Name() << std::endl;
-        auto frame = FRM::newFrame( *name, new U::BoolList( /* extra escaping param for static link */ true, name->Name(), formals ), this->frame );
+        auto frame = FRM::newFrame( *name, formals, this->frame );
         return new Level( frame, this );
     }
 };
@@ -327,6 +327,7 @@ TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
             std::cout << "  compare access sym " << access->sym << ", " << this->sym->Name() << std::endl;
             if ( access->sym == this->sym->Name() ) {
                 accessObj = access;
+                std::cout << "Found it!" << std::endl;
                 break;
             }
         }
@@ -337,7 +338,7 @@ TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
         accessList = accessList->tail;
     }
 
-    if ( var && var->kind == E::EnvEntry::Kind::VAR ) {
+    if ( true || var && var->kind == E::EnvEntry::Kind::VAR ) {
         auto tempExp = new T::TempExp( F::Frame::framePointer() );
         std::cout << "successfully build tempExp" << std::endl;
         std::cout << "going to call getExp with access: " << accessObj << std::endl;
@@ -396,8 +397,12 @@ TR::ExpAndTy SubscriptVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< T
     std::cout << "before we call recEnt->ty->kind" << std::endl;
     std::cout << recEnt->kind << std::endl;
     std::cout << "recEnt->ty->kind = " << ty_names[ recEnt->kind ] << std::endl;
+
     if ( recEnt->kind == TY::Ty::Kind::ARRAY ) {
-        return TR::ExpAndTy( nullptr, ( ( TY::ArrayTy* )( recEnt ) )->ty );
+        auto indexT = this->subscript->Translate( venv, tenv, level, label );
+        std::cout << "Translated indexT, which .exp = " << indexT.exp << std::endl;
+        auto subscriptExp = new TR::ExExp( new T::MemExp( new T::BinopExp( T::PLUS_OP, recT.exp->UnEx(), new T::BinopExp( T::MUL_OP, indexT.exp->UnEx(), new T::ConstExp( F::wordSize ) ) ) ) );
+        return TR::ExpAndTy( subscriptExp, ( ( TY::ArrayTy* )( recEnt ) )->ty );
     }
 }
 
@@ -493,38 +498,107 @@ TR::ExpAndTy OpExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >
     std::string op_names[] = { "PLUS_OP", "MINUS_OP", "TIMES_OP", "DIVIDE_OP", "EQ_OP", "NEQ_OP", "LT_OP", "LE_OP", "GT_OP", "GE_OP" };
     std::cout << "Entered OpExp::Translate. OpCode: " << op_names[ this->oper ] << std::endl;
 
-    auto leftT  = left->Translate( venv, tenv, level, label );
+    auto leftT = left->Translate( venv, tenv, level, label );
+    std::cout << "Analyzed leftT, which.exp = " << leftT.exp << std::endl;
     auto rightT = right->Translate( venv, tenv, level, label );
+    std::cout << "Analyzed rightT, which.exp = " << rightT.exp << std::endl;
+    T::BinOp op;
+    T::RelOp rop;
+    bool     isBinOpButNotRelOp = false;
+    switch ( this->oper ) {
+        // this->oper:
+        // PLUS_OP, MINUS_OP, TIMES_OP, DIVIDE_OP, EQ_OP, NEQ_OP, LT_OP, LE_OP, GT_OP, GE_OP
+        //
+        // T::BinOp:
+        // PLUS_OP, MINUS_OP, MUL_OP, DIV_OP, AND_OP, OR_OP, LSHIFT_OP, RSHIFT_OP, ARSHIFT_OP, XOR_OP
+        // T::RelOp
+        // EQ_OP, NE_OP, LT_OP, GT_OP, LE_OP, GE_OP, ULT_OP, ULE_OP, UGT_OP, UGE_OP
+
+    case A::PLUS_OP:
+        op                 = T::PLUS_OP;
+        isBinOpButNotRelOp = true;
+        break;
+    case A::MINUS_OP:
+        op                 = T::MINUS_OP;
+        isBinOpButNotRelOp = true;
+        break;
+    case A::TIMES_OP:
+        op                 = T::MUL_OP;
+        isBinOpButNotRelOp = true;
+        break;
+    case A::DIVIDE_OP:
+        op                 = T::DIV_OP;
+        isBinOpButNotRelOp = true;
+        break;
+    case A::EQ_OP:
+        rop                = T::EQ_OP;
+        isBinOpButNotRelOp = false;
+        break;
+    case A::NEQ_OP:
+        rop                = T::NE_OP;
+        isBinOpButNotRelOp = false;
+        break;
+    case A::LT_OP:
+        rop                = T::LT_OP;
+        isBinOpButNotRelOp = false;
+        break;
+    case A::LE_OP:
+        rop                = T::LE_OP;
+        isBinOpButNotRelOp = false;
+        break;
+    case A::GT_OP:
+        rop                = T::GT_OP;
+        isBinOpButNotRelOp = false;
+        break;
+    case A::GE_OP:
+        rop                = T::GE_OP;
+        isBinOpButNotRelOp = false;
+        break;
+    default:
+        std::cout << "! invalid oper " << this->oper << std::endl;
+        // 去死吧
+        assert( 0 );
+    }
+    TR::Exp* finExp;
+    if ( isBinOpButNotRelOp ) {
+        finExp = new TR::ExExp( new T::BinopExp( op, leftT.exp->UnEx(), rightT.exp->UnEx() ) );
+    }
+    else {
+        auto stm    = new T::CjumpStm( rop, leftT.exp->UnEx(), rightT.exp->UnEx(), nullptr, nullptr );
+        auto trues  = new TR::PatchList( &stm->true_label, nullptr );
+        auto falses = new TR::PatchList( &stm->false_label, nullptr );
+        finExp      = new TR::CxExp( TR::Cx( trues, falses, stm ) );
+    }
     std::cout << "  making a comparison between <type> " << leftT.ty->ActualTy()->kind << " and <type> " << rightT.ty->ActualTy()->kind << std::endl;
     if ( leftT.ty->kind == TY::Ty::Kind::INT && rightT.ty->kind == TY::Ty::Kind::VOID ) {
         std::cout << "integer required" << std::endl;
-        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+        return TR::ExpAndTy( finExp, TY::IntTy::Instance() );
     }
     else if ( rightT.ty->kind == TY::Ty::Kind::INT && leftT.ty->kind == TY::Ty::Kind::VOID ) {
         std::cout << "integer required" << std::endl;
-        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+        return TR::ExpAndTy( finExp, TY::IntTy::Instance() );
     }
     else if ( this->oper == A::Oper::PLUS_OP && leftT.ty->kind == TY::Ty::Kind::INT && rightT.ty->kind == TY::Ty::Kind::STRING ) {
         std::cout << "integer required" << std::endl;
-        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+        return TR::ExpAndTy( finExp, TY::IntTy::Instance() );
     }
     else if ( this->oper == A::Oper::NEQ_OP && !leftT.ty->IsSameType( rightT.ty ) ) {
         std::cout << "same type required" << std::endl;
-        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+        return TR::ExpAndTy( finExp, TY::IntTy::Instance() );
     }
     else if ( leftT.ty->kind == TY::Ty::Kind::RECORD && !leftT.ty->IsSameType( rightT.ty ) ) {
         std::cout << "type mismatch" << std::endl;
-        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+        return TR::ExpAndTy( finExp, TY::IntTy::Instance() );
     }
     else if ( !leftT.ty->IsSameType( rightT.ty ) ) {
         std::cout << "same type required" << std::endl;
-        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+        return TR::ExpAndTy( finExp, TY::IntTy::Instance() );
     }
     else if ( leftT.ty->kind == TY::Ty::Kind::INT && rightT.ty->kind != TY::Ty::Kind::INT ) {
         std::cout << "integer required" << std::endl;
-        return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+        return TR::ExpAndTy( finExp, TY::IntTy::Instance() );
     }
-    return TR::ExpAndTy( nullptr, TY::IntTy::Instance() );
+    return TR::ExpAndTy( finExp, TY::IntTy::Instance() );
 }
 
 TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -548,8 +622,10 @@ TR::ExpAndTy SeqExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
     // std::vector< TR::Exp* > exps;
 
     TY::Ty* lastType = nullptr;
-    while ( seq != nullptr ) {
-        auto la     = seq->head->Translate( venv, tenv, level, label );
+    while ( seq ) {
+        std::cout << "Add one translation layer" << std::endl;
+        auto la = seq->head->Translate( venv, tenv, level, label );
+        std::cout << "la.exp = " << la.exp << std::endl;
         auto newExp = la.exp->UnEx();
         lastType    = la.ty;
         if ( node->exp == nullptr ) {
@@ -583,7 +659,7 @@ TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
         }
     }
 
-    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+    return TR::ExpAndTy( new TR::NxExp( nullptr ), TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -622,7 +698,9 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
     std::cout << "Entered ForExp::Translate." << std::endl;
 
     auto loTrans = this->lo->Translate( venv, tenv, level, label );
+    std::cout << "loTrans success. loTrans.exp = " << loTrans.exp << std::endl;
     auto hiTrans = this->hi->Translate( venv, tenv, level, label );
+    std::cout << "hiTrans success. hiTrans.exp = " << hiTrans.exp << std::endl;
     if ( hiTrans.ty->kind != TY::Ty::Kind::INT ) {
         std::cout << "for exp's range type is not integer" << std::endl;
     }
@@ -640,7 +718,7 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
     venv->Enter( S::Symbol::UniqueSymbol( "__l__" ), new E::VarEntry( new TR::Access( level, loopVar->access ), TY::IntTy::Instance(), true ) );
 
     auto bodyTrans = this->body->Translate( venv, tenv, level, label );
-
+    std::cout << "bodyTrans success. bodyTrans.exp = " << bodyTrans.exp << std::endl;
     auto limit  = getExp( limitVar->access, new T::TempExp( level->frame->framePointer() ) );
     auto loop   = getExp( loopVar->access, new T::TempExp( level->frame->framePointer() ) );
     auto finExp = new TR::NxExp( new T::SeqStm(
@@ -681,9 +759,11 @@ TR::ExpAndTy LetExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
 
 TR::ExpAndTy ArrayExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered ArrayExp::Translate." << std::endl;
-    auto rightTsl = this->init->Translate( venv, tenv, level, label );
+    auto    initTsl  = this->init->Translate( venv, tenv, level, label );
+    auto    sizeTsl  = this->size->Translate( venv, tenv, level, label );
+    T::Exp* arrayExp = new T::CallExp( new T::NameExp( TEMP::NamedLabel( "initArray" ) ), new T::ExpList( sizeTsl.exp->UnEx(), new T::ExpList( sizeTsl.exp->UnEx(), nullptr ) ) );
 
-    return TR::ExpAndTy( nullptr, tenv->Look( this->typ ) );
+    return TR::ExpAndTy( new TR::ExExp( arrayExp ), tenv->Look( this->typ ) );
 }
 
 TR::ExpAndTy VoidExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -716,20 +796,30 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         size_t inputParamCount = 0;
 
         venv->BeginScope();
-        auto blist = new U::BoolList( true, "__STATIC_LINK__", nullptr );
+        auto blist       = new U::BoolList( true, "__STATIC_LINK__", nullptr );
+        auto originBlist = blist;
         while ( field ) {
             auto fh = field->head;
-            // venv->Enter( fh->name, new E::VarEntry( tenv->Look( fh->typ ) ) );
+            venv->Enter( fh->name, new E::VarEntry( tenv->Look( fh->typ ) ) );
             std::cout << "constructing formal: " << fh->name->Name() << ", type: " << fh->typ->Name() << ", id: " << tenv->Look( fh->typ ) << std::endl;
-            field       = field->tail;
+
             blist->tail = new U::BoolList( true, fh->name->Name(), nullptr );
             blist       = blist->tail;
             std::cout << " param +1" << std::endl;
+            field = field->tail;
             ++inputParamCount;
+        }
+
+        std::cout << "===== PRINT BLIST =====" << std::endl;
+        auto newblist = originBlist;
+
+        while ( newblist ) {
+            std::cout << "# " << newblist->symbol << std::endl;
+            newblist = newblist->tail;
         }
         auto newlabel = TEMP::NamedLabel( head->name->Name() );
         std::cout << "I'm entering the evil part of translate, which didn't give me a good exp " << std::endl;
-        auto bodyTranslate = head->body->Translate( venv, tenv, level->NewLevel( level, newlabel, blist ), newlabel );
+        auto bodyTranslate = head->body->Translate( venv, tenv, level->NewLevel( level, newlabel, originBlist ), newlabel );
         auto retType       = bodyTranslate.ty;
 
         field = head->params;
@@ -781,22 +871,11 @@ TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* t
         venv->Enter( this->var, new E::VarEntry( initT.ty ) );
     }
 
-    if ( initT.ty->kind == TY::Ty::Kind::ARRAY && this->init->kind == A::Exp::Kind::ARRAY ) {
-        std::cout << "VarDec a new Array type" << std::endl;
-        auto arrayExp = ( reinterpret_cast< ArrayExp* >( this->init ) );
-        auto initExp  = arrayExp->init->Translate( venv, tenv, level, label ).exp->UnEx();
-        auto sizeExp  = arrayExp->size->Translate( venv, tenv, level, label ).exp->UnEx();
-        return new TR::ExExp( new T::CallExp( new T::NameExp( TEMP::NamedLabel( "initArray" ) ), new T::ExpList( sizeExp, new T::ExpList( initExp, nullptr ) ) ) );
-    }
-    else if ( initT.ty->kind == TY::Ty::Kind::RECORD ) {
-    }
-    else {
-        TR::Access* new_acc = TR::AllocLocal( level, true, this->var->Name() );
-        std::cout << "AllocLocal fine" << std::endl;
-        auto resultExp = new TR::NxExp( new T::MoveStm( new_acc->access->ToExp( new T::TempExp( level->frame->framePointer() ) ), initT.exp->UnEx() ) );
-        std::cout << "successfully generated resultExp" << resultExp << std::endl;
-        return resultExp;
-    }
+    TR::Access* new_acc = TR::AllocLocal( level, true, this->var->Name() );
+    std::cout << "AllocLocal fine" << std::endl;
+    auto resultExp = new TR::NxExp( new T::MoveStm( new_acc->access->ToExp( new T::TempExp( level->frame->framePointer() ) ), initT.exp->UnEx() ) );
+    std::cout << "successfully generated resultExp" << resultExp << std::endl;
+    return resultExp;
 }
 
 TR::Exp* TypeDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
