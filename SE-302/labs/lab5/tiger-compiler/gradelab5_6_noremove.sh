@@ -109,8 +109,8 @@ for tcase in $(ls $TESTCASEDIR/); do
                 # 深圳寶安國際機場
                 # 香港赤臘角國際機場
                 # 溫州龍灣國際機場
-                # JFK     <- Ross & Phoebe
-                # Atlanta <- Rachel
+                # JFK    <- Ross & Phoebe
+                # Newark <- Rachel
             done
             score=$((score + result + count / 2))
             rm -f test.out $TESTCASEDIR/${tfileName}.s
