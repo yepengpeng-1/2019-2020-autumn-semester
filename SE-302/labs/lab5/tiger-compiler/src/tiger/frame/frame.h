@@ -77,7 +77,9 @@ public:
             std::cout << "gonna return new framePointer register" << std::endl;
             fp = TEMP::Temp::NewTemp();
         }
-        std::cout << "gonna return existed framePointer register" << std::endl;
+        else {
+            std::cout << "gonna return existed framePointer register" << std::endl;
+        }
         return fp;
     }
 
@@ -88,7 +90,9 @@ public:
             std::cout << "gonna return new returnValue register" << std::endl;
             rp = TEMP::Temp::NewTemp();
         }
-        std::cout << "gonna return existed returnValue register" << std::endl;
+        else {
+            std::cout << "gonna return existed returnValue register" << std::endl;
+        }
         return rp;
     }
 

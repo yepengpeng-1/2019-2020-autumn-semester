@@ -5,10 +5,11 @@ namespace U {
 
 class BoolList {
 public:
-    bool      head;
-    BoolList* tail;
+    bool        head;
+    std::string symbol;
+    BoolList*   tail;
 
-    BoolList( bool head, BoolList* tail ) : head( head ), tail( tail ) {}
+    BoolList( bool head, std::string symbol, BoolList* tail ) : head( head ), tail( tail ), symbol( symbol ) {}
 };
 
 }  // namespace U

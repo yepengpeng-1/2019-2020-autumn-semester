@@ -22,6 +22,7 @@ F::Frame* newFrame( TEMP::Label name, U::BoolList* formals, F::Frame* lastFrame 
     while ( formals->tail ) {
         ++argCount;
         auto access = new F::InFrameAccess( /* offset: */ argCount * F::wordSize );
+        access->sym = formals->symbol;
         std::cout << "created new InFrameAccess. sym: " << access->sym << std::endl;
         formalAcList = new F::AccessList( access, formalAcList );
         formals      = formals->tail;
@@ -66,7 +67,7 @@ public:
 
     Level* NewLevel( Level* parent, TEMP::Label* name, U::BoolList* formals ) {
         std::cout << "called new level. label: " << name->Name() << std::endl;
-        auto frame = FRM::newFrame( *name, new U::BoolList( /* extra escaping param for static link */ true, formals ), this->frame );
+        auto frame = FRM::newFrame( *name, new U::BoolList( /* extra escaping param for static link */ true, name->Name(), formals ), this->frame );
         return new Level( frame, this );
     }
 };
@@ -449,6 +450,8 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
     auto        formals = ( ( E::FunEntry* )fun )->formals;
     A::ExpList* arg     = this->args;
     TY::Ty*     retType;
+
+    venv->BeginScope();
     while ( arg || formals ) {
         if ( arg && formals ) {
             std::cout << "comparing arg->head and formals->head" << std::endl;
@@ -457,6 +460,7 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
                 std::cout << "ty1: " << arg->head->Translate( venv, tenv, level, label ).ty << "; ty2:" << formals->head << std::endl;
                 break;
             }
+
             arg     = arg->tail;
             formals = formals->tail;
         }
@@ -480,7 +484,7 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         finExps = new T::ExpList( rawExps->head->Translate( venv, tenv, level, label ).exp->UnEx(), finExps );
         rawExps = rawExps->tail;
     }
-
+    venv->EndScope();
     auto finExp = new TR::ExExp( new T::CallExp( new T::NameExp( TEMP::NamedLabel( this->func->Name() ) ), finExps ) );
     return TR::ExpAndTy( finExp, result );
 }
@@ -534,13 +538,30 @@ TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
 
 TR::ExpAndTy SeqExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered SeqExp::Translate." << std::endl;
-    ExpList*      seq  = this->seq;
-    TR::ExpAndTy* last = reinterpret_cast< TR::ExpAndTy* >( calloc( 1, sizeof( TR::ExpAndTy ) ) );
-    while ( seq != nullptr ) {
-        *last = seq->head->Translate( venv, tenv, level, label );
-        seq   = seq->tail;
+    ExpList* seq = this->seq;
+    if ( seq == nullptr ) {
+        return TR::ExpAndTy( new TR::NxExp( nullptr ), TY::VoidTy::Instance() );
     }
-    return *last;
+    T::EseqExp* node = new T::EseqExp( nullptr, nullptr );
+    // T::EseqExp* node = nullptr;
+
+    // std::vector< TR::Exp* > exps;
+
+    TY::Ty* lastType = nullptr;
+    while ( seq != nullptr ) {
+        auto la     = seq->head->Translate( venv, tenv, level, label );
+        auto newExp = la.exp->UnEx();
+        lastType    = la.ty;
+        if ( node->exp == nullptr ) {
+            node->exp = newExp;
+        }
+        else {
+            node->exp = new T::EseqExp( new T::ExpStm( node->exp ), newExp );
+        }
+        seq = seq->tail;
+    }
+
+    return TR::ExpAndTy( new TR::ExExp( node ), lastType );
 }
 
 TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -600,13 +621,42 @@ TR::ExpAndTy WhileExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::T
 TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered ForExp::Translate." << std::endl;
 
-    if ( this->hi->Translate( venv, tenv, level, label ).ty->kind != TY::Ty::Kind::INT ) {
+    auto loTrans = this->lo->Translate( venv, tenv, level, label );
+    auto hiTrans = this->hi->Translate( venv, tenv, level, label );
+    if ( hiTrans.ty->kind != TY::Ty::Kind::INT ) {
         std::cout << "for exp's range type is not integer" << std::endl;
     }
     if ( this->body->kind == A::Exp::Kind::ASSIGN ) {
         std::cout << "loop variable can't be assigned" << std::endl;
     }
-    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+
+    auto        start    = TEMP::NewLabel();
+    auto        t        = TEMP::NewLabel();
+    auto        done     = TEMP::NewLabel();
+    TR::Access* loopVar  = TR::AllocLocal( level, true, this->var->Name() );
+    TR::Access* limitVar = TR::AllocLocal( level, true, "__l__" );
+    venv->BeginScope();
+    venv->Enter( S::Symbol::UniqueSymbol( this->var->Name() ), new E::VarEntry( new TR::Access( level, loopVar->access ), TY::IntTy::Instance(), true ) );
+    venv->Enter( S::Symbol::UniqueSymbol( "__l__" ), new E::VarEntry( new TR::Access( level, loopVar->access ), TY::IntTy::Instance(), true ) );
+
+    auto bodyTrans = this->body->Translate( venv, tenv, level, label );
+
+    auto limit  = getExp( limitVar->access, new T::TempExp( level->frame->framePointer() ) );
+    auto loop   = getExp( loopVar->access, new T::TempExp( level->frame->framePointer() ) );
+    auto finExp = new TR::NxExp( new T::SeqStm(
+        new T::MoveStm( limit, hiTrans.exp->UnEx() ),
+        new T::SeqStm(
+            new T::MoveStm( loop, loTrans.exp->UnEx() ),
+            new T::SeqStm( new T::CjumpStm( T::LE_OP, loop, limit, start, done ),
+                           new T::SeqStm( new T::LabelStm( start ),
+                                          new T::SeqStm( bodyTrans.exp->UnNx(),
+                                                         new T::SeqStm( new T::CjumpStm( T::LT_OP, loop, limit, t, done ),
+                                                                        new T::SeqStm( new T::LabelStm( t ),
+                                                                                       new T::SeqStm( new T::MoveStm( loop, new T::BinopExp( T::PLUS_OP, loop, new T::ConstExp( 1 ) ) ),
+                                                                                                      new T::SeqStm( new T::JumpStm( new T::NameExp( start ), new TEMP::LabelList( start, nullptr ) ),
+                                                                                                                     new T::LabelStm( done ) ) ) ) ) ) ) ) ) ) );
+    venv->EndScope();
+    return TR::ExpAndTy( finExp, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy BreakExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -638,7 +688,7 @@ TR::ExpAndTy ArrayExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::T
 
 TR::ExpAndTy VoidExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered VoidExp::Translate." << std::endl;
-    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+    return TR::ExpAndTy( new TR::NxExp( nullptr ), TY::VoidTy::Instance() );
 }
 
 TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -665,18 +715,20 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         auto   field           = head->params;
         size_t inputParamCount = 0;
 
-        auto blist = new U::BoolList( true, nullptr );
+        venv->BeginScope();
+        auto blist = new U::BoolList( true, "__STATIC_LINK__", nullptr );
         while ( field ) {
             auto fh = field->head;
             // venv->Enter( fh->name, new E::VarEntry( tenv->Look( fh->typ ) ) );
             std::cout << "constructing formal: " << fh->name->Name() << ", type: " << fh->typ->Name() << ", id: " << tenv->Look( fh->typ ) << std::endl;
             field       = field->tail;
-            blist->tail = new U::BoolList( true, nullptr );
+            blist->tail = new U::BoolList( true, fh->name->Name(), nullptr );
             blist       = blist->tail;
             std::cout << " param +1" << std::endl;
             ++inputParamCount;
         }
-        auto newlabel      = TEMP::NamedLabel( head->name->Name() );
+        auto newlabel = TEMP::NamedLabel( head->name->Name() );
+        std::cout << "I'm entering the evil part of translate, which didn't give me a good exp " << std::endl;
         auto bodyTranslate = head->body->Translate( venv, tenv, level->NewLevel( level, newlabel, blist ), newlabel );
         auto retType       = bodyTranslate.ty;
 
@@ -687,20 +739,24 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
 
             --inputParamCount;
         }
-        std::cout << "function declared result: " << ( head->result ? head->result->Name() : "NULL" ) << std::endl;
+        std::cout << "function return value type: " << ( head->result ? head->result->Name() : "NULL" ) << std::endl;
         if ( ( ( E::FunEntry* )( venv->Look( head->name ) ) )->result->kind == TY::Ty::Kind::VOID && retType->kind != TY::Ty::Kind::VOID ) {
             std::cout << "procedure returns value" << std::endl;
         }
         std::cout << "head->result: " << head->result << ", retType->kind: " << retType->kind << std::endl;
+        std::cout << "going to unEx bodyTranslate. Now it is actually" << bodyTranslate.exp << std::endl;
+        auto bodyEx = bodyTranslate.exp->UnEx();
+        std::cout << "bodyEx now is " << bodyEx << std::endl;
+        new TR::NxExp( new T::MoveStm( new T::TempExp( F::Frame::returnValue() ), bodyEx ) );
 
-        // Tr_Nx( T_Move( T_Temp( F_RV() ), unEx( body ) ) );
-        new TR::NxExp( new T::MoveStm( new T::TempExp( F::Frame::returnValue() ), bodyTranslate.exp->UnEx() ) );
+        venv->EndScope();
         func = func->tail;
     }
+    return new TR::NxExp( nullptr );
 }
 
 TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    std::cout << "Entered VarDec::Translate." << std::endl;
+    std::cout << "Entered VarDec::Translate. going to declare var: " << this->var->Name() << std::endl;
     auto initT = this->init->Translate( venv, tenv, level, label );
     if ( this->typ ) {
         std::cout << "explicit type" << tenv->Look( this->typ ) << std::endl;
@@ -741,7 +797,6 @@ TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* t
         std::cout << "successfully generated resultExp" << resultExp << std::endl;
         return resultExp;
     }
-    // Tr_Nx(T_Move(Tr_simpleVar(new_acc, level), unEx(e.exp)));
 }
 
 TR::Exp* TypeDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
