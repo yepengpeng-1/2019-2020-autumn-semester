@@ -228,16 +228,27 @@ Level* Outermost() {
     return lv;
 }
 
-F::FragList* addFragment( F::Frag* frag ) {
+F::FragList* addFragment( F::Frag* frag = nullptr ) {
     static F::FragList* fl = nullptr;
-
-    fl = new F::FragList( frag, nullptr );
+    if ( frag ) {
+        fl = new F::FragList( frag, nullptr );
+    }
     return fl;
+}
+
+TEMP::Label* lastLoop( TEMP::Label* set = nullptr ) {
+    static TEMP::Label* lloop = nullptr;
+    if ( set ) {
+        lloop = set;
+    }
+    return lloop;
 }
 
 F::FragList* TranslateProgram( A::Exp* root ) {
     std::cout << "Called TranslateProgram(A::Exp* root)." << std::endl;
     root->Translate( E::BaseVEnv(), E::BaseTEnv(), Outermost(), TEMP::NewLabel() );
+    std::cout << " ~~~~ Completed Translation ~~~~" << std::endl;
+    return addFragment();
 }
 
 static TY::TyList* make_formal_tylist( TEnvType tenv, A::FieldList* params ) {
@@ -312,6 +323,7 @@ TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
                 std::cout << "  compare access sym " << access->sym << ", " << this->sym->Name() << std::endl;
                 if ( access->sym == this->sym->Name() ) {
                     accessObj = access;
+                    std::cout << "Found it!" << std::endl;
                     break;
                 }
             }
@@ -334,23 +346,39 @@ TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
         currentLevel = currentLevel->parent;
     }
 
-    auto accessList = level->frame->args;
-    while ( accessList ) {
-        auto access = accessList->head;
+    currentLevel = level;
 
-        if ( access->kind == F::Access::Kind::INFRAME ) {
-            std::cout << "  compare access sym " << access->sym << ", " << this->sym->Name() << std::endl;
-            if ( access->sym == this->sym->Name() ) {
-                accessObj = access;
-                std::cout << "Found it!" << std::endl;
-                break;
+    while ( accessObj == nullptr ) {
+        auto accessList = currentLevel->frame->args;
+        while ( accessList ) {
+            auto access = accessList->head;
+
+            if ( access->kind == F::Access::Kind::INFRAME ) {
+                std::cout << "  compare access sym " << access->sym << ", " << this->sym->Name() << std::endl;
+                if ( access->sym == this->sym->Name() ) {
+                    accessObj = access;
+                    std::cout << "Found it!" << std::endl;
+                    break;
+                }
             }
-        }
-        else if ( access->kind == F::Access::Kind::INREG ) {
-            // not going to do this in lab5
+            else if ( access->kind == F::Access::Kind::INREG ) {
+                // not going to do this in lab5
+            }
+
+            accessList = accessList->tail;
         }
 
-        accessList = accessList->tail;
+        std::cout << "accessList traverse over" << std::endl;
+        if ( accessObj ) {
+            std::cout << "Already found~" << std::endl;
+            break;
+        }
+        if ( currentLevel->parent == nullptr ) {
+            std::cout << "No... I can't find anything anywhere. " << std::endl;
+            break;
+        }
+        std::cout << "I'll go one layer above. " << std::endl;
+        currentLevel = currentLevel->parent;
     }
 
     if ( true || var && var->kind == E::EnvEntry::Kind::VAR ) {
@@ -382,11 +410,16 @@ TR::ExpAndTy FieldVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::T
     }
 
     auto fields = ( ( TY::RecordTy* )( ( A::SimpleVar* )this->var )->Translate( venv, tenv, level, label ).ty )->fields;
+
+    size_t counter = 0;
     while ( fields ) {
         std::cout << "checking field " << fields->head->name->Name() << " and " << this->sym->Name() << std::endl;
         if ( fields->head->name->Name() == this->sym->Name() ) {
-            return TR::ExpAndTy( nullptr, fields->head->ty );
+
+            auto fieldExp = new TR::ExExp( new T::MemExp( new T::BinopExp( T::PLUS_OP, recT.exp->UnEx(), new T::ConstExp( counter * F::wordSize ) ) ) );
+            return TR::ExpAndTy( fieldExp, fields->head->ty );
         }
+        counter += 1;
         fields = fields->tail;
     }
 
@@ -439,12 +472,14 @@ TR::ExpAndTy VarExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
         A::SubscriptVar* svar = ( A::SubscriptVar* )this->var;
         return svar->Translate( venv, tenv, level, label );
     }
+    std::cout << "完蛋" << std::endl;
+    assert( 0 );
     return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy NilExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered NilExp::Translate." << std::endl;
-    return TR::ExpAndTy( nullptr, TY::NilTy::Instance() );
+    return TR::ExpAndTy( new TR::ExExp(new T::ConstExp(0)), TY::NilTy::Instance() );
 }
 
 TR::ExpAndTy IntExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -626,7 +661,39 @@ TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
     if ( !recT ) {
         std::cout << "undefined type rectype" << std::endl;
     }
-    return TR::ExpAndTy( nullptr, recT /*new TY::RecordTy( make_fieldlist_from_e( tenv, this->fields, level, label ) ) */ );
+
+    auto acc = TR::AllocLocal( level, true, "" );
+
+    T::Stm* statements;
+
+    auto r = getExp( acc->access, nullptr );
+
+    auto initfield = this->fields;
+    auto copyfield = initfield;
+
+    size_t offset = 0;
+
+    while ( copyfield ) {
+        ++offset;
+        copyfield = copyfield->tail;
+    }
+
+    auto argsCount = offset;
+
+    while ( initfield ) {
+        --offset;
+        auto actual = initfield->head;
+        initfield   = initfield->tail;
+        auto fieldInitExp =
+            new T::MoveStm( new T::MemExp( new T::BinopExp( T::PLUS_OP, r, new T::ConstExp( offset * F::wordSize ) ) ), actual->exp->Translate( venv, tenv, level, label ).exp->UnEx() );
+        statements = new T::SeqStm( fieldInitExp, statements );
+    }
+
+    auto recordAlloc = new T::CallExp( new T::NameExp( TEMP::NamedLabel( "allocRecord" ) ), new T::ExpList( new T::ConstExp( argsCount * F::wordSize ), nullptr ) );
+    auto init        = new T::MoveStm( r, recordAlloc );
+
+    std::cout << "Going to exit from RecordExp. " << std::endl;
+    return TR::ExpAndTy( new TR::ExExp(new T::EseqExp( new T::SeqStm(init, statements), r)), recT);
 }
 
 TR::ExpAndTy SeqExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -688,6 +755,8 @@ TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >
     std::cout << "Entered IfExp::Translate" << std::endl;
 
     auto testT = this->test->Translate( venv, tenv, level, label );
+    std::cout << "translated testT. exp = " << testT.exp << std::endl;
+
     if ( testT.ty->kind != TY::Ty::Kind::INT ) {
         return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
     }
@@ -697,6 +766,7 @@ TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >
 
     if ( !this->elsee ) {
         thenT = this->then->Translate( venv, tenv, level, label );
+        std::cout << "(no else) translated then, exp = " << thenT.exp << std::endl;
         if ( thenT.ty->kind != TY::Ty::Kind::VOID ) {
             std::cout << "if-then exp's body must produce no value" << std::endl;
             assert( 0 );
@@ -705,7 +775,9 @@ TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >
     }
     else {
         thenT = this->then->Translate( venv, tenv, level, label );
+        std::cout << "(exists else) translated then, exp = " << thenT.exp << std::endl;
         elseT = this->elsee->Translate( venv, tenv, level, label );
+        std::cout << "(exists else) translated else, exp = " << elseT.exp << std::endl;
         if ( !thenT.ty->IsSameType( elseT.ty ) ) {
             std::cout << "then exp and else exp type mismatch" << std::endl;
             assert( 0 );
@@ -754,6 +826,7 @@ TR::ExpAndTy WhileExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::T
     auto test = TEMP::NewLabel();
     auto t    = TEMP::NewLabel();
     auto done = TEMP::NewLabel();
+    TR::lastLoop( done );
     auto cond = testT.exp->UnCx();
     std::cout << "cond.stm = " << cond.stm << std::endl;
     TR::do_patch( cond.trues, t );
@@ -783,9 +856,10 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
         std::cout << "loop variable can't be assigned" << std::endl;
     }
 
-    auto        start    = TEMP::NewLabel();
-    auto        t        = TEMP::NewLabel();
-    auto        done     = TEMP::NewLabel();
+    auto start = TEMP::NewLabel();
+    auto t     = TEMP::NewLabel();
+    auto done  = TEMP::NewLabel();
+    TR::lastLoop( done );
     TR::Access* loopVar  = TR::AllocLocal( level, true, this->var->Name() );
     TR::Access* limitVar = TR::AllocLocal( level, true, "__l__" );
     venv->BeginScope();
@@ -814,7 +888,8 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
 
 TR::ExpAndTy BreakExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered BreakExp::Translate." << std::endl;
-    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+
+    return TR::ExpAndTy( new TR::NxExp( new T::JumpStm( new T::NameExp( TR::lastLoop() ), new TEMP::LabelList( TR::lastLoop(), nullptr ) ) ), TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy LetExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {

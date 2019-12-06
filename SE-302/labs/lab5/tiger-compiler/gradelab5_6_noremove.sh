@@ -60,7 +60,7 @@ for tcase in $(ls $TESTCASEDIR/); do
         gcc -Wl,--wrap,getchar -m64 $TESTCASEDIR/${tfileName}.s $RUNTIMEPATH -o test.out &>/dev/null
         if [ ! -s test.out ]; then
             echo -e "${BLUE_COLOR}[*_*]$ite: Link error. [$tfileName]${RES}"
-            rm $TESTCASEDIR/${tfileName}.s
+            # rm $TESTCASEDIR/${tfileName}.s
 
             continue
             #exit 345
