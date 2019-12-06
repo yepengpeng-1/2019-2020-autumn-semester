@@ -127,7 +127,7 @@ public:
     }
     T::Stm* UnNx() const override {
         std::cout << "Ex's UnNx() called" << std::endl;
-        // special condition: if the second part of the eseq is constant, then let's just put the first part as Statement.
+
         if ( this->exp->kind == T::Exp::Kind::ESEQ && reinterpret_cast< T::EseqExp* >( this->exp )->exp->kind == T::Exp::Kind::CONST ) {
             return reinterpret_cast< T::EseqExp* >( this->exp )->stm;
         }
@@ -154,6 +154,7 @@ public:
         return new T::EseqExp( this->stm, new T::ConstExp( 0 ) );
     }
     T::Stm* UnNx() const override {
+        std::cout << "Nx's UnNx() called" << std::endl;
         return this->stm;
     }
     Cx UnCx() const override {
@@ -225,6 +226,13 @@ Level* Outermost() {
     auto label = TEMP::NewLabel();
     lv         = new Level( new F::Frame( *label ), nullptr );
     return lv;
+}
+
+F::FragList* addFragment( F::Frag* frag ) {
+    static F::FragList* fl = nullptr;
+
+    fl = new F::FragList( frag, nullptr );
+    return fl;
 }
 
 F::FragList* TranslateProgram( A::Exp* root ) {
@@ -446,7 +454,11 @@ TR::ExpAndTy IntExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
 
 TR::ExpAndTy StringExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered StringExp::Translate." << std::endl;
-    return TR::ExpAndTy( nullptr, TY::StringTy::Instance() );
+
+    auto newLabel = TEMP::NewLabel();
+
+    TR::addFragment( new F::StringFrag( newLabel, this->s ) );
+    return TR::ExpAndTy( new TR::ExExp( new T::NameExp( newLabel ) ), TY::StringTy::Instance() );
 }
 
 TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -651,7 +663,10 @@ TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
     std::cout << "Entered AssignExp::Translate." << std::endl;
 
     auto varKind = this->var->Translate( venv, tenv, level, label );
-    auto expT    = this->exp->Translate( venv, tenv, level, label );
+    std::cout << "translated varKind. which exp = " << varKind.exp << std::endl;
+
+    auto expT = this->exp->Translate( venv, tenv, level, label );
+    std::cout << "translated expT. which exp = " << expT.exp << std::endl;
 
     if ( varKind.ty->kind == TY::Ty::Kind::VOID ) {
     }
@@ -666,7 +681,7 @@ TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
         }
     }
 
-    return TR::ExpAndTy( new TR::NxExp( nullptr ), TY::VoidTy::Instance() );
+    return TR::ExpAndTy( new TR::NxExp( new T::MoveStm( varKind.exp->UnEx(), expT.exp->UnEx() ) ), TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -723,18 +738,35 @@ TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >
     else {
         /* if exp has no return value */
         finExp = new TR::NxExp( new T::SeqStm( cx.stm, new T::SeqStm( new T::LabelStm( t ), new T::SeqStm( thenT.exp->UnNx(), new T::LabelStm( f ) ) ) ) );
-        return TR::ExpAndTy(finExp, TY::VoidTy::Instance());
+        return TR::ExpAndTy( finExp, TY::VoidTy::Instance() );
     }
 }
 
 TR::ExpAndTy WhileExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered WhileExp::Translate." << std::endl;
-
+    auto testT    = this->test->Translate( venv, tenv, level, label );
     auto expAndTy = this->body->Translate( venv, tenv, level, label );
+
     if ( expAndTy.ty->kind != TY::Ty::Kind::VOID ) {
         std::cout << "while body must produce no value" << std::endl;
     }
-    return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+
+    auto test = TEMP::NewLabel();
+    auto t    = TEMP::NewLabel();
+    auto done = TEMP::NewLabel();
+    auto cond = testT.exp->UnCx();
+    std::cout << "cond.stm = " << cond.stm << std::endl;
+    TR::do_patch( cond.trues, t );
+    TR::do_patch( cond.falses, done );
+    // std::cout << "body.unnx: " <<  expAndTy.exp->UnNx() << std::endl;
+    auto internalStm =
+        new T::SeqStm( new T::LabelStm( test ),
+                       new T::SeqStm( cond.stm, new T::SeqStm( new T::LabelStm( t ),
+                                                               new T::SeqStm( expAndTy.exp->UnNx(), new T::SeqStm( new T::JumpStm( new T::NameExp( test ), new TEMP::LabelList( test, nullptr ) ),
+                                                                                                                   new T::LabelStm( done ) ) ) ) ) );
+    auto finWhileExp = new TR::NxExp( internalStm );
+
+    return TR::ExpAndTy( finWhileExp, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -882,7 +914,8 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         std::cout << "going to unEx bodyTranslate. Now it is actually" << bodyTranslate.exp << std::endl;
         auto bodyEx = bodyTranslate.exp->UnEx();
         std::cout << "bodyEx now is " << bodyEx << std::endl;
-        new TR::NxExp( new T::MoveStm( new T::TempExp( F::Frame::returnValue() ), bodyEx ) );
+
+        TR::addFragment( new F::ProcFrag( new T::MoveStm( new T::TempExp( F::Frame::returnValue() ), bodyEx ), level->frame ) );
 
         venv->EndScope();
         func = func->tail;

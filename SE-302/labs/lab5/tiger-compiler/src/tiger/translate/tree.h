@@ -5,6 +5,7 @@
 
 #include "tiger/canon/canon.h"
 #include "tiger/frame/temp.h"
+// #include <iostream>
 
 /* Forward Declarations */
 namespace C {
@@ -49,6 +50,7 @@ public:
     Stm *left, *right;
 
     SeqStm( Stm* left, Stm* right ) : Stm( SEQ ), left( left ), right( right ) {
+        // std::cout << "Called SeqStm constructor, left: " << left << ", right: " << right << std::endl;
         assert( left );
     }
     void Print( FILE* out, int d ) const override;
