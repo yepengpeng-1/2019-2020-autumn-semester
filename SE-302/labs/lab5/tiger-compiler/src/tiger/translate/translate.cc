@@ -231,6 +231,7 @@ Level* Outermost() {
 F::FragList* addFragment( F::Frag* frag = nullptr ) {
     static F::FragList* fl = nullptr;
     if ( frag ) {
+        std::cout << "[translate] [frag] called add fragment. kind: " << (frag->kind == F::Frag::Kind::PROC ? "PROC" : "STRING")  << std::endl;
         if ( fl ) {
             auto pt = fl;
             while ( pt->tail ) {
@@ -275,6 +276,9 @@ TEMP::Label* getLastLoop() {
 //     }
 //     return lloop;
 // }
+
+
+
 
 F::FragList* TranslateProgram( A::Exp* root ) {
     std::cout << "Called TranslateProgram(A::Exp* root)." << std::endl;
@@ -766,28 +770,44 @@ TR::ExpAndTy SeqExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
     if ( seq == nullptr ) {
         return TR::ExpAndTy( new TR::NxExp( nullptr ), TY::VoidTy::Instance() );
     }
-    T::EseqExp* node = new T::EseqExp( new T::ExpStm( new T::ConstExp( 0 ) ), nullptr );
-    // T::EseqExp* node = nullptr;
+    
 
-    // std::vector< TR::Exp* > exps;
+    std::vector< TR::Exp* > exps;
 
     TY::Ty* lastType = nullptr;
     while ( seq ) {
-        std::cout << "Add one translation layer" << std::endl;
+        // std::cout << "Add one translation layer" << std::endl;
         auto la = seq->head->Translate( venv, tenv, level, label );
-        std::cout << "la.exp = " << la.exp << std::endl;
-        auto newExp = la.exp->UnEx();
-        lastType    = la.ty;
-        if ( node->exp == nullptr ) {
-            node->exp = newExp;
-        }
-        else {
-            node->exp = new T::EseqExp( new T::ExpStm( node->exp ), newExp );
-        }
+        // std::cout << "la.exp = " << la.exp << std::endl;
         seq = seq->tail;
+
+        auto newExp = la.exp;
+        lastType    = la.ty;
+        exps.push_back(newExp);
     }
 
-    return TR::ExpAndTy( new TR::ExExp( node ), lastType );
+    if (exps.size() == 1) {
+        std::cout << "[translate] [seq] exp.size = 1" << std::endl;
+        return TR::ExpAndTy(exps[0], lastType);
+    } else if (exps.size() == 2) {
+        std::cout << "[translate] [seq] exp.size = 2" << std::endl;
+        return TR::ExpAndTy(new TR::ExExp(new T::EseqExp(exps[0]->UnNx(), exps[1]->UnEx())), lastType);
+    }
+
+    // EseqExp(0->UnNx(), EseqExp(1->UnNx(), ))
+
+    T::EseqExp* node = new T::EseqExp( exps[0]->UnNx(), nullptr );
+    auto returnNode = node;
+    for (size_t i = 0; i < exps.size(); ++i) {
+        if (i == exps.size() - 1) {
+            node->exp = exps[i]->UnEx();
+        } else {
+            node->exp = new T::EseqExp(exps[i]->UnNx(), nullptr);
+            node = reinterpret_cast<T::EseqExp*>( node->exp);
+        }
+    }
+
+    return TR::ExpAndTy( new TR::ExExp( returnNode ), lastType );
 }
 
 TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -973,17 +993,48 @@ TR::ExpAndTy LetExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
     std::cout << "Entered LetExp::Translate." << std::endl;
 
     A::DecList* node = this->decs;
+
+    std::vector<T::Stm*> stms;
+
+    auto finStm = stms;
+    venv->BeginScope();
+    tenv->BeginScope();
+
     while ( node ) {
-        // std::cout << "while!" << std::endl;
-        node->head->Translate( venv, tenv, level, label );
+        std::cout << "[translate] [letexp] while!" << std::endl;
+        auto headT = node->head->Translate( venv, tenv, level, label );
         node = node->tail;
+
+        std::cout << "[translate] [letexp] while out, stms going to push_back " << headT->UnNx() << std::endl;
+        stms.push_back(headT->UnNx());
     }
+
 
     std::cout << "LetExp Going to translate bodyT " << std::endl;
     auto bodyT = this->body->Translate( venv, tenv, level, label );
     std::cout << "LetExp translated bodyT, which.exp = " << bodyT.exp << std::endl;
-    return bodyT;
-    // return TR::ExpAndTy( nullptr, TY::VoidTy::Instance() );
+    // return new T::EseqExp( stms, bodyT);
+    tenv->EndScope();
+    venv->EndScope();
+    T::Exp* finExp = nullptr;
+    if (stms.size() == 1) {
+        finExp = new T::EseqExp(stms[0], bodyT.exp->UnEx());
+    } else if (stms.size() == 2) {
+        finExp = new T::EseqExp(new T::SeqStm(stms[0], stms[1]), bodyT.exp->UnEx());
+    } else {
+        T::SeqStm* node_i = new T::SeqStm(stms[0], nullptr);
+        finExp = new T::EseqExp(node_i, bodyT.exp->UnEx());
+        for (size_t i = 1; i < stms.size(); ++i) {
+            if (i == stms.size() - 1) {
+                node_i->right = stms[i];
+            } else {
+                node_i->right = new T::SeqStm(stms[i], nullptr);
+                node_i = reinterpret_cast<T::SeqStm*>(node_i->right);
+            }
+        }
+    }
+    assert(finExp);
+    return TR::ExpAndTy(new TR::ExExp(finExp), bodyT.ty);
 }
 
 TR::ExpAndTy ArrayExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -1074,7 +1125,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         venv->EndScope();
         func = func->tail;
     }
-    return new TR::NxExp( nullptr );
+    return new TR::ExExp(new T::ConstExp(0) );
 }
 
 TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -1175,7 +1226,7 @@ TR::Exp* TypeDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* 
         std::cout << "declared type " << nt->name->Name() << ", id: " << tenv->Look( nt->name ) << std::endl;
     }
 
-    return new TR::NxExp( nullptr );
+    return new TR::ExExp( new T::ConstExp(0) );
 }
 
 TY::Ty* NameTy::Translate( S::Table< TY::Ty >* tenv ) const {
