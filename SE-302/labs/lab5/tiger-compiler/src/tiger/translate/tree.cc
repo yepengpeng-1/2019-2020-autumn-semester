@@ -1,7 +1,7 @@
 #include "tiger/translate/tree.h"
 
 #include <cassert>
-
+#include <iostream>
 namespace {
 
 static void indent( FILE* out, int d ) {
@@ -18,6 +18,7 @@ static char rel_oper[][ 12 ] = { "EQ", "NE", "LT", "GT", "LE", "GE", "ULT", "ULE
 namespace T {
 
 void SeqStm::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a SeqStm~" << std::endl;
     indent( out, d );
     fprintf( out, "SEQ(\n" );
     this->left->Print( out, d + 1 );
@@ -27,11 +28,13 @@ void SeqStm::Print( FILE* out, int d ) const {
 }
 
 void LabelStm::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a LabelStm~" << std::endl;
     indent( out, d );
     fprintf( out, "LABEL %s", this->label->Name().c_str() );
 }
 
 void JumpStm::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a JumpStm~" << std::endl;
     indent( out, d );
     fprintf( out, "JUMP(\n" );
     this->exp->Print( out, d + 1 );
@@ -39,6 +42,7 @@ void JumpStm::Print( FILE* out, int d ) const {
 }
 
 void CjumpStm::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a CjumpStm~" << std::endl;
     indent( out, d );
     fprintf( out, "CJUMP(%s,\n", rel_oper[ this->op ] );
     this->left->Print( out, d + 1 );
@@ -52,6 +56,7 @@ void CjumpStm::Print( FILE* out, int d ) const {
 }
 
 void MoveStm::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a MoveStm~" << std::endl;
     indent( out, d );
     fprintf( out, "MOVE(\n" );
     this->dst->Print( out, d + 1 );
@@ -61,6 +66,7 @@ void MoveStm::Print( FILE* out, int d ) const {
 }
 
 void ExpStm::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a ExpStm~" << std::endl;
     indent( out, d );
     fprintf( out, "EXP(\n" );
     this->exp->Print( out, d + 1 );
@@ -68,6 +74,7 @@ void ExpStm::Print( FILE* out, int d ) const {
 }
 
 void BinopExp::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a BinopExp~" << std::endl;
     indent( out, d );
     fprintf( out, "BINOP(%s,\n", bin_oper[ this->op ] );
     left->Print( out, d + 1 );
@@ -77,6 +84,7 @@ void BinopExp::Print( FILE* out, int d ) const {
 }
 
 void MemExp::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a MemExp~" << std::endl;
     indent( out, d );
     fprintf( out, "MEM" );
     fprintf( out, "(\n" );
@@ -85,11 +93,14 @@ void MemExp::Print( FILE* out, int d ) const {
 }
 
 void TempExp::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a TempExp~" << std::endl;
     indent( out, d );
     fprintf( out, "TEMP t%s", TEMP::Map::Name()->Look( this->temp )->c_str() );
 }
 
 void EseqExp::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a EseqExp~" << std::endl;
+    std::cout << "My stm = " << this->stm << ", exp = " << exp << std::endl;
     indent( out, d );
     fprintf( out, "ESEQ(\n" );
     this->stm->Print( out, d + 1 );
@@ -99,16 +110,20 @@ void EseqExp::Print( FILE* out, int d ) const {
 }
 
 void NameExp::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a NameExp~" << std::endl;
+    // std::cout << "my name is " << this->name << std::endl;
     indent( out, d );
     fprintf( out, "NAME %s", this->name->Name().c_str() );
 }
 
 void ConstExp::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a ConstExp~" << std::endl;
     indent( out, d );
     fprintf( out, "CONST %d", this->consti );
 }
 
 void CallExp::Print( FILE* out, int d ) const {
+    std::cout << "gonna print a CallExp~" << std::endl;
     ExpList* args = this->args;
     indent( out, d );
     fprintf( out, "CALL(\n" );
@@ -121,6 +136,7 @@ void CallExp::Print( FILE* out, int d ) const {
 }
 
 void StmList::Print( FILE* out ) const {
+    std::cout << "gonna print a StmList~" << std::endl;
     this->head->Print( out, 0 );
     fprintf( out, "\n" );
     if ( this->tail )
