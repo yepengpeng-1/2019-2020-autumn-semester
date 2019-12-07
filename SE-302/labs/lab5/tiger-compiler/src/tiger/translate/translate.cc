@@ -1075,7 +1075,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         auto   field           = head->params;
         size_t inputParamCount = 0;
 
-        venv->BeginScope();
+        // venv->BeginScope();
         auto blist       = new U::BoolList( true, "__STATIC_LINK__", nullptr );
         auto originBlist = blist;
         while ( field ) {
@@ -1119,10 +1119,11 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         std::cout << "going to unEx bodyTranslate. Now it is actually" << bodyTranslate.exp << std::endl;
         auto bodyEx = bodyTranslate.exp->UnEx();
         std::cout << "bodyEx now is " << bodyEx << std::endl;
-
+        
+        std::cout << "[translate] [fundec] going to addFragment" << std::endl;
         TR::addFragment( new F::ProcFrag( new T::MoveStm( new T::TempExp( F::Frame::returnValue() ), bodyEx ), level->frame ) );
 
-        venv->EndScope();
+        // venv->EndScope();
         func = func->tail;
     }
     return new TR::ExExp(new T::ConstExp(0) );
