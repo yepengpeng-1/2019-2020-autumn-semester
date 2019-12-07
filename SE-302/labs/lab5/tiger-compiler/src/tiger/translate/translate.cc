@@ -335,7 +335,7 @@ static TY::FieldList* make_fieldlist_from_e( TEnvType tenv, A::EFieldList* field
 namespace A {
 
 T::Exp* getExp( F::Access* acc, T::Exp* framePtr ) {
-    std::cout << "called getExp " << std::endl;
+    std::cout << "called getExp. input framePtr = " << framePtr << std::endl;
     switch ( acc->kind ) {
     case F::Access::Kind::INFRAME: {
         std::cout << "with a INFRAME access" << std::endl;
@@ -581,13 +581,15 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
     auto result = ( ( E::FunEntry* )fun )->result;
     std::cout << "Call operation returns an " << result->kind << std::endl;
 
-    auto        rawExps = arg;
+    auto        rawExps = this->args;
     T::ExpList* finExps = nullptr, *headExp = nullptr;
+
+    std::cout << "[callexp] start traversing rawExps" << std::endl;
     while ( rawExps ) {
-        if (finExps) {
+        std::cout << "[callexp] while (rawExps) => " << rawExps << std::endl;
         finExps = new T::ExpList( rawExps->head->Translate( venv, tenv, level, label ).exp->UnEx(), finExps );
-        } else {
-            headExp = finExps = new T::ExpList( rawExps->head->Translate( venv, tenv, level, label ).exp->UnEx(), finExps );
+        if (finExps) {
+            headExp = finExps;
         }
         rawExps = rawExps->tail;
     }
@@ -712,9 +714,9 @@ TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
 
     auto acc = TR::AllocLocal( level, true, "" );
 
-    T::Stm* statements;
+    
 
-    auto r = getExp( acc->access, nullptr );
+    auto r = getExp( acc->access, new T::TempExp( level->frame->framePointer()) );
 
     auto initfield = this->fields;
     auto copyfield = initfield;
@@ -728,20 +730,34 @@ TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
 
     auto argsCount = offset;
 
+    T::Stm* statements = nullptr;
+    T::Stm *retStm = nullptr;
+
     while ( initfield ) {
         --offset;
         auto actual = initfield->head;
         initfield   = initfield->tail;
         auto fieldInitExp =
             new T::MoveStm( new T::MemExp( new T::BinopExp( T::PLUS_OP, r, new T::ConstExp( offset * F::wordSize ) ) ), actual->exp->Translate( venv, tenv, level, label ).exp->UnEx() );
-        statements = new T::SeqStm( fieldInitExp, statements );
+
+            if (statements != nullptr) {
+                statements = new T::SeqStm( fieldInitExp, statements );
+            } else {
+                statements = fieldInitExp;
+            }
+        if (retStm == nullptr) {
+            retStm = statements;
+        }
     }
 
+    statements = reinterpret_cast<T::SeqStm*>(statements)->left;
+    
     auto recordAlloc = new T::CallExp( new T::NameExp( TEMP::NamedLabel( "allocRecord" ) ), new T::ExpList( new T::ConstExp( argsCount * F::wordSize ), nullptr ) );
     auto init        = new T::MoveStm( r, recordAlloc );
 
     std::cout << "Going to exit from RecordExp. " << std::endl;
-    return TR::ExpAndTy( new TR::ExExp( new T::EseqExp( new T::SeqStm( init, statements ), r ) ), recT );
+    assert(retStm);
+    return TR::ExpAndTy( new TR::ExExp( new T::EseqExp( new T::SeqStm( init, retStm ), r ) ), recT );
 }
 
 TR::ExpAndTy SeqExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {

@@ -36,7 +36,6 @@ bool commute( T::Stm* x, T::Exp* y ) {
 }
 
 T::Stm* reorder( C::ExpRefList* rlist ) {
-
     // auto rlist_backup = rlist;
     // std::cout << "=== reoder rlist print ===" << std::endl;
     // while ( rlist_backup ) {
@@ -83,6 +82,9 @@ T::Stm* reorder( C::ExpRefList* rlist ) {
 C::ExpRefList* get_call_rlist( T::Exp* exp ) {
     C::ExpRefList *rlist, *curr;
     T::CallExp*    callexp = dynamic_cast< T::CallExp* >( exp );
+    // std::cout << "called get_call_rlist." << std::endl;
+    // std::cout << "callexp->fun = " << callexp->fun << std::endl;
+    // std::cout << "callexp->args = " << callexp->args << std::endl;
     if ( !callexp )
         assert( 0 );
     T::ExpList* args = callexp->args;
@@ -289,44 +291,71 @@ namespace T {
 
 /* processes stm so that it contains no ESEQ nodes */
 Stm* SeqStm::Canon( Stm* self ) {
+    std::cout << "[canon] SeqStm::Canon called. this->left, right = " << this->left << ", " << this->right << std::endl;
     return seq( do_stm( this->left ), do_stm( this->right ) );
 }
 
 Stm* LabelStm::Canon( Stm* self ) {
+    std::cout << "[canon] LabelStm::Canon called" << std::endl;
     return self;
 }
 
 Stm* JumpStm::Canon( Stm* self ) {
+    std::cout << "[canon] JumpStm::Canon called" << std::endl;
     return seq( reorder( new C::ExpRefList( ( T::Exp** )&this->exp, nullptr ) ), self );
 }
 
 Stm* CjumpStm::Canon( Stm* self ) {
+    std::cout << "[canon] CjumpStm::Canon called" << std::endl;
     return seq( reorder( new C::ExpRefList( &this->left, new C::ExpRefList( &this->right, nullptr ) ) ), self );
 }
 
 Stm* MoveStm::Canon( Stm* self ) {
-    if ( this->dst->kind == Exp::Kind::TEMP && this->src->kind == Exp::Kind::CALL )
-        return seq( reorder( get_call_rlist( this->src ) ), self );
-    else if ( this->dst->kind == Exp::Kind::TEMP )
-        return seq( reorder( new C::ExpRefList( &this->src, nullptr ) ), self );
+    std::cout << "[canon] MoveStm::Canon called" << std::endl;
+    if ( this->dst->kind == Exp::Kind::TEMP && this->src->kind == Exp::Kind::CALL ) {
+        // std::cout << "[canon] [movestm] TEMP + CALL" << std::endl;
+        auto ret = seq( reorder( get_call_rlist( this->src ) ), self );
+        // std::cout << "[canon] [movestm] TEMP + CALL over. ret = " << ret << std::endl;
+        return ret;
+    }
+    else if ( this->dst->kind == Exp::Kind::TEMP ) {
+        // std::cout << "[canon] [movestm] TEMP" << std::endl;
+        auto ret = seq( reorder( new C::ExpRefList( &this->src, nullptr ) ), self );
+        // std::cout << "[canon] [movestm] TEMP over. ret = " << ret << std::endl;
+        return ret;
+    }
     else if ( this->dst->kind == Exp::Kind::MEM ) {
+        // std::cout << "[canon] [movestm] MEM" << std::endl;
+
         MemExp* memexp = dynamic_cast< MemExp* >( this->dst );
         if ( !memexp )
             assert( 0 );
-        return seq( reorder( new C::ExpRefList( &memexp->exp, new C::ExpRefList( &this->src, nullptr ) ) ), self );
+
+        // std::cout << "this->src = " << this->src << std::endl;
+        // std::cout << "memexp->exp = " << memexp->exp << std::endl;
+
+        auto reflist = reorder( new C::ExpRefList( &memexp->exp, new C::ExpRefList( &this->src, nullptr ) ) );
+        // std::cout << "gotta reflis: " << reflist << std::endl;
+        auto ret = seq( reflist, self );
+        // std::cout << "[canon] [movestm] MEM over. ret = " << ret << std::endl;
+        return ret;
     }
     else if ( this->dst->kind == Exp::Kind::ESEQ ) {
+        // std::cout << "[canon] [movestm] FALLBACK" << std::endl;
         EseqExp* eseqexp = dynamic_cast< EseqExp* >( this->dst );
         if ( !eseqexp )
             assert( 0 );
         Stm* s    = eseqexp->stm;
         this->dst = eseqexp->exp;
-        return do_stm( new SeqStm( s, self ) );
+        auto ret  = do_stm( new SeqStm( s, self ) );
+        // std::cout << "[canon] [movestm] FALLBACK over. ret = " << ret << std::endl;
+        return ret;
     }
     assert( 0 ); /* dst should be temp or mem only */
 }
 
 Stm* ExpStm::Canon( Stm* self ) {
+    std::cout << "[canon] ExpStm::Canon called" << std::endl;
     if ( this->exp->kind == Exp::Kind::CALL )
         return seq( reorder( get_call_rlist( this->exp ) ), self );
     else
@@ -334,31 +363,39 @@ Stm* ExpStm::Canon( Stm* self ) {
 }
 
 C::StmAndExp BinopExp::Canon( Exp* self ) {
+    std::cout << "[canon] BinopExp::Canon called" << std::endl;
+    std::cout << "[canon] [binop] left, right = " << this->left << ", " << this->right << std::endl;
     return C::StmAndExp( reorder( new C::ExpRefList( &this->left, new C::ExpRefList( &this->right, nullptr ) ) ), self );
 }
 
 C::StmAndExp MemExp::Canon( Exp* self ) {
+    std::cout << "[canon] MemExp::Canon called" << std::endl;
     return C::StmAndExp( reorder( new C::ExpRefList( &this->exp, nullptr ) ), self );
 }
 
 C::StmAndExp TempExp::Canon( Exp* self ) {
+    std::cout << "[canon] TempExp::Canon called" << std::endl;
     return C::StmAndExp( reorder( nullptr ), self );
 }
 
 C::StmAndExp EseqExp::Canon( Exp* self ) {
+    std::cout << "[canon] EseqExp::Canon called" << std::endl;
     C::StmAndExp x = do_exp( this->exp );
     return C::StmAndExp( seq( do_stm( this->stm ), x.s ), x.e );
 }
 
 C::StmAndExp NameExp::Canon( Exp* self ) {
+    std::cout << "[canon] NameExp::Canon called" << std::endl;
     return C::StmAndExp( reorder( nullptr ), self );
 }
 
 C::StmAndExp ConstExp::Canon( Exp* self ) {
+    std::cout << "[canon] ConstExp::Canon called" << std::endl;
     return C::StmAndExp( reorder( nullptr ), self );
 }
 
 C::StmAndExp CallExp::Canon( Exp* self ) {
+    std::cout << "[canon] CallExp::Canon called" << std::endl;
     return C::StmAndExp( reorder( get_call_rlist( self ) ), self );
 }
 
