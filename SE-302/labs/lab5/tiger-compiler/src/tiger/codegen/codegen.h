@@ -7,10 +7,12 @@
 
 namespace CG {
 typedef std::pair< TEMP::Temp*, AS::InstrList* > smart_pair;
+// typedef std::pair< TEMP::TempList*, AS::Instr* > smart_args_pair;
 
 AS::InstrList*                                  Codegen( F::Frame* f, T::StmList* stmList );
-static AS::InstrList*                           munchStm( T::Stm* stmNode );
-static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( T::Exp* expNode );
+static AS::InstrList*                           munchArgs( F::Frame* f, int index, T::ExpList* args );
+static AS::InstrList*                           munchStm( F::Frame* f, T::Stm* stmNode );
+static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* expNode );
 
 static AS::Proc* F_procEntryExit3( F::Frame* frame, AS::InstrList* body ) {
     // new AS::LabelInstr("", &frame->name);

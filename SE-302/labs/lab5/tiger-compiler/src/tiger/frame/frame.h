@@ -84,6 +84,19 @@ public:
         return fp;
     }
 
+    static TEMP::Temp* stackPointer() {
+        std::cout << "stackPointer register requested" << std::endl;
+        static TEMP::Temp* sp = nullptr;
+        if ( !sp ) {
+            std::cout << "gonna return new stackPointer register" << std::endl;
+            sp = TEMP::Temp::NewTemp();
+        }
+        else {
+            std::cout << "gonna return existed stackPointer register" << std::endl;
+        }
+        return sp;
+    }
+
     static TEMP::Temp* returnValue() {
         std::cout << "returnValue register requested" << std::endl;
         static TEMP::Temp* rp = nullptr;
