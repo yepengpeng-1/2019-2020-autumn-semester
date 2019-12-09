@@ -7,6 +7,12 @@
 
 namespace CG {
 
-AS::InstrList* Codegen( F::Frame* f, T::StmList* stmList );
+AS::InstrList*   Codegen( F::Frame* f, T::StmList* stmList );
+static AS::Proc* F_procEntryExit3( F::Frame* frame, AS::InstrList* body ) {
+    // new AS::LabelInstr("", &frame->name);
+    auto proc = new AS::Proc( std::string( "================= prologue ==============" ), new AS::InstrList( new AS::LabelInstr( "What's wrong with you?\n", &frame->name ), nullptr ),
+                              std::string( "================ epilogue =============" ) );
 }
+
+}  // namespace CG
 #endif

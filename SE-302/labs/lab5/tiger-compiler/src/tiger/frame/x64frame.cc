@@ -4,8 +4,5 @@
 
 namespace F {
 
-class X64Frame : public Frame {
-
-    // TODO: Put your codes here (lab6).
-};
+class X64Frame : public Frame {};
 }  // namespace F

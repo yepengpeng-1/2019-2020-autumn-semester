@@ -2,6 +2,7 @@
 #define TIGER_FRAME_FRAME_H_
 
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "tiger/codegen/assem.h"
