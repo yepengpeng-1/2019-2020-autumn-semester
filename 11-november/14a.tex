@@ -1,0 +1,375 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Nov 14 Thu}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-227::CSE}\label{header-n2}}
+
+\hypertarget{header-n3}{%
+\subsubsection{Re-provision}\label{header-n3}}
+
+又一次。噩夢。
+
+\hypertarget{header-n5}{%
+\paragraph{New API Design}\label{header-n5}}
+
+\begin{figure}
+\centering
+\includegraphics{/Users/yue/Documents/GitHub/2019-2020-autumn-semester/11-november/14.assets/image-20191114102845374.png}
+\caption{}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{/Users/yue/Documents/GitHub/2019-2020-autumn-semester/11-november/14.assets/image-20191114102935400.png}
+\caption{}
+\end{figure}
+
+為了避免拿著鎖睡覺的問題。設計了一套新的 API。
+
+\hypertarget{header-n9}{%
+\subsubsection{Threads}\label{header-n9}}
+
+為了徹底理解「進程／線程切換」，不得不理解一下：在一台機器上，是怎麼衍生出這些「Thread」抽象的。
+
+實際上是分時使用、切換上下文（Context）來偽裝出一個「多進程」的環境；而多線程則毋須切換上下文。
+
+本質上就是來回切換運行控制權。切換的時機完全由 CPU
+決定。因此就存在了切換時機組合的不確定性；這就帶來了多線程的複雜性和不可預知性，同時帶來了一堆
+Race Conditions。
+
+\hypertarget{header-n13}{%
+\subsubsection{Thread Layer / Processor Layer}\label{header-n13}}
+
+yield 之前，還是在 Thread Layer，也就是用戶狀態裡。而在調用 yield
+之後，CPU 就會被切換到內核狀態（Processor Layer）。
+
+\hypertarget{header-n15}{%
+\paragraph{Preemption}\label{header-n15}}
+
+所謂 Preemption，就是「搶佔式的」。
+
+\begin{figure}
+\centering
+\includegraphics{/Users/yue/Documents/GitHub/2019-2020-autumn-semester/11-november/14.assets/image-20191114110707769.png}
+\caption{}
+\end{figure}
+
+搶佔式的任務調度，就是說一個正在運行中的 Task
+不會願意自己退休。必須有一段更高級的指令\emph{逼宮}，才可能讓他\emph{退位}。
+
+誰來做這件事呢？
+
+\hypertarget{header-n20}{%
+\paragraph{Implementation}\label{header-n20}}
+
+\begin{figure}
+\centering
+\includegraphics{/Users/yue/Documents/GitHub/2019-2020-autumn-semester/11-november/14.assets/image-20191114111134412.png}
+\caption{}
+\end{figure}
+
+在設備中建立一個時鐘；時鐘到期的時候，就觸發一次
+Interrupt（中斷），切換到 Kernel Mode，並在此模式下執行 Clock Interrupt
+Handler。
+
+隨後，Clock Interrupt Handler 會根據條件，選擇性交予 Thread Layer
+控制權。
+
+\begin{figure}
+\centering
+\includegraphics{/Users/yue/Documents/GitHub/2019-2020-autumn-semester/11-november/14.assets/image-20191114111627160.png}
+\caption{}
+\end{figure}
+
+偽匯編大概長這樣。
+
+通過這樣簡單的分工，計算機就開始執行了。
+
+\hypertarget{header-n27}{%
+\subsubsection{Summary}\label{header-n27}}
+
+\begin{figure}
+\centering
+\includegraphics{/Users/yue/Documents/GitHub/2019-2020-autumn-semester/11-november/14.assets/image-20191114111826129.png}
+\caption{}
+\end{figure}
+
+\hypertarget{header-n29}{%
+\subsection{SE-344::CG}\label{header-n29}}
+
+\emph{could someone take me away from this planet}
+
+\hypertarget{header-n31}{%
+\subsubsection{復習}\label{header-n31}}
+
+上節課我們提到了⋯⋯多邊形化的方法。
+
+希望盡可能快（高效率）。
+
+用盡可能少的頂點數。
+
+且最多地保留原有形狀（保形性）。
+
+滿足上面三條的算法：自適應型多邊形化。這個有用的。
+
+\hypertarget{header-n37}{%
+\subsubsection{合併與條帶化}\label{header-n37}}
+
+考慮到如果我們分別獨立存儲每個三角形，就會造成同樣的頂點被多次存儲。同樣的，被三角形共享的邊也會被多次存儲，不夠經濟實惠。
+
+如果我們抽離出那些被共享的頂點和邊，然後據此來構建條帶化的三角形，就能節約空間，提升效能。
+
+「合併與條帶化」做的事情就是這些了。
+
+\hypertarget{header-n41}{%
+\subsubsection{網格簡化與 LOD}\label{header-n41}}
+
+網格簡化的目的：在圖形外觀（基本）不變的情況下，盡可能減少模型的頂點數量。
+
+實際最好的情況是可以動態地調整目標頂點數量。
+
+\hypertarget{header-n44}{%
+\paragraph{LOD}\label{header-n44}}
+
+多分辨率模型：預先計算好多種分辨率的模型。
+
+\begin{itemize}
+\item
+  Remeshing
+\item
+  Parametric Surfaces
+\item
+  Subdivision Surfaces
+\end{itemize}
+
+\hypertarget{header-n53}{%
+\paragraph{Vertex Clustering}\label{header-n53}}
+
+頂點聚合。{[}Rossignac \& Borrel 93{]}
+
+這個問題就在於，沒辦法保證下一次做聚合時，哪些點會遭到聚合，哪些又不會。
+
+並且，無法控制頂點聚合之後，結果的細粒度是多少。
+
+再並且，這個操作是不可逆的。聚合了就再也分不開。
+
+\hypertarget{header-n58}{%
+\paragraph{Edge Collapse}\label{header-n58}}
+
+邊塌陷法。所謂邊塌陷，相當於兩點合併為一點。減少了一個點，減少了兩個三角形，減少了三條邊。
+
+好處就在於，我們做一次邊塌陷，減少的點、邊、三角形數目都是固定的。
+
+可以精細地控制最終剩餘多少點、邊、三角形。
+
+而且，我們只要記錄下來我們把哪兩個點合併了，就還能進行
+Undo。是個可逆操作。
+
+\hypertarget{header-n63}{%
+\subsubsection{動態網格簡化}\label{header-n63}}
+
+\hypertarget{header-n64}{%
+\paragraph{Hoppe's 漸進網格法}\label{header-n64}}
+
+\hypertarget{header-n65}{%
+\paragraph{Garland 和 Heckbert 的方法}\label{header-n65}}
+
+利用「代價函數」來改進。代價函數定義為平面與該頂點新位置之間距離的平方和。
+
+通過定量的代價函數，我們就可以嚴格地進行動態網格簡化。
+
+\hypertarget{header-n68}{%
+\paragraph{基於保持表面特徵不變的代價函數}\label{header-n68}}
+
+人類的觀察是很複雜的。要保持其表面特徵，很難量化地表述。
+
+Linston \& Turk
+提出了一種可以量化「相似性」的算法，可以定量地衡量走樣的程度。
+
+\hypertarget{header-n71}{%
+\subsubsection{Transformation}\label{header-n71}}
+
+I love transformation!
+
+OpenGL has provided much APIs, and it could be implemented quite easily.
+
+However, what does the transformation APIs do indeed? What should we do
+if we're going to implement it by ourselves?
+
+\hypertarget{header-n75}{%
+\paragraph{Geometric Transformation}\label{header-n75}}
+
+Changing Shapes' position, size, rotation to implement animation,
+design, and layout.
+
+\hypertarget{header-n77}{%
+\paragraph{Animations}\label{header-n77}}
+
+As human eye are not functionally good, it can't separatedly tell the
+segmentation of frames when the FPS (Frame per Second) is about over
+than 24fps. Human eyes sucked at all.
+
+So we can trick our eyes, constructing animation at low costs.
+
+\hypertarget{header-n80}{%
+\paragraph{Coordinate}\label{header-n80}}
+
+Coordinate: 所謂坐標系。Commonly accepted coordinate includes:
+
+\begin{itemize}
+\item
+  \textbf{Modeling Coordinate}, created by the main object (model) as
+  the central of the object. 
+\item
+  \textbf{World Coordinate}, created when the world was created.
+\item
+  \textbf{Vision Coordinate}, transformed from the world coordinate.
+  That could be used for the viewpoint's generation.
+\end{itemize}
+
+\hypertarget{header-n89}{%
+\paragraph{Rotation}\label{header-n89}}
+
+That's simple. Give me the base point \((x_0, y_0)\) and the rotation
+angle \(\theta\).
+
+The transformed point would be \((x_0\cos\theta, y_0\cos\theta)\)。
+
+It's very easy to conclude under the polar coordinate.
+
+If the rotation operation was referenced as another point, we just need
+to move the coordinate to the reference point, do the rotation, and then
+move back the coordinate.
+
+\hypertarget{header-n94}{%
+\paragraph{Scaling}\label{header-n94}}
+
+Under 2D coordinate, the transformed position can be calculated by:
+
+\(x' = x \times s_x\), \(y' = y \times s_y\).
+
+If we want to scale by another base point, just do as above!
+
+\begin{itemize}
+\item
+  Move the object to another base point
+\item
+  Scale
+\item
+  Move it back
+\end{itemize}
+
+That's it.
+
+\hypertarget{header-n106}{%
+\paragraph{2D to 3D}\label{header-n106}}
+
+It's getting more complex. Why?
+
+Moving and Scaling are nothing different. However, here's the problem:
+
+The rotation stuff 需要指定在哪個平面上進行旋轉。
+
+\hypertarget{header-n110}{%
+\subsection{Inconsistency}\label{header-n110}}
+
+在笛卡兒坐標系下，矩陣變換的平移、縮放和旋轉的形式不統一。
+
+這真是太痛苦了。不統一的東西實在讓人想死得要命。
+
+有什麼辦法嗎？只好用數學語言來說話。
+
+數學語言能幹這事嗎？
+
+沒事的本來也沒有什麼交流的需求。
+
+活在 PC 機裡也挺好的。
+
+所有的 System Call 都有著嚴格的規定。明白易懂無歧異，Well Documented.
+所有的事情都有文檔可查，所有人都說著一樣的 Arch Assembly.
+調用著一樣的底層 API。
+
+但是反過來想。PC 與 PC 之間的區隔一點不少。
+
+同屬 Unix-like 的就已有大量的不兼容，Mac OS X 的根本不向下兼容，Windows
+的努力向下兼容卻根本做不好的向下兼容。差勁的東西一點不少。
+
+如果生活在一個屬於 Apple 當局的
+OS，那連存在安全也很難得到保障。說不定明天 Apple
+一不開心就把你下架了，把舊版 OS 給鎖了。清除掉了低端
+App。或者因為沒連結到 Apple 的中央軟件驗證服務器，直接被拒絕啟動。
+
+如果生活在 Windows 裡，那大概會骯髒地在混亂裡面勉強地生活下去，捏著鼻子
+Call 那些又臭又長、為了向下兼容而設定的垃圾一樣的 API。
+
+可算發現了。人造出來的東西就總是沒法好。OS、語言、文字、政體，都跳不出作為人類的本性。一旦達到了一定的複雜度，就是會有人去把它弄亂、打著簡化的名頭弄出醜陋和不一致。大家都想著各立山頭，想著要進步，卻又被積俗拉著沒法達到理想的目標；想要
+Undo 卻又積重難返。
+
+人類還是回去山洞裡住得了。我們的大腦不足夠管理這麼複雜的系統。
+
+少禍害人了。
+
+\end{document}

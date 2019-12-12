@@ -1,0 +1,315 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\newenvironment{Shaded}{}{}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Nov 9, Sat}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-302::Compilers}\label{header-n2}}
+
+\hypertarget{header-n3}{%
+\subsubsection{Instructor Selection}\label{header-n3}}
+
+從此處開始，就跟具體的 Architecture 有關了。（在 Lab 5 \& Lab 6 中，是
+x86-64。）
+
+\hypertarget{header-n5}{%
+\paragraph{Weird Points}\label{header-n5}}
+
+要拿到 0，要從一個固定的寄存器 \(r_0\)
+中拿。（保證你從這裡頭拿到的一定是 0。）
+
+而且 MOVEM
+只提供從內存到內存的移動；要想把他挪到寄存器裡頭，就得在外面套一層
+ADDI，跟 \(r_0\) 作加法。
+
+\hypertarget{header-n8}{%
+\paragraph{Tile Pattern}\label{header-n8}}
+
+我們要做的實際上就是根據我們有的「瓦片」（奇形怪狀的）來不重不漏地覆蓋整棵
+IR Tree。
+
+\hypertarget{header-n10}{%
+\subsubsection{Tiling Algorithm}\label{header-n10}}
+
+\hypertarget{header-n11}{%
+\paragraph{Optimum \& Optimal}\label{header-n11}}
+
+上節課我們也提到了，衡量覆蓋優秀與否的標準：最優覆蓋、最佳覆蓋。
+
+英文原著採用的是 Optimum 和 Optimal 兩個區別很細微的詞。
+
+Optimum（最優）覆蓋定義為所有瓦片執行代價之和最小的覆蓋方式；
+
+Optimal（最佳）覆蓋定義為不存在兩個相鄰的瓦片可以連結成一個代價更小的瓦片的覆蓋。
+
+（P.S.
+指令的代價即為其執行時間。因此瓦片的塊數基本就是執行時間的代價。）
+
+（Jouette 指令集說，除了 MOVEM 以外的其他八條指令執行時間均為一
+Cycle。）
+
+可以證明：最優覆蓋總是最佳的（這一眼就能看出）；而最佳指令則不一定是最優的。
+
+\hypertarget{header-n19}{%
+\paragraph{Maximal Munch 算法}\label{header-n19}}
+
+算法思路很簡單；從根節點開始，找出最大一塊 Tile
+來覆蓋根節點，同時覆蓋盡可能多的其他節點。
+
+在此以後，遞歸地調用自己來處理那些尚未被覆蓋的（遺留的）子樹，直到所有的節點都被覆蓋完成。
+
+當兩個大小相等的瓦片都可以覆蓋時，可以隨意選擇其中一塊瓦片來進行覆蓋。
+
+留意到 Maximal Munch 算法得到的一定是最佳覆蓋，而並不一定是最優覆蓋。
+
+有沒有辦法可以找出最優覆蓋？
+
+M.M. 是一個自頂向下的算法。然而考慮到實際生成的指令是自底向上執行的。
+
+有沒有一個自底向上的覆蓋算法？
+
+\hypertarget{header-n27}{%
+\paragraph{Dynamic Programming 算法}\label{header-n27}}
+
+動態規劃算法。自底向上的。
+
+樹型圖的動態規劃寫起來是很舒服的。由於樹的同構性，一棵確定樹的最優與否與其父親節點沒有關係。
+
+我們只需要通過瓦片分配、切割子樹、遞歸調用等方法來填補空缺。
+
+一定是個先求子樹的 Cost，然後逐步向上填空的過程。
+
+而且，最多只需要對每一個節點計算一次 Cost。DP 可以保證不進行重複計算。
+
+Optimal 的算法（全局最佳）勢必要比 Optimum
+的算法（局部最佳）更費時的。這是當然。
+
+不僅如此，還要維護調用棧，開空間來存放 DP 表，等等。
+
+DP 算法的代價是很高的；但通常能比 Max Munch 找到更優的解。
+
+\hypertarget{header-n36}{%
+\subsubsection{CISC Machines}\label{header-n36}}
+
+CISC 〔 complex instruction set computer
+〕実行できる複合命令の数を多くして設計した CPU
+を採用したコンピューター。リスク（RISC）に比べ，設計は容易だが，処理速度は遅い。
+
+CISC（對這門課而言）重要的特點是：
+
+\begin{itemize}
+\item
+  寄存器有限且不多。
+\item
+  部分寄存器有特殊用途。
+\item
+  變長指令。（這似乎跟編譯器沒有關係）
+\item
+  兩種尋址模式（直接／間接）。
+\item
+  雙地址指令。
+\item
+  具有副作用的地址。（如 addq t3, t1 就是 t3 = V(t3) + V(t1)）。
+\end{itemize}
+
+副作用指令很難做；大概有三種解決方案。
+
+要麼，無視它（因為這種指令是越來越少了）。
+
+要麼，用特別的方式進行匹配。
+
+要麼，用 DAG 指令算法。
+
+\hypertarget{header-n56}{%
+\paragraph{LABEL}\label{header-n56}}
+
+Label 本身只是一個
+Symbol，本身不是指令。他只是用一個唯一的名字標記著一個特定的內存地址。
+
+\hypertarget{header-n58}{%
+\subsection{SE-227::CSE}\label{header-n58}}
+
+I hate Everything related to CSE.
+
+\hypertarget{header-n60}{%
+\subsubsection{Lock \& Memory Model}\label{header-n60}}
+
+鎖及內存模型。
+
+\begin{itemize}
+\item
+  All-or-nothing
+\item
+  Before-or-After
+\end{itemize}
+
+As long as it seems like a sequential request, it would be fine.
+
+Optimistic strategy assumes that conflict merely happens. If tragically
+it goes wrong, simply throws a retry, then.
+
+However when the frequency of faults is rising high, optimistic strategy
+isn't quite suitable. Maybe we should come up with a lock or something;
+Waiting a little time on the lock to reduce conflicts and save more
+time!
+
+\hypertarget{header-n70}{%
+\paragraph{Memory Consistency}\label{header-n70}}
+
+When we get dual-core (or more?) CPU, how can we ensure their memory
+access to be consistent and sequencial without any conflicts?
+
+That's a problem unsolved in ICS::Cache.
+
+Even it's hard to determine the sequence at a god's view: Not even a
+global clock exists.
+
+\hypertarget{header-n74}{%
+\subparagraph{Case 1: Strict Consistency}\label{header-n74}}
+
+The most strict consistency strategy: Easy to program, but not very easy
+to implement.
+
+Moreover, different cores can't work altogether.
+
+As one core working, the other cores will be locked.
+
+So why I purchase for Intel's dual core CPUs?
+
+\hypertarget{header-n79}{%
+\subparagraph{Case 2: Sequencial Consistency}\label{header-n79}}
+
+序列化的一致性。
+
+Weaker than the strict consistency.
+不保證你可以讀到最新的數據。（可能會出現髒讀。）
+
+留意到，Cache Coherence \& Sequencial Consistency 並不是一回事。
+
+Cache Coherence 是 Global Consistency。對每個單獨的變量而言，都是
+Consistency 的；然而對於變量的組合總體來看，卻不能保證 Consistency。
+
+因此可以說，Cache Coherence 保證不了 Sequencial Consistency。
+
+\hypertarget{header-n85}{%
+\subparagraph{Case 3: Processor Consistency}\label{header-n85}}
+
+Intel 說：所有 CPU 的所有的寫操作都保證是順序的。
+
+ARM 不提供這種保證。
+
+\hypertarget{header-n88}{%
+\subparagraph{Case 4: Java Memory Model}\label{header-n88}}
+
+Java 幹的好事：寫 Java Virtual Machine
+的人幫你考慮好這些事情，通過插入一些 Consistency Ensuring
+指令來幫你保證上層 Java 機器碼在 Multi-Core 機器上運行時的正確性。
+
+\hypertarget{header-n90}{%
+\subsubsection{原子指令}\label{header-n90}}
+
+\hypertarget{header-n91}{%
+\paragraph{Test \& Set}\label{header-n91}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DataTypeTok{int}\NormalTok{ test_and_set(}\DataTypeTok{int}\NormalTok{ *old_ptr, }\DataTypeTok{int} \KeywordTok{new}\NormalTok{) \{}
+    \DataTypeTok{int}\NormalTok{ old = *old_ptr;}
+\NormalTok{    *old_ptr = }\KeywordTok{new}\NormalTok{;}
+    \ControlFlowTok{return}\NormalTok{ old;}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+如果可以保證這個函數的執行不被打斷，那就可以利用這個函數來實現 Lock 了。
+
+\hypertarget{header-n94}{%
+\paragraph{Compare \& Swap}\label{header-n94}}
+
+\end{document}
