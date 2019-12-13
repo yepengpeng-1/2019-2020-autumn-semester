@@ -147,10 +147,12 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
             assert( 0 );
             break;
         }
+
         auto leftMunch = munchExp( f, left ), rightMunch = munchExp( f, right );
 
         auto compareInstr = new AS::OperInstr( "cmpq `s1, `s0", nullptr, new TEMP::TempList( leftMunch.first, new TEMP::TempList( rightMunch.first, nullptr ) ), nullptr );
-        auto cjumpInstr   = new AS::OperInstr( assem, nullptr, nullptr, new AS::Targets( new TEMP::LabelList( e->true_label, new TEMP::LabelList( e->false_label, nullptr ) ) ) );
+        auto cjumpInstr   = new AS::OperInstr( assem + " " + TEMP::LabelString( e->true_label ), nullptr, nullptr,
+                                             new AS::Targets( new TEMP::LabelList( e->true_label, new TEMP::LabelList( e->false_label, nullptr ) ) ) );
 
         auto instrList = new AS::InstrList( compareInstr, new AS::InstrList( cjumpInstr, nullptr ) );
         return combine( leftMunch.second, combine( rightMunch.second, instrList ) );
