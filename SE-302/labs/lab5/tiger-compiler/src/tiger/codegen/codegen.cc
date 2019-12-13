@@ -1,4 +1,5 @@
 #include "tiger/codegen/codegen.h"
+#include "tiger/translate/translate.h"
 
 namespace CG {
 
@@ -339,7 +340,7 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         auto args = reinterpret_cast< T::CallExp* >( expNode )->args;
         auto l    = munchArgs( f, 0, args );
         auto instr =
-            new AS::OperInstr( "callq `s0\n", new TEMP::TempList( f->stackPointer(), nullptr /* TODO: add caller saved registers */ ), new TEMP::TempList( f->stackPointer(), nullptr ), nullptr );
+            new AS::OperInstr( "callq `s0", new TEMP::TempList( f->stackPointer(), nullptr /* TODO: add caller saved registers */ ), new TEMP::TempList( f->stackPointer(), nullptr ), nullptr );
         return smart_pair( f->returnValue(), combine( l, new AS::InstrList( instr, nullptr ) ) );
         // if ( e->u.CALL.fun->kind == T_NAME ) {
         //     Temp_tempList l = munchArgs( 0, e->u.CALL.args );

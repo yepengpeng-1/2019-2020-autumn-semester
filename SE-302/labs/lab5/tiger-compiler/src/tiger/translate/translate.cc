@@ -1,3 +1,5 @@
+#ifndef TIGER_TRANSLATE_TRANSLATE_CC_
+#define TIGER_TRANSLATE_TRANSLATE_CC_
 #include "tiger/translate/translate.h"
 
 #include "tiger/errormsg/errormsg.h"
@@ -208,7 +210,11 @@ static Access* AllocLocal( Level* level, bool escape, std::string sym ) {
     std::cout << "create newAcc fine" << std::endl;
     level->frame->vars = new F::AccessList( newAcc, level->frame->vars );
     auto finAccess     = new Access( level, newAcc );
+    return finAccess;
 }
+// static F::Access * TR::AllocLocalWrapped(F::Frame * f, std::string sym)
+// F::Access *TR::AllocLocalWrapped(F::Frame *f, std::__1::string sym)
+
 
 PatchList* join_patch( PatchList* first, PatchList* second ) {
     if ( !first )
@@ -280,8 +286,11 @@ TEMP::Label* getLastLoop() {
 
 F::FragList* TranslateProgram( A::Exp* root ) {
     std::cout << "Called TranslateProgram(A::Exp* root)." << std::endl;
-    auto totalProgram = root->Translate( E::BaseVEnv(), E::BaseTEnv(), Outermost(), TEMP::NewLabel() );
-    addFragment( new F::ProcFrag( totalProgram.exp->UnNx(), Outermost()->frame ) );
+
+    auto mainLevel = Outermost()->NewLevel(Outermost(), TEMP::NamedLabel("tigermain"), nullptr);
+
+    auto totalProgram = root->Translate( E::BaseVEnv(), E::BaseTEnv(), mainLevel, nullptr );
+    addFragment( new F::ProcFrag( totalProgram.exp->UnNx(), mainLevel->frame ) );
 
     std::cout << " ~~~~ Completed Translation ~~~~" << std::endl;
     // FILE* fptr;
@@ -1337,3 +1346,5 @@ TY::Ty* ArrayTy::Translate( S::Table< TY::Ty >* tenv ) const {
 }
 
 }  // namespace A
+
+#endif
