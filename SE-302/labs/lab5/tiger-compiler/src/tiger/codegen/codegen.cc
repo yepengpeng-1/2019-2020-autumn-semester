@@ -34,7 +34,7 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
         auto e1munch = munchExp( f, e1 );
         auto e2munch = munchExp( f, e2 );
 
-        auto instr = new AS::OperInstr( "movq `s1, $" + std::to_string( i ) + "(`s0)", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
+        auto instr = new AS::OperInstr( "movq `s1, " + std::to_string( i ) + "(`s0)", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
 
         return combine( combine( e1munch.second, e2munch.second ), new AS::InstrList( instr, nullptr ) );
     }
@@ -54,7 +54,7 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
 
         auto e1munch = munchExp( f, e1 );
         auto e2munch = munchExp( f, e2 );
-        auto instr   = new AS::OperInstr( "movq `s1, $" + std::to_string( i ) + "(`s0)", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
+        auto instr   = new AS::OperInstr( "movq `s1, " + std::to_string( i ) + "(`s0)", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
         return combine( combine( e1munch.second, e2munch.second ), new AS::InstrList( instr, nullptr ) );
     }
     else if ( stmNode->kind == T::Stm::Kind::MOVE
@@ -213,7 +213,7 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         auto r  = TEMP::Temp::NewTemp();
         CG::temp_map->Enter( r, nullptr );
         auto e1munch = munchExp( f, e1 );
-        auto instr   = new AS::OperInstr( "movq $" + std::to_string( i ) + "(`s0), `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, nullptr ), nullptr );
+        auto instr   = new AS::OperInstr( "movq " + std::to_string( i ) + "(`s0), `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, nullptr ), nullptr );
         return smart_pair( r, combine( e1munch.second, new AS::InstrList( instr, nullptr ) ) );
     }
     else if ( expNode->kind == T::Exp::MEM && reinterpret_cast< T::MemExp* >( expNode )->exp->kind == T::Exp::BINOP
@@ -226,7 +226,7 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         auto r  = TEMP::Temp::NewTemp();
         CG::temp_map->Enter( r, nullptr );
         auto e1munch = munchExp( f, e1 );
-        auto instr   = new AS::OperInstr( "movq $" + std::to_string( i ) + "(`s0), `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, nullptr ), nullptr );
+        auto instr   = new AS::OperInstr( "movq " + std::to_string( i ) + "(`s0), `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, nullptr ), nullptr );
         return smart_pair( r, combine( e1munch.second, new AS::InstrList( instr, nullptr ) ) );
     }
     else if ( expNode->kind == T::Exp::MEM && reinterpret_cast< T::ExpStm* >( expNode )->exp->kind == T::Exp::CONST ) {
@@ -345,23 +345,6 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         auto instr = new AS::OperInstr( "callq " + funname->Name(), new TEMP::TempList( f->stackPointer(), nullptr /* TODO: add caller saved registers */ ),
                                         new TEMP::TempList( f->stackPointer(), nullptr ), nullptr );
         return smart_pair( f->returnValue(), combine( l, new AS::InstrList( instr, nullptr ) ) );
-        // if ( e->u.CALL.fun->kind == T_NAME ) {
-        //     Temp_tempList l = munchArgs( 0, e->u.CALL.args );
-        //     assert( l == NULL );  // in x86, don't use register to transfer args
-        //     sprintf( as_buf, "call %s", Temp_labelstring( e->u.CALL.fun->u.NAME ) );
-        //     string as = String( as_buf );
-        //     emit( AS_Oper( as, L( F_SP(), F_callersaves() ), L( F_SP(), l ), NULL ) );  // callersaves includes F_RV()
-        //     int       argCnt = 0;
-        //     T_expList tmp;
-        //     for ( tmp = e->u.CALL.args; tmp != NULL; tmp = tmp->tail ) {
-        //         ++argCnt;
-        //     }
-        //     if ( argCnt != 0 ) {
-        //         sprintf( as_buf, "addl $%d, `d0", argCnt * F_wordSize );
-        //         as = String( as_buf );
-        //         emit( AS_Oper( as, L( F_SP(), NULL ), L( F_SP(), NULL ), NULL ) );
-        //     }
-        //     return F_RV();
     }
     else if ( expNode->kind == T::Exp::ESEQ ) {
         std::cout << "[codegen] fallen into ESEQ **WIP**" << std::endl;

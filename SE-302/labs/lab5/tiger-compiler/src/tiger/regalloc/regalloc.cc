@@ -58,9 +58,10 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                 // std::cout << "while loop of src: " << src << ", which->head = " << src->head << std::endl;
                 // auto head = src->head;
                 if ( src->head == tl->head ) {
-                    auto temp  = TEMP::Temp::NewTemp();
-                    auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( temp, nullptr ), new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
-                    src->head  = temp;
+                    // auto temp  = TEMP::Temp::NewTemp();
+                    auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister(), nullptr ),
+                                                   new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
+                    src->head  = f->idiotRegister();
                     prev->tail = new AS::InstrList( load, now );
                     prev       = prev->tail;
                     break;
@@ -72,9 +73,10 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                 // std::cout << "while loop of dst: " << dst << std::endl;
                 // auto head = dst->head;
                 if ( dst->head == tl->head ) {
-                    auto temp  = TEMP::Temp::NewTemp();
-                    auto store = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr, new TEMP::TempList( f->framePointer(), new TEMP::TempList( temp, nullptr ) ), nullptr );
-                    dst->head  = temp;
+                    // auto temp  = TEMP::Temp::NewTemp();
+                    auto store = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr,
+                                                    new TEMP::TempList( f->framePointer(), new TEMP::TempList( f->smartRegister(), nullptr ) ), nullptr );
+                    dst->head  = f->smartRegister();
                     prev       = now;
                     now->tail  = new AS::InstrList( store, now->tail );
                     now        = now->tail;
@@ -91,10 +93,21 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
     return instrL;
 }
 
+inline bool isExcept( F::Frame* f, TEMP::Temp* temp ) {
+    static const TEMP::Temp* excepts[] = { f->framePointer(), f->idiotRegister(), f->returnValue(), f->stackPointer(), f->smartRegister() };
+    for ( size_t i = 0; i < 5; i++ ) {
+        if ( temp == excepts[ i ] ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
     // TODO: Put your codes here (lab6).
     auto result     = Result();
     result.coloring = TEMP::Map::Empty();
+
     std::vector< TEMP::Temp* > tempset;
     while ( true ) {
 
@@ -120,7 +133,9 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
                         if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
-                            tempset.push_back( temps->head );
+                            if ( !isExcept( f, temps->head ) ) {
+                                tempset.push_back( temps->head );
+                            }
                         }
                         temps = temps->tail;
                     }
@@ -131,7 +146,9 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
                         if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
-                            tempset.push_back( temps->head );
+                            if ( !isExcept( f, temps->head ) ) {
+                                tempset.push_back( temps->head );
+                            }
                         }
                         temps = temps->tail;
                     }
@@ -144,7 +161,9 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
                         if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
-                            tempset.push_back( temps->head );
+                            if ( !isExcept( f, temps->head ) ) {
+                                tempset.push_back( temps->head );
+                            }
                         }
                         temps = temps->tail;
                     }
@@ -155,7 +174,9 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
                         if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
-                            tempset.push_back( temps->head );
+                            if ( !isExcept( f, temps->head ) ) {
+                                tempset.push_back( temps->head );
+                            }
                         }
                         temps = temps->tail;
                     }
