@@ -321,12 +321,30 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         }
         auto var1 = munchExp( f, e1 );
         auto var2 = munchExp( f, e2 );
-        auto r    = TEMP::Temp::NewTemp();
-        CG::temp_map->Enter( r, nullptr );
-        assem += "`s1, `d0";
 
-        auto instr = new AS::OperInstr( assem, new TEMP::TempList( r, nullptr ), new TEMP::TempList( r, new TEMP::TempList( var2.first, nullptr ) ), nullptr );
-        return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( instr, nullptr ) ) ) );
+        if ( e->op == T::PLUS_OP || e->op == T::MINUS_OP ) {
+
+            auto r = TEMP::Temp::NewTemp();
+            CG::temp_map->Enter( r, nullptr );
+            assem += "`s1, `d0";
+
+            auto instr = new AS::OperInstr( assem, new TEMP::TempList( r, nullptr ), new TEMP::TempList( r, new TEMP::TempList( var2.first, nullptr ) ), nullptr );
+            return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( instr, nullptr ) ) ) );
+        }
+        else if ( e->op == T::MUL_OP ) {
+            auto r             = TEMP::Temp::NewTemp();
+            auto moveInstr     = new AS::MoveInstr( "movq `d0, `s0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
+            auto mulqInstr     = new AS::OperInstr( "mulq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
+            auto moveBackInstr = new AS::MoveInstr( "movq `d0, `s0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
+            return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( moveInstr, new AS::InstrList( mulqInstr, new AS::InstrList( moveBackInstr, nullptr ) ) ) ) ) );
+        }
+        else if ( e->op == T::DIV_OP ) {
+            auto r             = TEMP::Temp::NewTemp();
+            auto moveInstr     = new AS::MoveInstr( "movq `d0, `s0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
+            auto divqInstr     = new AS::OperInstr( "divq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
+            auto moveBackInstr = new AS::MoveInstr( "movq `d0, `s0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
+            return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( moveInstr, new AS::InstrList( divqInstr, new AS::InstrList( moveBackInstr, nullptr ) ) ) ) ) );
+        }
     }
     else if ( expNode->kind == T::Exp::TEMP ) {
         std::cout << "[codegen] fallen into TEMP(t)" << std::endl;

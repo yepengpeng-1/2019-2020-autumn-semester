@@ -79,9 +79,20 @@ static std::string format( std::string assem, TEMP::TempList* dst, TEMP::TempLis
     return result;
 }
 
+static const std::string useless_craps[]    = { "movq (%r13), (%r13)" };
+static const size_t      useless_crap_count = 1;
+
 void OperInstr::Print( FILE* out, TEMP::Map* m ) const {
+
     std::cout << "[instr] OperInstr::Print called." << std::endl;
     std::string result = format( this->assem, this->dst, this->src, this->jumps, m );
+
+    for ( size_t i = 0; i < useless_crap_count; i++ ) {
+        if ( result == useless_craps[ i ] ) {
+            return;
+        }
+    }
+
     fprintf( out, "%s\n", result.c_str() );
 }
 
@@ -105,6 +116,11 @@ void MoveInstr::Print( FILE* out, TEMP::Map* m ) const {
         }
     }
     std::string result = format( this->assem, this->dst, this->src, nullptr, m );
+    for ( size_t i = 0; i < useless_crap_count; i++ ) {
+        if ( result == useless_craps[ i ] ) {
+            return;
+        }
+    }
     fprintf( out, "%s\n", result.c_str() );
 }
 

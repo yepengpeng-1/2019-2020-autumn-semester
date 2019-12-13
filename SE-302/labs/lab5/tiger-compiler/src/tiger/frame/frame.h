@@ -109,6 +109,18 @@ public:
         }
         return rp;
     }
+    static TEMP::Temp* radioRegister() {
+        // std::cout << "radioRegister requested" << std::endl;
+        static TEMP::Temp* rr = nullptr;
+        if ( !rr ) {
+            std::cout << "gonna return new radioRegister" << std::endl;
+            rr = TEMP::Temp::NewTemp();
+        }
+        else {
+            // std::cout << "gonna return existed radioRegister" << std::endl;
+        }
+        return rr;
+    }
 
     static TEMP::Temp* idiotRegister() {
         // std::cout << "idiot register requested" << std::endl;

@@ -94,8 +94,8 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
 }
 
 inline bool isExcept( F::Frame* f, TEMP::Temp* temp ) {
-    static const TEMP::Temp* excepts[] = { f->framePointer(), f->idiotRegister(), f->returnValue(), f->stackPointer(), f->smartRegister() };
-    for ( size_t i = 0; i < 5; i++ ) {
+    static const TEMP::Temp* excepts[] = { f->framePointer(), f->idiotRegister(), f->returnValue(), f->stackPointer(), f->smartRegister(), f->radioRegister() };
+    for ( size_t i = 0; i < 6; i++ ) {
         if ( temp == excepts[ i ] ) {
             return true;
         }
