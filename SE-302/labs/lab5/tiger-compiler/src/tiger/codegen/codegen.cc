@@ -279,7 +279,7 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         // CONST(i)
         auto r = TEMP::Temp::NewTemp();
         CG::temp_map->Enter( r, nullptr );
-        auto instr = new AS::OperInstr( "movl $" + std::to_string( i ) + ", `d0", new TEMP::TempList( r, nullptr ), nullptr, nullptr );
+        auto instr = new AS::OperInstr( "movq $" + std::to_string( i ) + ", `d0", new TEMP::TempList( r, nullptr ), nullptr, nullptr );
         return smart_pair( r, nullptr );
     }
     else if ( false && expNode->kind == T::Exp::BINOP && reinterpret_cast< T::BinopExp* >( expNode )->op == T::PLUS_OP ) {
@@ -371,7 +371,7 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         std::cout << "current name: " << e->name->Name() << std::endl;
         auto r = TEMP::Temp::NewTemp();
         CG::temp_map->Enter( r, nullptr );
-        auto instr = new AS::OperInstr( "movl $." + TEMP::LabelString( e->name ) + ", `d0", new TEMP::TempList( r, nullptr ), nullptr, nullptr );
+        auto instr = new AS::OperInstr( "movq " + TEMP::LabelString( e->name ) + ", `d0", new TEMP::TempList( r, nullptr ), nullptr, nullptr );
         return smart_pair( r, new AS::InstrList( instr, nullptr ) );
     }
     else {

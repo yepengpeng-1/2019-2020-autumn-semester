@@ -63,10 +63,10 @@ void do_proc( FILE* out, F::ProcFrag* procFrag ) {
     }
 
     // lab6: register allocation
-    // RA::Result allocation = RA::RegAlloc( procFrag->frame, iList ); /* 11 */
+    RA::Result allocation = RA::RegAlloc( procFrag->frame, iList ); /* 11 */
     std::cout << "regAlloc skipped" << std::endl;
 
-    AS::Proc* proc = CG::F_procEntryExit3( procFrag->frame, /* allocation.il */ iList );
+    AS::Proc* proc = CG::F_procEntryExit3( procFrag->frame, allocation.il );
     std::cout << "F_procEntryExit3 done" << std::endl;
 
     std::string procName = procFrag->frame->name.Name();
@@ -77,7 +77,7 @@ void do_proc( FILE* out, F::ProcFrag* procFrag ) {
     // prologue
     fprintf( out, "%s", proc->prolog.c_str() );
     // body
-    proc->body->Print( out, temp_map );
+    proc->body->Print( out, TEMP::Map::LayerMap( temp_map, allocation.coloring ) );
     // epilog
     fprintf( out, "%s", proc->epilog.c_str() );
     fprintf( out, ".size %s, .-%s\n", procName.c_str(), procName.c_str() );
