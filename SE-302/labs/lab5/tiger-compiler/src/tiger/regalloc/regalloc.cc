@@ -24,6 +24,7 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
         now = now->tail;
     }
 
+    // now = instrL->tail, prev = instrL;
     auto tl = spillL;
     while ( tl ) {
         std::cout << "[regalloc] in while(tl)" << std::endl;
@@ -70,8 +71,7 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
             while ( dst ) {
                 auto head = dst->head;
                 if ( head == tl->head ) {
-                    auto temp = TEMP::Temp::NewTemp();
-
+                    auto temp  = TEMP::Temp::NewTemp();
                     auto store = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr, new TEMP::TempList( f->framePointer(), new TEMP::TempList( temp, nullptr ) ), nullptr );
                     dst->head  = temp;
                     prev       = now;
@@ -163,10 +163,13 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
 
     TEMP::TempList* tList = nullptr;
 
+    std::cout << "\n\n\n\nSPILLED TEMP SHOW\n\n" << std::endl;
     for ( size_t i = 0; i < tempset.size(); i++ ) {
         // spill them all
         tList = new TEMP::TempList( tempset[ i ], tList );
+        std::cout << "gotta spilled temp #" << i << ": t" << tempset[ i ]->Int() << std::endl;
     }
+    std::cout << "\n\n\n\nSPILLED TEMP SHOW OVER\n\n" << std::endl;
 
     auto spill = spillTemp( f, il, tList );
     result.il  = spill;
