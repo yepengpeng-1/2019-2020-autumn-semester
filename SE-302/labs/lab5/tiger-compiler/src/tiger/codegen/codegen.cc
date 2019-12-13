@@ -337,10 +337,13 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
     }
     else if ( expNode->kind == T::Exp::CALL && reinterpret_cast< T::CallExp* >( expNode )->fun->kind == T::Exp::NAME ) {
         std::cout << "[codegen] fallen into CALL" << std::endl;
-        auto args = reinterpret_cast< T::CallExp* >( expNode )->args;
-        auto l    = munchArgs( f, 0, args );
-        auto instr =
-            new AS::OperInstr( "callq `s0", new TEMP::TempList( f->stackPointer(), nullptr /* TODO: add caller saved registers */ ), new TEMP::TempList( f->stackPointer(), nullptr ), nullptr );
+        auto exp     = reinterpret_cast< T::CallExp* >( expNode );
+        auto args    = exp->args;
+        auto funname = reinterpret_cast< T::NameExp* >( reinterpret_cast< T::CallExp* >( expNode )->fun )->name;
+        auto l       = munchArgs( f, 0, args );
+
+        auto instr = new AS::OperInstr( "callq " + funname->Name(), new TEMP::TempList( f->stackPointer(), nullptr /* TODO: add caller saved registers */ ),
+                                        new TEMP::TempList( f->stackPointer(), nullptr ), nullptr );
         return smart_pair( f->returnValue(), combine( l, new AS::InstrList( instr, nullptr ) ) );
         // if ( e->u.CALL.fun->kind == T_NAME ) {
         //     Temp_tempList l = munchArgs( 0, e->u.CALL.args );
