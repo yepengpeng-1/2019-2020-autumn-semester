@@ -51,7 +51,7 @@ void do_proc( FILE* out, F::ProcFrag* procFrag ) {
     fclose( fptr );
 
     // lab5&lab6: code generation
-    AS::InstrList* iList = CG::Codegen( procFrag->frame, stmList ); /* 9 */
+    AS::InstrList* iList = CG::Codegen( procFrag->frame, stmList, temp_map ); /* 9 */
     //  AS_printInstrList(stdout, iList, Temp::Map::LayerMap(temp_map,
     //  Temp_name()));
     std::cout << "Code gen complete!" << std::endl;

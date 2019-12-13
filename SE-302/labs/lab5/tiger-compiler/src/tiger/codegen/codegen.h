@@ -26,7 +26,9 @@ static AS::InstrList* combine( AS::InstrList* as1, AS::InstrList* as2 ) {
 typedef std::pair< TEMP::Temp*, AS::InstrList* > smart_pair;
 // typedef std::pair< TEMP::TempList*, AS::Instr* > smart_args_pair;
 
-AS::InstrList*                                  Codegen( F::Frame* f, T::StmList* stmList );
+static TEMP::Map* temp_map = nullptr;
+
+AS::InstrList*                                  Codegen( F::Frame* f, T::StmList* stmList, TEMP::Map* map );
 static AS::InstrList*                           munchArgs( F::Frame* f, int index, T::ExpList* args );
 static AS::InstrList*                           munchStm( F::Frame* f, T::Stm* stmNode );
 static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* expNode );
@@ -35,13 +37,15 @@ static AS::Proc* F_procEntryExit3( F::Frame* frame, AS::InstrList* body ) {
 
     std::stringstream prologue, epilogue;
     auto              procName = frame->name.Name();
-    prologue << ".text\n"
-             << ".globl " << procName << "\n"
-             << ".type " << procName << "\n"
-             << "@function " << procName << ":\n";
-    std::cout << "Generated prologue:\n" << prologue.str() << std::endl;
+    prologue << std::endl;
+    epilogue << std::endl;
+    // prologue << ".text\n"
+    //          << ".globl " << procName << "\n"
+    //          << ".type " << procName << "\n"
+    //          << "@function " << procName << ":\n";
+    // std::cout << "Generated prologue:\n" << prologue.str() << std::endl;
 
-    epilogue << "nop\n";
+    // epilogue << "nop\n";
     std::cout << "Generated epilogue:\n" << epilogue.str() << std::endl;
 
     auto manageStack      = new AS::OperInstr( "pushq `s0", new TEMP::TempList( frame->stackPointer(), nullptr ),
