@@ -52,10 +52,10 @@ static AS::Proc* F_procEntryExit3( F::Frame* frame, AS::InstrList* body ) {
                                           new TEMP::TempList( frame->framePointer(), new TEMP::TempList( frame->stackPointer(), nullptr ) ), nullptr );
     auto moveCriticalRegs = new AS::OperInstr( "movq `s0, `d0", new TEMP::TempList( frame->framePointer(), nullptr ), new TEMP::TempList( frame->stackPointer(), nullptr ), nullptr );
 
-    auto allocStack = new AS::OperInstr( "subq $" + std::to_string( frame->argCount * F::wordSize ) + ", `d0", new TEMP::TempList( frame->stackPointer(), nullptr ),
+    auto allocStack = new AS::OperInstr( "subq $" + std::to_string( frame->varCount * F::wordSize ) + ", `d0", new TEMP::TempList( frame->stackPointer(), nullptr ),
                                          new TEMP::TempList( frame->stackPointer(), nullptr ), nullptr );
 
-    auto releaseStack = new AS::OperInstr( "addq $" + std::to_string( frame->argCount * F::wordSize ) + ", `d0", new TEMP::TempList( frame->stackPointer(), nullptr ),
+    auto releaseStack = new AS::OperInstr( "addq $" + std::to_string( frame->varCount * F::wordSize ) + ", `d0", new TEMP::TempList( frame->stackPointer(), nullptr ),
                                            new TEMP::TempList( frame->stackPointer(), nullptr ), nullptr );
     auto returnInstr  = new AS::OperInstr( "ret", nullptr, nullptr, nullptr );
 

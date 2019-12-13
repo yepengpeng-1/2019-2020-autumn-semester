@@ -27,14 +27,14 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
     // now = instrL->tail, prev = instrL;
     auto tl = spillL;
     while ( tl ) {
-        std::cout << "[regalloc] in while(tl)" << std::endl;
+        // std::cout << "[regalloc] in while(tl)" << std::endl;
         auto head   = tl->head;
         auto newAcc = TR::AllocLocalWrapped( f, "t" + std::to_string( head->Int() ) );
         tl          = tl->tail;
         int  offset = reinterpret_cast< F::InFrameAccess* >( newAcc )->offset;
         auto now = instrL->tail, prev = instrL;
         while ( now ) {
-            std::cout << "[regalloc] in while(now)" << std::endl;
+            // std::cout << "[regalloc] in while(now)" << std::endl;
             TEMP::TempList *src, *dst;
             auto            head = now->head;
             if ( head->kind == AS::Instr::Kind::LABEL ) {
@@ -114,6 +114,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
             {
                 auto temps = moveInstr->dst;
                 while ( temps ) {
+                    std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
                     if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                         tempset.push_back( temps->head );
                     }
@@ -124,6 +125,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
             {
                 auto temps = moveInstr->src;
                 while ( temps ) {
+                    std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
                     if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                         tempset.push_back( temps->head );
                     }
@@ -137,6 +139,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
             {
                 auto temps = operInstr->dst;
                 while ( temps ) {
+                    std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
                     if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                         tempset.push_back( temps->head );
                     }
@@ -147,6 +150,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
             {
                 auto temps = operInstr->src;
                 while ( temps ) {
+                    std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
                     if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                         tempset.push_back( temps->head );
                     }
