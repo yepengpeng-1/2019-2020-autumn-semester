@@ -119,10 +119,12 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
     }
     else if ( stmNode->kind == T::Stm::CJUMP ) {
         std::cout << "[codegen] fallen into CJUMP" << std::endl;
+
         std::string assem;
-        auto        e     = reinterpret_cast< T::CjumpStm* >( stmNode );
-        auto        left  = e->left;
-        auto        right = e->right;
+        auto        e = reinterpret_cast< T::CjumpStm* >( stmNode );
+        std::cout << "\te->true_label" << e->true_label << "@" << e->true_label->Name() << ", false_label = " << e->false_label->Name() << std::endl;
+        auto left  = e->left;
+        auto right = e->right;
         switch ( e->op ) {
         case T::EQ_OP:
             assem = "je";
@@ -151,8 +153,8 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
         auto leftMunch = munchExp( f, left ), rightMunch = munchExp( f, right );
 
         auto compareInstr = new AS::OperInstr( "cmpq `s1, `s0", nullptr, new TEMP::TempList( leftMunch.first, new TEMP::TempList( rightMunch.first, nullptr ) ), nullptr );
-        auto cjumpInstr   = new AS::OperInstr( assem + " " + TEMP::LabelString( e->true_label ), nullptr, nullptr,
-                                             new AS::Targets( new TEMP::LabelList( e->true_label, new TEMP::LabelList( e->false_label, nullptr ) ) ) );
+        auto cjumpInstr =
+            new AS::OperInstr( assem + " " + e->true_label->Name(), nullptr, nullptr, new AS::Targets( new TEMP::LabelList( e->true_label, new TEMP::LabelList( e->false_label, nullptr ) ) ) );
 
         auto instrList = new AS::InstrList( compareInstr, new AS::InstrList( cjumpInstr, nullptr ) );
         return combine( leftMunch.second, combine( rightMunch.second, instrList ) );
