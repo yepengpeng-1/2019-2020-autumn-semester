@@ -42,7 +42,13 @@ static AS::Proc* F_procEntryExit3( F::Frame* frame, AS::InstrList* body ) {
     // prologue << ".text\n"
     //          << ".globl " << procName << "\n"
     //          << ".type " << procName << "\n"
-    //          << "@function " << procName << ":\n";
+    std::cout << "[codegen] F_procEntryExit3 frame->functionName = " << frame->functionName << std::endl;
+    if ( frame->functionName == "" ) {
+        prologue << procName << ":\n";
+    }
+    else {
+        prologue << frame->functionName << ":\n";
+    }
     // std::cout << "Generated prologue:\n" << prologue.str() << std::endl;
 
     // epilogue << "nop\n";

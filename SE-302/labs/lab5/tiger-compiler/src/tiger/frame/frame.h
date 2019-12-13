@@ -65,6 +65,8 @@ public:
     int            argCount, varCount;
     F::AccessList *args, *vars;
 
+    std::string functionName;
+
     F::Frame* lastFrame;
 
     F::Access* InFrame( int offset ) {

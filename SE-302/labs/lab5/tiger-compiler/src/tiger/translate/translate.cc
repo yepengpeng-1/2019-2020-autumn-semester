@@ -71,6 +71,7 @@ public:
     Level* NewLevel( Level* parent, TEMP::Label* name, U::BoolList* formals ) {
         std::cout << "called new level. label: " << name->Name() << std::endl;
         auto frame = FRM::newFrame( *name, new U::BoolList( true, "__STATIC_LINK__", formals ), this->frame );
+        frame->functionName = "";
         return new Level( frame, this );
     }
 };
@@ -261,6 +262,7 @@ void addLoop( TEMP::Label* set ) {
 }
 
 void popLoop() {
+    return;
     std::cout << "called popLoop. " << std::endl;
     assert( looprec.size() );
     looprec.pop_back();
@@ -1019,6 +1021,8 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
     std::cout << "Entered ForExp::Translate." << std::endl;
 
     auto done = TEMP::NewLabel(), start = TEMP::NewLabel(), t = TEMP::NewLabel();
+    TR::addLoop(done);
+
     auto loTrans = this->lo->Translate( venv, tenv, level, done );
     std::cout << "loTrans success. loTrans.exp = " << loTrans.exp << std::endl;
     auto hiTrans = this->hi->Translate( venv, tenv, level, done );
@@ -1052,8 +1056,8 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
 
 TR::ExpAndTy BreakExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered BreakExp::Translate." << std::endl;
-    return TR::ExpAndTy(new TR::ExExp(new T::ConstExp(0)), TY::VoidTy::Instance());
-    // return TR::ExpAndTy( new TR::NxExp( new T::JumpStm( new T::NameExp( TR::getLastLoop() ), new TEMP::LabelList( TR::getLastLoop(), nullptr ) ) ), TY::VoidTy::Instance() );
+    // return TR::ExpAndTy(new TR::ExExp(new T::ConstExp(0)), TY::VoidTy::Instance());
+    return TR::ExpAndTy( new TR::NxExp( new T::JumpStm( new T::NameExp( TR::getLastLoop() ), new TEMP::LabelList( TR::getLastLoop(), nullptr ) ) ), TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy LetExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -1172,6 +1176,9 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         }
 
         auto          newlevel = level->NewLevel( level, TEMP::NamedLabel( f->name->Name() ), start );
+        level = newlevel;
+        // newlevel->frame->name = *TEMP::NamedLabel(f->name->Name());
+        newlevel->frame->functionName = f->name->Name();
         A::FieldList* fl       = nullptr;
         TY::TyList*   t        = formalTys;
         std::cout << "gonna build formals." << std::endl;
@@ -1193,30 +1200,37 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         exps.push_back( finalExp );
         // Tr_procEntryExit(new_level, final_exp, Tr_formals(new_level));
         venv->EndScope();
+
+        TR::addFragment( new F::ProcFrag( e.exp->UnNx(), newlevel->frame ) );
         func = func->tail;
     }
 
-    assert( exps.size() );
-    if ( exps.size() == 1 ) {
-        return new TR::NxExp( exps[ 0 ]->UnNx() );
-    }
-    else if ( exps.size() == 2 ) {
-        return new TR::NxExp( new T::SeqStm( exps[ 0 ]->UnNx(), exps[ 1 ]->UnNx() ) );
-    }
-    else {
-        auto stm  = new T::SeqStm( exps[ 0 ]->UnNx(), nullptr );
-        auto head = stm;
-        for ( size_t i = 1; i < exps.size(); i++ ) {
-            if ( i == exps.size() - 1 ) {
-                stm->right = exps[ i ]->UnNx();
-            }
-            else {
-                stm->right = new T::SeqStm( exps[ i ]->UnNx(), nullptr );
-                stm        = reinterpret_cast< T::SeqStm* >( stm->right );
-            }
+
+    if (false) {
+        // misused return of functiondec
+        assert( exps.size() );
+        if ( exps.size() == 1 ) {
+            return new TR::NxExp( exps[ 0 ]->UnNx() );
         }
-        return new TR::NxExp( head );
+        else if ( exps.size() == 2 ) {
+            return new TR::NxExp( new T::SeqStm( exps[ 0 ]->UnNx(), exps[ 1 ]->UnNx() ) );
+        }
+        else {
+            auto stm  = new T::SeqStm( exps[ 0 ]->UnNx(), nullptr );
+            auto head = stm;
+            for ( size_t i = 1; i < exps.size(); i++ ) {
+                if ( i == exps.size() - 1 ) {
+                    stm->right = exps[ i ]->UnNx();
+                }
+                else {
+                    stm->right = new T::SeqStm( exps[ i ]->UnNx(), nullptr );
+                    stm        = reinterpret_cast< T::SeqStm* >( stm->right );
+                }
+            }
+            return new TR::NxExp( head );
+        }
     }
+    return new TR::NxExp( new T::ExpStm(new T::ConstExp(0)) );
 }
 
 TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {

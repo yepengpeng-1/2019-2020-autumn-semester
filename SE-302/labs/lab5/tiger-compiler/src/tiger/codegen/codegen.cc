@@ -354,13 +354,13 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         return smart_pair( t, nullptr );
     }
     else if ( expNode->kind == T::Exp::CALL && reinterpret_cast< T::CallExp* >( expNode )->fun->kind == T::Exp::NAME ) {
-        std::cout << "[codegen] fallen into CALL" << std::endl;
+        std::cout << "[codegen] fallen into CALL." << std::endl;
         auto exp     = reinterpret_cast< T::CallExp* >( expNode );
         auto args    = exp->args;
         auto funname = reinterpret_cast< T::NameExp* >( reinterpret_cast< T::CallExp* >( expNode )->fun )->name;
         auto l       = munchArgs( f, 0, args );
-
-        auto instr = new AS::OperInstr( "callq " + funname->Name(), new TEMP::TempList( f->stackPointer(), nullptr /* TODO: add caller saved registers */ ),
+        std::cout << "\tcallq's funname = " << funname->Name() << ", TEMP::LabelString(funname) = " << TEMP::LabelString( funname ) << std::endl;
+        auto instr = new AS::OperInstr( "callq " + TEMP::LabelString( funname ), new TEMP::TempList( f->stackPointer(), nullptr /* TODO: add caller saved registers */ ),
                                         new TEMP::TempList( f->stackPointer(), nullptr ), nullptr );
         return smart_pair( f->returnValue(), combine( l, new AS::InstrList( instr, nullptr ) ) );
     }
