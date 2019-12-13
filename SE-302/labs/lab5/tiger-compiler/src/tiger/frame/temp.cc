@@ -1,6 +1,7 @@
 #include "tiger/frame/temp.h"
 
 #include <cstdio>
+#include <iostream>
 #include <sstream>
 
 namespace {
@@ -37,6 +38,9 @@ Temp* Temp::NewTemp() {
     std::stringstream stream;
     stream << p->num;
     Map::Name()->Enter( p, new std::string( stream.str() ) );
+
+    // comment the following line after debugging
+    // std::cout << "[temp] [new/temp] called NewTemp, and get a " << p->Int() << std::endl;
     return p;
 }
 

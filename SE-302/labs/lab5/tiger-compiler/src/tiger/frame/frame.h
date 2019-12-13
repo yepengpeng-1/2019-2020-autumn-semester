@@ -72,40 +72,40 @@ public:
     }  // namespace F
 
     static TEMP::Temp* framePointer() {
-        std::cout << "framePointer register requested" << std::endl;
+        // std::cout << "framePointer register requested" << std::endl;
         static TEMP::Temp* fp = nullptr;
         if ( !fp ) {
             std::cout << "gonna return new framePointer register" << std::endl;
             fp = TEMP::Temp::NewTemp();
         }
         else {
-            std::cout << "gonna return existed framePointer register" << std::endl;
+            // std::cout << "gonna return existed framePointer register" << std::endl;
         }
         return fp;
     }
 
     static TEMP::Temp* stackPointer() {
-        std::cout << "stackPointer register requested" << std::endl;
+        // std::cout << "stackPointer register requested" << std::endl;
         static TEMP::Temp* sp = nullptr;
         if ( !sp ) {
             std::cout << "gonna return new stackPointer register" << std::endl;
             sp = TEMP::Temp::NewTemp();
         }
         else {
-            std::cout << "gonna return existed stackPointer register" << std::endl;
+            // std::cout << "gonna return existed stackPointer register" << std::endl;
         }
         return sp;
     }
 
     static TEMP::Temp* returnValue() {
-        std::cout << "returnValue register requested" << std::endl;
+        // std::cout << "returnValue register requested" << std::endl;
         static TEMP::Temp* rp = nullptr;
         if ( !rp ) {
             std::cout << "gonna return new returnValue register" << std::endl;
             rp = TEMP::Temp::NewTemp();
         }
         else {
-            std::cout << "gonna return existed returnValue register" << std::endl;
+            // std::cout << "gonna return existed returnValue register" << std::endl;
         }
         return rp;
     }

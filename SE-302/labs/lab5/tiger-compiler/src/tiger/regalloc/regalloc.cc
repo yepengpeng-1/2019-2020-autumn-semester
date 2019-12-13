@@ -6,15 +6,13 @@
 namespace RA {
 
 static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempList* spillL ) {
-    instrL = new AS::InstrList( nullptr, instrL );
-    TEMP::TempList* tempL;
-    auto            now = instrL->tail, prev = instrL;
+    auto now = instrL->tail, prev = instrL;
 
     while ( now ) {
         auto as = now->head;
 
         if ( as->kind == AS::Instr::Kind::MOVE && reinterpret_cast< AS::MoveInstr* >( as )->src->head == reinterpret_cast< AS::MoveInstr* >( as )->dst->head ) {
-            // Move(to: Here()), useless
+            // 原地 tp
             prev->tail = now->tail;
             // ignore this node
         }
@@ -27,14 +25,14 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
     // now = instrL->tail, prev = instrL;
     auto tl = spillL;
     while ( tl ) {
-        // std::cout << "[regalloc] in while(tl)" << std::endl;
+        // std::cout << "[regalloc] in while(tl). tl = " << tl << std::endl;
         auto head   = tl->head;
         auto newAcc = TR::AllocLocalWrapped( f, "t" + std::to_string( head->Int() ) );
-        tl          = tl->tail;
+
         int  offset = reinterpret_cast< F::InFrameAccess* >( newAcc )->offset;
         auto now = instrL->tail, prev = instrL;
         while ( now ) {
-            // std::cout << "[regalloc] in while(now)" << std::endl;
+            // std::cout << "[regalloc] in while(now). now = " << now << std::endl;
             TEMP::TempList *src, *dst;
             auto            head = now->head;
             if ( head->kind == AS::Instr::Kind::LABEL ) {
@@ -57,26 +55,30 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
             }
 
             while ( src ) {
-                auto head = src->head;
-                if ( head == tl->head ) {
+                // std::cout << "while loop of src: " << src << ", which->head = " << src->head << std::endl;
+                // auto head = src->head;
+                if ( src->head == tl->head ) {
                     auto temp  = TEMP::Temp::NewTemp();
                     auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( temp, nullptr ), new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
                     src->head  = temp;
                     prev->tail = new AS::InstrList( load, now );
                     prev       = prev->tail;
+                    break;
                 }
                 src = src->tail;
             }
 
             while ( dst ) {
-                auto head = dst->head;
-                if ( head == tl->head ) {
+                // std::cout << "while loop of dst: " << dst << std::endl;
+                // auto head = dst->head;
+                if ( dst->head == tl->head ) {
                     auto temp  = TEMP::Temp::NewTemp();
                     auto store = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr, new TEMP::TempList( f->framePointer(), new TEMP::TempList( temp, nullptr ) ), nullptr );
                     dst->head  = temp;
                     prev       = now;
                     now->tail  = new AS::InstrList( store, now->tail );
                     now        = now->tail;
+                    break;
                 }
                 dst = dst->tail;
             }
@@ -86,103 +88,110 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
         }
         tl = tl->tail;
     }
-    instrL = instrL->tail;
     return instrL;
 }
 
 Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
     // TODO: Put your codes here (lab6).
     auto result     = Result();
-    result.il       = il;
     result.coloring = TEMP::Map::Empty();
-
-    // TEMP::TempList* temps = nullptr;
     std::vector< TEMP::Temp* > tempset;
-    auto                       til = il;
-    while ( til ) {
-        std::cout << "[regalloc] in while(til)" << std::endl;
-        auto head = til->head;
-        til       = til->tail;
+    while ( true ) {
 
-        switch ( head->kind ) {
-        case AS::Instr::Kind::LABEL:
-            // auto labelInstr = reinterpret_cast< AS::LabelInstr* >( head );
-            // no available Temp* for LabelInstr.
-            break;
-        case AS::Instr::Kind::MOVE: {
-            auto moveInstr = reinterpret_cast< AS::MoveInstr* >( head );
-            {
-                auto temps = moveInstr->dst;
-                while ( temps ) {
-                    std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                    if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
-                        tempset.push_back( temps->head );
-                    }
-                    temps = temps->tail;
-                }
-            }
+        // TEMP::TempList* temps = nullptr;
+        auto til = il;
+        while ( til ) {
+            std::cout << "[regalloc] in while(til)" << std::endl;
+            auto head = til->head;
+            std::cout << "this instr kind = " << head->kind << std::endl;
+            til = til->tail;
 
-            {
-                auto temps = moveInstr->src;
-                while ( temps ) {
-                    std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                    if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
-                        tempset.push_back( temps->head );
-                    }
-                    temps = temps->tail;
-                }
+            switch ( head->kind ) {
+            case AS::Instr::Kind::LABEL: {
+                auto labelInstr = reinterpret_cast< AS::LabelInstr* >( head );
+                std::cout << "[regalloc] [spillcheck] gotta an LabelInstr, name = " << labelInstr->label->Name() << std::endl;
+                // no available Temp* for LabelInstr.
+                break;
             }
-        } break;
-        case AS::Instr::Kind::OPER: {
-            auto operInstr = reinterpret_cast< AS::OperInstr* >( head );
+            case AS::Instr::Kind::MOVE: {
+                auto moveInstr = reinterpret_cast< AS::MoveInstr* >( head );
+                {
+                    auto temps = moveInstr->dst;
+                    while ( temps ) {
+                        std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
+                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                            tempset.push_back( temps->head );
+                        }
+                        temps = temps->tail;
+                    }
+                }
 
-            {
-                auto temps = operInstr->dst;
-                while ( temps ) {
-                    std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                    if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
-                        tempset.push_back( temps->head );
+                {
+                    auto temps = moveInstr->src;
+                    while ( temps ) {
+                        std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
+                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                            tempset.push_back( temps->head );
+                        }
+                        temps = temps->tail;
                     }
-                    temps = temps->tail;
                 }
-            }
+            } break;
+            case AS::Instr::Kind::OPER: {
+                auto operInstr = reinterpret_cast< AS::OperInstr* >( head );
+                {
+                    auto temps = operInstr->dst;
+                    while ( temps ) {
+                        std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
+                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                            tempset.push_back( temps->head );
+                        }
+                        temps = temps->tail;
+                    }
+                }
 
-            {
-                auto temps = operInstr->src;
-                while ( temps ) {
-                    std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                    if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
-                        tempset.push_back( temps->head );
+                {
+                    auto temps = operInstr->src;
+                    while ( temps ) {
+                        std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
+                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                            tempset.push_back( temps->head );
+                        }
+                        temps = temps->tail;
                     }
-                    temps = temps->tail;
                 }
+            } break;
+            default:
+                std::cout << "[regalloc] invalid instr type " << head->kind << std::endl;
+                assert( 0 );
+                break;
             }
-        } break;
-        default:
-            std::cout << "[regalloc] invalid instr type " << head->kind << std::endl;
-            assert( 0 );
+        }
+
+        TEMP::TempList* tList = nullptr;
+
+        std::cout << "\n\n\n\nSPILLED TEMP SHOW\n\n" << std::endl;
+        for ( size_t i = 0; i < tempset.size(); i++ ) {
+            // spill them all
+            tList = new TEMP::TempList( tempset[ i ], tList );
+            // std::cout << "gotta spilled temp #" << i << ": t" << tempset[ i ]->Int() << std::endl;
+        }
+        std::cout << "\n\n\n\nSPILLED TEMP SHOW OVER\n\n" << std::endl;
+
+        if ( tempset.size() != 0 ) {
+            std::cout << "[regalloc] relsama houwy" << std::endl;
+            // relsama houwy
+            il = spillTemp( f, il, tList );
+        }
+        else {
+            std::cout << "[regalloc] over then, I suppose." << std::endl;
+            // no more spilled nodes. bye
+            result.il = il;
             break;
         }
+        // ...or, re-scan the program, again and again.
+        tempset.clear();
     }
-
-    TEMP::TempList* tList = nullptr;
-
-    std::cout << "\n\n\n\nSPILLED TEMP SHOW\n\n" << std::endl;
-    for ( size_t i = 0; i < tempset.size(); i++ ) {
-        // spill them all
-        tList = new TEMP::TempList( tempset[ i ], tList );
-        std::cout << "gotta spilled temp #" << i << ": t" << tempset[ i ]->Int() << std::endl;
-    }
-    std::cout << "\n\n\n\nSPILLED TEMP SHOW OVER\n\n" << std::endl;
-
-    auto spill = spillTemp( f, il, tList );
-    result.il  = spill;
-    // G::Gra           flow      = FG_AssemFlowGraph( il, f );
-    // struct Live_graph liveness  = Live_liveness( flow );
-    // struct COL_result colResult = COL_color( liveness.graph, F_initial(), F_registers(), liveness.moves, liveness.adjSet, liveness.table );
-    // if ( colResult.spills != NULL ) {
-    //     il = rewriteProgram( f, il, colResult.spills, colResult.tempAlias );
-    // AS_printInstrList(stdout, il, Temp_layerMap(F_tempMap, Temp_name()));
     return result;
 }
 
