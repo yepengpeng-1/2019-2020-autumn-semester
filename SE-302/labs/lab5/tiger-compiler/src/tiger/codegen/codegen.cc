@@ -2,20 +2,6 @@
 
 namespace CG {
 
-static AS::InstrList* combine( AS::InstrList* as1, AS::InstrList* as2 ) {
-    if ( !as1 ) {
-        return as2;
-    }
-
-    auto head = as1;
-    while ( as1->tail ) {
-        as1 = as1->tail;
-    }
-
-    as1->tail = as2;
-    return head;
-}
-
 static AS::InstrList* munchArgs( F::Frame* f, int index, T::ExpList* args ) {
     if ( !args ) {
         return nullptr;
@@ -121,14 +107,14 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
         auto e2 = reinterpret_cast< T::MoveStm* >( stmNode )->src;
         // auto r     = TEMP::Temp::NewTemp();
         auto e2munch = munchExp( f, e2 );
-        auto instr   = new AS::OperInstr( "ADD `d0 <- `s0 + r0\n", nullptr, new TEMP::TempList( e2munch.first, nullptr ), nullptr );
+        auto instr   = new AS::MoveInstr( "ADD `d0 <- `s0 + r0\n", new TEMP::TempList( t, nullptr ), new TEMP::TempList( e2munch.first, nullptr ) );
         return combine( e2munch.second, new AS::InstrList( instr, nullptr ) );
     }
     else if ( stmNode->kind == T::Stm::LABEL ) {
         std::cout << "[codegen] fallen into LABEL" << std::endl;
         auto lab = reinterpret_cast< T::LabelStm* >( stmNode )->label;
         std::cout << "I'm trying to find the label " << lab->Name() << std::endl;
-        auto instr = new AS::LabelInstr( TEMP::LabelString( lab ) + ":\n", lab );
+        auto instr = new AS::LabelInstr( lab->Name() + ":\n", lab );
         return new AS::InstrList( instr, nullptr );
     }
     else if ( stmNode->kind == T::Stm::CJUMP ) {
@@ -163,7 +149,7 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
         }
         auto leftMunch = munchExp( f, left ), rightMunch = munchExp( f, right );
 
-        auto compareInstr = new AS::OperInstr( "cmpl `s1, `s0", nullptr, new TEMP::TempList( leftMunch.first, new TEMP::TempList( rightMunch.first, nullptr ) ), nullptr );
+        auto compareInstr = new AS::OperInstr( "cmpq `s1, `s0", nullptr, new TEMP::TempList( leftMunch.first, new TEMP::TempList( rightMunch.first, nullptr ) ), nullptr );
         auto cjumpInstr   = new AS::OperInstr( assem, nullptr, nullptr, new AS::Targets( new TEMP::LabelList( e->true_label, new TEMP::LabelList( e->false_label, nullptr ) ) ) );
 
         auto instrList = new AS::InstrList( compareInstr, new AS::InstrList( cjumpInstr, nullptr ) );
@@ -299,6 +285,7 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         return smart_pair( r, combine( combine( e1munch.second, e2munch.second ), new AS::InstrList( instr, nullptr ) ) );
     }
     else if ( expNode->kind == T::Exp::BINOP ) {
+        std::cout << "[codegen] fallen into BINOP" << std::endl;
         auto e  = reinterpret_cast< T::BinopExp* >( expNode );
         auto e1 = e->left, e2 = e->right;
 
@@ -337,9 +324,10 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
     }
     else if ( expNode->kind == T::Exp::CALL && reinterpret_cast< T::CallExp* >( expNode )->fun->kind == T::Exp::NAME ) {
         std::cout << "[codegen] fallen into CALL" << std::endl;
-        auto args  = reinterpret_cast< T::CallExp* >( expNode )->args;
-        auto l     = munchArgs( f, 0, args );
-        auto instr = new AS::OperInstr( "CALL `s0\n", nullptr, nullptr, nullptr );
+        auto args = reinterpret_cast< T::CallExp* >( expNode )->args;
+        auto l    = munchArgs( f, 0, args );
+        auto instr =
+            new AS::OperInstr( "CALL `s0\n", new TEMP::TempList( f->stackPointer(), nullptr /* TODO: add caller saved registers */ ), new TEMP::TempList( f->stackPointer(), nullptr ), nullptr );
         return smart_pair( f->returnValue(), combine( l, new AS::InstrList( instr, nullptr ) ) );
         // if ( e->u.CALL.fun->kind == T_NAME ) {
         //     Temp_tempList l = munchArgs( 0, e->u.CALL.args );
@@ -367,7 +355,8 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
     }
     else if ( expNode->kind == T::Exp::NAME ) {
         std::cout << "[codegen] fallen into NAME" << std::endl;
-        auto e     = reinterpret_cast< T::NameExp* >( expNode );
+        auto e = reinterpret_cast< T::NameExp* >( expNode );
+        std::cout << "current name: " << e->name->Name() << std::endl;
         auto r     = TEMP::Temp::NewTemp();
         auto instr = new AS::OperInstr( "movl $." + TEMP::LabelString( e->name ) + ", `d0", new TEMP::TempList( r, nullptr ), nullptr, nullptr );
         return smart_pair( r, new AS::InstrList( instr, nullptr ) );
@@ -384,6 +373,7 @@ AS::InstrList* Codegen( F::Frame* f, T::StmList* stmList ) {
     if ( stmList == nullptr ) {
         return nullptr;
     }
+
     std::cout << "[as] [codegen] stmList called" << std::endl;
     AS::InstrList* node    = nullptr;
     auto           stmNode = stmList->head;

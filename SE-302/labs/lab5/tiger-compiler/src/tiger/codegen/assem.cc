@@ -26,6 +26,7 @@ namespace AS {
  * Last param is function to use to determine what to do with each temp.
  */
 static std::string format( std::string assem, TEMP::TempList* dst, TEMP::TempList* src, Targets* jumps, TEMP::Map* m ) {
+    std::cout << "[instr] Format called. assem = " << assem << ", dst = " << dst << ", src = " << src << std::endl;
     std::string result;
     for ( int i = 0; i < assem.size(); i++ ) {
         char ch = assem.at( i );
@@ -34,20 +35,33 @@ static std::string format( std::string assem, TEMP::TempList* dst, TEMP::TempLis
             switch ( assem.at( i ) ) {
             case 's': {
                 i++;
-                int          n = assem.at( i ) - '0';
+                int n = assem.at( i ) - '0';
+                std::cout << "\t[instr] [format] got a `s = " << nth_temp( src, n )->Int() << std::endl;
                 std::string* s = m->Look( nth_temp( src, n ) );
-                result += *s;
+                if ( s ) {
+                    result += *s;
+                }
+                else {
+                    result += "t" + std::to_string( nth_temp( src, n )->Int() );
+                }
             } break;
             case 'd': {
                 i++;
-                int          n = assem.at( i ) - '0';
+                int n = assem.at( i ) - '0';
+                std::cout << "\t[instr] [format] got a `d = " << nth_temp( dst, n )->Int() << std::endl;
                 std::string* s = m->Look( nth_temp( dst, n ) );
-                result += *s;
+                if ( s ) {
+                    result += *s;
+                }
+                else {
+                    result += "t" + std::to_string( nth_temp( dst, n )->Int() );
+                }
             } break;
             case 'j': {
                 i++;
                 assert( jumps );
-                int         n = assem.at( i ) - '0';
+                int n = assem.at( i ) - '0';
+                std::cout << "\t[instr] [format] got a `j = " << nth_label( jumps->labels, n )->Name() << std::endl;
                 std::string s = TEMP::LabelString( nth_label( jumps->labels, n ) );
                 result += s;
             } break;
@@ -66,16 +80,19 @@ static std::string format( std::string assem, TEMP::TempList* dst, TEMP::TempLis
 }
 
 void OperInstr::Print( FILE* out, TEMP::Map* m ) const {
+    std::cout << "[instr] OperInstr::Print called." << std::endl;
     std::string result = format( this->assem, this->dst, this->src, this->jumps, m );
     fprintf( out, "%s\n", result.c_str() );
 }
 
 void LabelInstr::Print( FILE* out, TEMP::Map* m ) const {
+    std::cout << "[instr] LabelInstr::Print called." << std::endl;
     std::string result = format( this->assem, nullptr, nullptr, nullptr, m );
     fprintf( out, "%s:\n", result.c_str() );
 }
 
 void MoveInstr::Print( FILE* out, TEMP::Map* m ) const {
+    std::cout << "[instr] MoveInstr::Print called." << std::endl;
     if ( ( this->dst == nullptr ) && ( this->src == nullptr ) ) {
         std::size_t srcpos = this->assem.find_first_of( '%' );
         if ( srcpos != std::string::npos ) {
@@ -92,6 +109,7 @@ void MoveInstr::Print( FILE* out, TEMP::Map* m ) const {
 }
 
 void InstrList::Print( FILE* out, TEMP::Map* m ) const {
+    std::cout << "[instr] InstrList::Print called." << std::endl;
     const InstrList* p = this;
     for ( ; p; p = p->tail ) {
         p->head->Print( out, m );

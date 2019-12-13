@@ -8,12 +8,12 @@
 namespace RA {
 
 class Result {
- public:
-  TEMP::Map* coloring;
-  AS::InstrList* il;
+public:
+    TEMP::Map*     coloring;
+    AS::InstrList* il;
 };
 
-Result RegAlloc(F::Frame* f, AS::InstrList* il);
+Result RegAlloc( F::Frame* f, AS::InstrList* il );
 
 }  // namespace RA
 

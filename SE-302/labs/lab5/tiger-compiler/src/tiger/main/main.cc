@@ -43,28 +43,45 @@ void do_proc( FILE* out, F::ProcFrag* procFrag ) {
     //  stmList->Print(stdout);
     //  printf("-------====trace=====-----\n");
 
+    FILE* fptr;
+    fptr = fopen( "canoned.s", "a" );
+    fprintf( fptr, "\n\n\n============================\n\n\n\n" );
+    stmList->Print( fptr );
+    std::cout << " ~~~~ Completed Printing ~~~~" << std::endl;
+    fclose( fptr );
+
     // lab5&lab6: code generation
     AS::InstrList* iList = CG::Codegen( procFrag->frame, stmList ); /* 9 */
     //  AS_printInstrList(stdout, iList, Temp::Map::LayerMap(temp_map,
     //  Temp_name()));
+    std::cout << "Code gen complete!" << std::endl;
+
+    auto forgeIlist = iList;
+    while ( forgeIlist ) {
+        auto head  = forgeIlist->head;
+        forgeIlist = forgeIlist->tail;
+    }
 
     // lab6: register allocation
-    //  printf("----======before RA=======-----\n");
-    RA::Result allocation = RA::RegAlloc( procFrag->frame, iList ); /* 11 */
-    //  printf("----======after RA=======-----\n");
+    // RA::Result allocation = RA::RegAlloc( procFrag->frame, iList ); /* 11 */
+    std::cout << "regAlloc skipped" << std::endl;
 
-    AS::Proc* proc = CG::F_procEntryExit3( procFrag->frame, allocation.il );
+    AS::Proc* proc = CG::F_procEntryExit3( procFrag->frame, /* allocation.il */ iList );
+    std::cout << "F_procEntryExit3 done" << std::endl;
 
     std::string procName = procFrag->frame->name.Name();
+    std::cout << "procName = " << procName << std::endl;
+
     fprintf( out, ".globl %s\n", procName.c_str() );
     fprintf( out, ".type %s, @function\n", procName.c_str() );
     // prologue
     fprintf( out, "%s", proc->prolog.c_str() );
     // body
-    proc->body->Print( out, TEMP::Map::LayerMap( temp_map, allocation.coloring ) );
+    proc->body->Print( out, temp_map );
     // epilog
     fprintf( out, "%s", proc->epilog.c_str() );
     fprintf( out, ".size %s, .-%s\n", procName.c_str(), procName.c_str() );
+    std::cout << "All done" << std::endl;
 }
 
 void do_str( FILE* out, F::StringFrag* strFrag ) {
