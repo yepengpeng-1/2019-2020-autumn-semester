@@ -70,7 +70,7 @@ public:
 
     Level* NewLevel( Level* parent, TEMP::Label* name, U::BoolList* formals ) {
         std::cout << "called new level. label: " << name->Name() << std::endl;
-        auto frame = FRM::newFrame( *name, new U::BoolList( true, "__STATIC_LINK__", formals ), this->frame );
+        auto frame          = FRM::newFrame( *name, new U::BoolList( true, "__STATIC_LINK__", formals ), this->frame );
         frame->functionName = "";
         return new Level( frame, this );
     }
@@ -216,7 +216,6 @@ static Access* AllocLocal( Level* level, bool escape, std::string sym ) {
 // static F::Access * TR::AllocLocalWrapped(F::Frame * f, std::string sym)
 // F::Access *TR::AllocLocalWrapped(F::Frame *f, std::__1::string sym)
 
-
 PatchList* join_patch( PatchList* first, PatchList* second ) {
     if ( !first )
         return second;
@@ -289,7 +288,7 @@ TEMP::Label* getLastLoop() {
 F::FragList* TranslateProgram( A::Exp* root ) {
     std::cout << "Called TranslateProgram(A::Exp* root)." << std::endl;
 
-    auto mainLevel = Outermost()->NewLevel(Outermost(), TEMP::NamedLabel("tigermain"), nullptr);
+    auto mainLevel = Outermost()->NewLevel( Outermost(), TEMP::NamedLabel( "tigermain" ), nullptr );
 
     auto totalProgram = root->Translate( E::BaseVEnv(), E::BaseTEnv(), mainLevel, nullptr );
     addFragment( new F::ProcFrag( totalProgram.exp->UnNx(), mainLevel->frame ) );
@@ -973,7 +972,8 @@ TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >
             new T::SeqStm( cx.stm, new T::SeqStm( new T::LabelStm( t ), new T::SeqStm( new T::MoveStm( r, thenT.exp->UnEx() ),
                                                                                        new T::SeqStm( new T::JumpStm( new T::NameExp( done ), new TEMP::LabelList( done, nullptr ) ),
                                                                                                       new T::SeqStm( new T::LabelStm( f ), new T::SeqStm( new T::MoveStm( r, elseT.exp->UnEx() ),
-                                                                                                                                                          new T::LabelStm( done ) ) ) ) ) ) ), r ) );
+                                                                                                                                                          new T::LabelStm( done ) ) ) ) ) ) ),
+            r ) );
 
         return TR::ExpAndTy( finExp, ifReturnType );
     }
@@ -1021,7 +1021,7 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
     std::cout << "Entered ForExp::Translate." << std::endl;
 
     auto done = TEMP::NewLabel(), start = TEMP::NewLabel(), t = TEMP::NewLabel();
-    TR::addLoop(done);
+    TR::addLoop( done );
 
     auto loTrans = this->lo->Translate( venv, tenv, level, done );
     std::cout << "loTrans success. loTrans.exp = " << loTrans.exp << std::endl;
@@ -1035,8 +1035,8 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
     }
 
     venv->BeginScope();
-    auto loopVar   = TR::AllocLocal( level, true, this->var->Name() );
-    auto envEntry  = new E::VarEntry(loopVar, TY::IntTy::Instance(), true);
+    auto loopVar  = TR::AllocLocal( level, true, this->var->Name() );
+    auto envEntry = new E::VarEntry( loopVar, TY::IntTy::Instance(), true );
 
     venv->Enter( this->var, envEntry );
     auto newAccess     = new F::InFrameAccess( level->frame->varCount * ( -F::wordSize ) );
@@ -1045,13 +1045,16 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
 
     auto bodyTrans = this->body->Translate( venv, tenv, level, done );
 
-
     auto i     = getExp( loopVar->access, new T::TempExp( level->frame->framePointer() ) );
     auto limit = getExp( newAccess, new T::TempExp( level->frame->framePointer() ) );
-    
-    auto finExp = new TR::NxExp(new T::SeqStm(new T::MoveStm(limit, hiTrans.exp->UnEx()), new T::SeqStm(new T::MoveStm(i, loTrans.exp->UnEx()), new T::SeqStm(new T::LabelStm(start), new T::SeqStm(bodyTrans.exp->UnNx(), new T::SeqStm(new T::CjumpStm(T::LT_OP, i, limit, t, done), new T::SeqStm(new T::JumpStm(new T::NameExp(start), new TEMP::LabelList(start, nullptr)), new T::LabelStm(done))))))));
+
     venv->EndScope();
-    return TR::ExpAndTy(finExp, TY::VoidTy::Instance());
+
+    auto finExp = new TR::NxExp(new T::SeqStm(new T::MoveStm(limit, hiTrans.exp->UnEx()), new T::SeqStm(new T::MoveStm(i, loTrans.exp->UnEx()), new T::SeqStm(new T::CjumpStm(T::LE_OP, i, limit, start, done),
+    new T::SeqStm(new T::LabelStm(start), new T::SeqStm(bodyTrans.exp->UnNx(), new T::SeqStm(new T::CjumpStm(T::LT_OP, i, limit, t, done), new T::SeqStm(new T::LabelStm(t), new T::SeqStm(new T::MoveStm(i, new T::BinopExp(T::PLUS_OP, i, new T::ConstExp(1))),
+    new T::SeqStm(new T::JumpStm(new T::NameExp(start), new TEMP::LabelList(start, nullptr)), new T::LabelStm(done)))))))))));
+
+    return TR::ExpAndTy( finExp, TY::VoidTy::Instance() );
 }
 
 TR::ExpAndTy BreakExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -1175,12 +1178,12 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
             l = l->tail;
         }
 
-        auto          newlevel = level->NewLevel( level, TEMP::NamedLabel( f->name->Name() ), start );
-        level = newlevel;
+        auto newlevel = level->NewLevel( level, TEMP::NamedLabel( f->name->Name() ), start );
+        level         = newlevel;
         // newlevel->frame->name = *TEMP::NamedLabel(f->name->Name());
         newlevel->frame->functionName = f->name->Name();
-        A::FieldList* fl       = nullptr;
-        TY::TyList*   t        = formalTys;
+        A::FieldList* fl              = nullptr;
+        TY::TyList*   t               = formalTys;
         std::cout << "gonna build formals." << std::endl;
         auto formals = buildFormals( newlevel );
         std::cout << "formals built." << std::endl;
@@ -1205,8 +1208,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         func = func->tail;
     }
 
-
-    if (false) {
+    if ( false ) {
         // misused return of functiondec
         assert( exps.size() );
         if ( exps.size() == 1 ) {
@@ -1230,7 +1232,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
             return new TR::NxExp( head );
         }
     }
-    return new TR::NxExp( new T::ExpStm(new T::ConstExp(0)) );
+    return new TR::NxExp( new T::ExpStm( new T::ConstExp( 0 ) ) );
 }
 
 TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
