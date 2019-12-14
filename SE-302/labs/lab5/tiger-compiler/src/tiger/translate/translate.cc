@@ -1049,9 +1049,12 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
     auto limit = getExp( newAccess, new T::TempExp( level->frame->framePointer() ) );
 
     venv->EndScope();
-
+    
+    /* first, put low limit to `loop` var and high limit to `limit` var  */ 
     auto finExp = new TR::NxExp(new T::SeqStm(new T::MoveStm(limit, hiTrans.exp->UnEx()), new T::SeqStm(new T::MoveStm(i, loTrans.exp->UnEx()), new T::SeqStm(new T::CjumpStm(T::LE_OP, i, limit, start, done),
+    /* second, add 1 to the loop var and compare it with the limit var every time  */ 
     new T::SeqStm(new T::LabelStm(start), new T::SeqStm(bodyTrans.exp->UnNx(), new T::SeqStm(new T::CjumpStm(T::LT_OP, i, limit, t, done), new T::SeqStm(new T::LabelStm(t), new T::SeqStm(new T::MoveStm(i, new T::BinopExp(T::PLUS_OP, i, new T::ConstExp(1))),
+    /* finally, decide if we want to go back to another loop (start label) or the done label */
     new T::SeqStm(new T::JumpStm(new T::NameExp(start), new TEMP::LabelList(start, nullptr)), new T::LabelStm(done)))))))))));
 
     return TR::ExpAndTy( finExp, TY::VoidTy::Instance() );
