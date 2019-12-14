@@ -97,11 +97,23 @@ void do_proc( FILE* out, F::ProcFrag* procFrag ) {
 }
 
 void do_str( FILE* out, F::StringFrag* strFrag ) {
-    fprintf( out, "%s:\n", strFrag->label->Name().c_str() );
+
+    /*
+    .globl	s
+    .type	s, @object
+    .size	s, 7
+s:
+    .string	"abcdef"
+    */
     int length = strFrag->str.size();
+
+    fprintf( out, ".globl %s\n", strFrag->label->Name().c_str() );
+    fprintf( out, ".type %s, @object\n", strFrag->label->Name().c_str() );
+    fprintf( out, ".size %s, %d\n", strFrag->label->Name().c_str(), length );
+    fprintf( out, "%s:\n", strFrag->label->Name().c_str() );
     // it may contains zeros in the middle of string. To keep this work, we need
     // to print all the charactors instead of using fprintf(str)
-    fprintf( out, ".long %d\n", length );
+
     fprintf( out, ".string \"" );
     for ( int i = 0; i < length; i++ ) {
         if ( strFrag->str[ i ] == '\n' ) {
