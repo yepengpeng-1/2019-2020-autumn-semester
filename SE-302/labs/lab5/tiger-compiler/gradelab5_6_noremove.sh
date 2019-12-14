@@ -113,7 +113,7 @@ for tcase in $(ls $TESTCASEDIR/); do
                 # Newark <- Rachel
             done
             score=$((score + result + count / 2))
-            rm -f test.out $TESTCASEDIR/${tfileName}.s
+            # rm -f test.out $TESTCASEDIR/${tfileName}.s
         else
             ./test.out >&_tmp.txt
             diff $DIFFOPTION _tmp.txt $REFOUTDIR/${tfileName%.*}.out >&_ref.txt

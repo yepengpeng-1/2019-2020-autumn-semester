@@ -63,11 +63,13 @@ static AS::Proc* F_procEntryExit3( F::Frame* frame, AS::InstrList* body ) {
 
     auto releaseStack = new AS::OperInstr( "addq $" + std::to_string( frame->varCount * F::wordSize ) + ", `d0", new TEMP::TempList( frame->stackPointer(), nullptr ),
                                            new TEMP::TempList( frame->stackPointer(), nullptr ), nullptr );
-    auto returnInstr  = new AS::OperInstr( "ret", nullptr, nullptr, nullptr );
+
+    auto popRbp      = new AS::OperInstr( "popq %rbp", nullptr, nullptr, nullptr );
+    auto returnInstr = new AS::OperInstr( "ret", nullptr, nullptr, nullptr );
 
     auto altogetherInstrs = new AS::Proc( prologue.str(),
                                           combine( new AS::InstrList( manageStack, new AS::InstrList( moveCriticalRegs, new AS::InstrList( allocStack, nullptr ) ) ),
-                                                   combine( body, new AS::InstrList( releaseStack, new AS::InstrList( returnInstr, nullptr ) ) ) ),
+                                                   combine( body, new AS::InstrList( releaseStack, new AS::InstrList( popRbp, new AS::InstrList( returnInstr, nullptr ) ) ) ) ),
                                           epilogue.str() );
     std::cout << "Generated altogether " << std::endl;
     return altogetherInstrs;
