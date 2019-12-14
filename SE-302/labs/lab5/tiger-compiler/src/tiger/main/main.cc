@@ -27,7 +27,7 @@ void do_proc( FILE* out, F::ProcFrag* procFrag ) {
     // Init temp_map
     // remove %rbp later.
 
-    static std::string regNames[] = { "%rbp", "%rsp", "%rax", "%r13", "%r12", "%rdx" };
+    static std::string regNames[] = { "%rbp", "%rsp", "%rax", "%r13", "%r12", "%rdx", "%r11", "%r10" };
 
     temp_map->Enter( procFrag->frame->framePointer(), &regNames[ 0 ] );
     temp_map->Enter( procFrag->frame->stackPointer(), &regNames[ 1 ] );
@@ -35,6 +35,8 @@ void do_proc( FILE* out, F::ProcFrag* procFrag ) {
     temp_map->Enter( procFrag->frame->idiotRegister(), &regNames[ 3 ] );
     temp_map->Enter( procFrag->frame->smartRegister(), &regNames[ 4 ] );
     temp_map->Enter( procFrag->frame->radioRegister(), &regNames[ 5 ] );
+    temp_map->Enter( procFrag->frame->smartRegister2(), &regNames[ 6 ] );
+    temp_map->Enter( procFrag->frame->idiotRegister2(), &regNames[ 7 ] );
 
     //  printf("doProc for function %s:\n", this->frame->label->Name().c_str());
     //  (new T::StmList(proc->body, nullptr))->Print(stdout);
@@ -150,17 +152,17 @@ int main( int argc, char** argv ) {
     out = fopen( outfile, "w" );
 
     fprintf( out, ".text\n" );
-    for ( F::FragList* fragList = frags; fragList; fragList = fragList->tail )
+    for ( F::FragList* fragList = frags; fragList; fragList = fragList->tail ) {
         if ( fragList->head->kind == F::Frag::Kind::PROC ) {
             do_proc( out, static_cast< F::ProcFrag* >( fragList->head ) );
         }
-
+    }
     fprintf( out, ".section .rodata\n" );
-    for ( F::FragList* fragList = frags; fragList; fragList = fragList->tail )
+    for ( F::FragList* fragList = frags; fragList; fragList = fragList->tail ) {
         if ( fragList->head->kind == F::Frag::Kind::STRING ) {
             do_str( out, static_cast< F::StringFrag* >( fragList->head ) );
         }
-
+    }
     fclose( out );
     return 0;
 }

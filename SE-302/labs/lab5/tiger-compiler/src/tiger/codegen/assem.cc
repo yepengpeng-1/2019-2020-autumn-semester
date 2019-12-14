@@ -1,5 +1,5 @@
 #include "tiger/codegen/assem.h"
-
+#include <map>
 namespace {
 
 TEMP::Temp* nth_temp( TEMP::TempList* list, int i ) {
@@ -79,8 +79,13 @@ static std::string format( std::string assem, TEMP::TempList* dst, TEMP::TempLis
     return result;
 }
 
-static const std::string useless_craps[]    = { "movq (%r13), (%r13)" };
-static const size_t      useless_crap_count = 1;
+static const std::string useless_craps[]    = { "movq (%r13), (%r13)", "movq (%r10), (%r10)" };
+static const size_t      useless_crap_count = 2;
+
+static const std::map< std::string, std::string > replacingPair = { { "movq (%r10), (%r13)", "movq (%r10), %r14\nmovq %r14, (%r13)" },
+                                                                    { "movq (%r13), (%r10)", "movq (%r13), %r14\nmovq %r14, (%r10)" } };
+
+static const std::string internalRegs = "%r15";
 
 void OperInstr::Print( FILE* out, TEMP::Map* m ) const {
 
@@ -93,7 +98,14 @@ void OperInstr::Print( FILE* out, TEMP::Map* m ) const {
         }
     }
 
-    fprintf( out, "%s\n", result.c_str() );
+    auto find = replacingPair.find( result );
+
+    if ( find != replacingPair.end() ) {
+        fprintf( out, "%s\n", find->second.c_str() );
+    }
+    else {
+        fprintf( out, "%s\n", result.c_str() );
+    }
 }
 
 void LabelInstr::Print( FILE* out, TEMP::Map* m ) const {

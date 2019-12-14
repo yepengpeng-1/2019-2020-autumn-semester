@@ -137,6 +137,19 @@ public:
         return ir;
     }
 
+    static TEMP::Temp* idiotRegister2() {
+        // std::cout << "idiot register2 requested" << std::endl;
+        static TEMP::Temp* ir2 = nullptr;
+        if ( !ir2 ) {
+            std::cout << "gonna return new idiot register2" << std::endl;
+            ir2 = TEMP::Temp::NewTemp();
+        }
+        else {
+            // std::cout << "gonna return existed idiot register2" << std::endl;
+        }
+        return ir2;
+    }
+
     static TEMP::Temp* smartRegister() {
         // std::cout << "smart register requested" << std::endl;
         static TEMP::Temp* sr = nullptr;
@@ -148,6 +161,19 @@ public:
             // std::cout << "gonna return existed smart register" << std::endl;
         }
         return sr;
+    }
+
+    static TEMP::Temp* smartRegister2() {
+        // std::cout << "smart register2 requested" << std::endl;
+        static TEMP::Temp* sr2 = nullptr;
+        if ( !sr2 ) {
+            std::cout << "gonna return new smart register2" << std::endl;
+            sr2 = TEMP::Temp::NewTemp();
+        }
+        else {
+            // std::cout << "gonna return existed smart register2" << std::endl;
+        }
+        return sr2;
     }
 
     inline void putInfo( F::Frame::Kind kind, int count, F::AccessList* list ) {
