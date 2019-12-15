@@ -1269,9 +1269,9 @@ TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* t
         venv->Enter( this->var, new E::VarEntry( access, initT.ty ) );
     }
 
-    TR::Access* new_acc = TR::AllocLocal( level, true, this->var->Name() );
+    // TR::Access* new_acc = TR::AllocLocal( level, true, this->var->Name() );
     std::cout << "AllocLocal fine" << std::endl;
-    auto resultExp = new TR::NxExp( new T::MoveStm( new_acc->access->ToExp( new T::TempExp( level->frame->framePointer() ) ), initT.exp->UnEx() ) );
+    auto resultExp = new TR::NxExp( new T::MoveStm( access->access->ToExp( new T::TempExp( level->frame->framePointer() ) ), initT.exp->UnEx() ) );
     std::cout << "successfully generated resultExp" << resultExp << std::endl;
     return resultExp;
 }
