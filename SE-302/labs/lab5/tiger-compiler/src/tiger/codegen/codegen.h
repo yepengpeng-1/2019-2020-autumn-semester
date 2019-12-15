@@ -37,18 +37,38 @@ static AS::Proc* F_procEntryExit3( F::Frame* frame, AS::InstrList* body ) {
 
     std::stringstream prologue, epilogue;
     auto              procName = frame->name.Name();
-    prologue << std::endl;
+    // prologue << std::endl;
     epilogue << std::endl;
     // prologue << ".text\n"
     //          << ".globl " << procName << "\n"
     //          << ".type " << procName << "\n"
-    std::cout << "[codegen] F_procEntryExit3 frame->functionName = " << frame->functionName << std::endl;
+    std::cout << "[codegen] F_procEntryExit3 frame->functionName = " << frame->functionName << ", argCount = " << frame->argCount << std::endl;
     if ( frame->functionName == "" ) {
         prologue << procName << ":\n";
     }
     else {
         prologue << frame->functionName << ":\n";
     }
+
+    // skip the static link stuff
+    auto argT = frame->args->tail;
+
+    size_t                   argCounter = 0;
+    static const std::string argRegs[]  = { "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9" };
+
+    while ( argT ) {
+        auto head = argT->head;
+        assert( head->kind == F::Access::INFRAME );
+        auto argAccess = reinterpret_cast< F::InFrameAccess* >( head );
+        // argAccess->offset;
+        // auto manageArgInstr =
+        // new AS::OperInstr( "movq " + argRegs[ argCounter ] + ", " + std::to_string( argAccess->offset ) + "(`s0)", nullptr, new TEMP::TempList( frame->framePointer(), nullptr ), nullptr );
+
+        prologue << "movq " << argRegs[ argCounter ] << ", " << argAccess->offset << "(%rbp)" << std::endl;
+        argT = argT->tail;
+        argCounter += 1;
+    }
+
     // std::cout << "Generated prologue:\n" << prologue.str() << std::endl;
 
     // epilogue << "nop\n";
