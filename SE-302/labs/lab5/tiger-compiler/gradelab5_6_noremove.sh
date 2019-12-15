@@ -10,6 +10,8 @@ if [[ $SYS == "Linux" ]]; then
     RES='\E[0m'
 fi
 
+rm ./build/canoned.s ./build/uncanoned.s ./build/regalloc.txt
+
 BIN=tiger-compiler
 #PROJDIR=lab6
 TESTCASEDIR=testcases

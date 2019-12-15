@@ -122,6 +122,21 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
         return combine( combine( e1munch.second, e2munch.second ), new AS::InstrList( instr, nullptr ) );
     }
     else if ( stmNode->kind == T::Stm::Kind::MOVE && reinterpret_cast< T::MoveStm* >( stmNode )->dst->kind == T::Exp::Kind::TEMP
+              && reinterpret_cast< T::MoveStm* >( stmNode )->src->kind == T::Exp::BINOP && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->src )->op == T::BinOp::PLUS_OP
+              && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->src )->left->kind == T::Exp::TEMP
+              && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->src )->right->kind == T::Exp::CONST
+              && reinterpret_cast< T::TempExp* >( reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->src )->left )->temp == f->framePointer() ) {
+
+        std::cout << "[codegen] fallen into MOVE(TEMP(t), BINOP(+, %rbp, C))" << std::endl;
+        // MOVE(TEMP(t), BINOP(PLUS_OP, TEMP, CONST));
+        auto t      = reinterpret_cast< T::TempExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->dst )->temp;
+        auto consti = reinterpret_cast< T::ConstExp* >( reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->src )->right )->consti;
+        // auto r     = TEMP::Temp::NewTemp();
+        // auto e2munch = munchExp( f, e2 );
+        auto instr = new AS::MoveInstr( "leaq " + std::to_string( consti ) + "(%rbp), `d0", new TEMP::TempList( t, nullptr ), new TEMP::TempList( f->framePointer(), nullptr ) );
+        return new AS::InstrList( instr, nullptr );
+    }
+    else if ( stmNode->kind == T::Stm::Kind::MOVE && reinterpret_cast< T::MoveStm* >( stmNode )->dst->kind == T::Exp::Kind::TEMP
               //   && reinterpret_cast< T::MoveStm* >( stmNode )->src->kind == T::Exp::Kind::TEMP
     ) {
         std::cout << "[codegen] fallen into MOVE(TEMP(t), e2)" << std::endl;
@@ -268,6 +283,47 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         auto e1munch = munchExp( f, e1 );
         auto instr   = new AS::OperInstr( "movq (`s0), `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, nullptr ), nullptr );
         return smart_pair( r, combine( e1munch.second, new AS::InstrList( instr, nullptr ) ) );
+    }
+
+    else if ( expNode->kind == T::Exp::MEM && reinterpret_cast< T::MemExp* >( expNode )->exp->kind == T::Exp::BINOP
+              && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->op == T::BinOp::PLUS_OP
+              && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->right->kind == T::Exp::CONST
+              && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->left->kind == T::Exp::MEM
+              && reinterpret_cast< T::MemExp* >( reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->left )->exp->kind == T::Exp::BINOP
+              && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->left )->exp )->op
+                     == T::BinOp::PLUS_OP
+              && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->left )->exp )->left->kind
+                     == T::Exp::TEMP
+              && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->left )->exp )->right->kind
+                     == T::Exp::CONST
+              && reinterpret_cast< T::TempExp* >(
+                     reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->left )->exp )->left )
+                         ->temp
+                     == f->framePointer() ) {
+        std::cout << "[codegen] fallen into MEM(MEM(t100 + iC) + eC);" << std::endl;
+        auto internalConst =
+            reinterpret_cast< T::ConstExp* >(
+                reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->left )->exp )->right )
+                ->consti;
+        auto externalConst = reinterpret_cast< T::ConstExp* >( reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->right )->consti;
+
+        auto temp = TEMP::Temp::NewTemp(), r = TEMP::Temp::NewTemp();
+
+        auto innerInstr = new AS::OperInstr( "movq $" + std::to_string( internalConst ) + "(%rbp), `d0", new TEMP::TempList( temp, nullptr ), nullptr, nullptr );
+
+        auto outerInstr = new AS::OperInstr( "movq $" + std::to_string( externalConst ) + "(`s0), `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( temp, nullptr ), nullptr );
+
+        return smart_pair( r, new AS::InstrList( innerInstr, new AS::InstrList( outerInstr, nullptr ) ) );
+        // MEM(MEM(t100 + iC) + eC);
+        /*
+        MEM(
+     BINOP(PLUS,
+      MEM(
+       BINOP(PLUS,
+        TEMP t100,
+        CONST -16)),
+      CONST 0))
+      */
     }
     // else if ( false && expNode->kind == T::Exp::BINOP && reinterpret_cast< T::BinopExp* >( expNode )->op == T::PLUS_OP && reinterpret_cast< T::BinopExp* >( expNode )->right->kind == T::Exp::CONST )
     // {

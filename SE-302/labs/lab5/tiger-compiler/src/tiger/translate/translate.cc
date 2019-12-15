@@ -815,34 +815,34 @@ TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
     auto argsCount = offset;
 
     T::Stm* statements = nullptr;
-    T::Stm* retStm     = nullptr;
+    // T::Stm* retStm     = nullptr;
 
+    size_t counter = 0;
     while ( initfield ) {
         --offset;
         auto actual = initfield->head;
         initfield   = initfield->tail;
         auto fieldInitExp =
-            new T::MoveStm( new T::MemExp( new T::BinopExp( T::PLUS_OP, r, new T::ConstExp( offset * F::wordSize ) ) ), actual->exp->Translate( venv, tenv, level, label ).exp->UnEx() );
+            new T::MoveStm( new T::MemExp( new T::BinopExp( T::PLUS_OP, r, new T::ConstExp( counter * F::wordSize ) ) ), actual->exp->Translate( venv, tenv, level, label ).exp->UnEx() );
 
         if ( statements != nullptr ) {
-            statements = new T::SeqStm( fieldInitExp, statements );
+            statements = new T::SeqStm( statements, fieldInitExp );
         }
         else {
             statements = fieldInitExp;
         }
-        if ( retStm == nullptr ) {
-            retStm = statements;
-        }
+        // if ( retStm == nullptr ) {
+        //     retStm = statements;
+        // }
+        ++counter;
     }
-
-    statements = reinterpret_cast< T::SeqStm* >( statements )->left;
 
     auto recordAlloc = new T::CallExp( new T::NameExp( TEMP::NamedLabel( "allocRecord" ) ), new T::ExpList( new T::ConstExp( argsCount * F::wordSize ), nullptr ) );
     auto init        = new T::MoveStm( r, recordAlloc );
 
     std::cout << "Going to exit from RecordExp. " << std::endl;
-    assert( retStm );
-    return TR::ExpAndTy( new TR::ExExp( new T::EseqExp( new T::SeqStm( init, retStm ), r ) ), recT );
+    // assert( retStm );
+    return TR::ExpAndTy( new TR::ExExp( new T::EseqExp( new T::SeqStm( init, statements ), r ) ), recT );
 }
 
 TR::ExpAndTy SeqExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {

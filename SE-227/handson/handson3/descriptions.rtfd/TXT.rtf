@@ -1,0 +1,661 @@
+{\rtf1\ansi\ansicpg950\cocoartf1504\cocoasubrtf840
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fmodern\fcharset0 Courier;\f2\fnil\fcharset0 LucidaGrande;
+}
+{\colortbl;\red255\green255\blue255;\red38\green38\blue38;\red52\green110\blue183;\red240\green241\blue241;
+\red246\green246\blue246;\red215\green219\blue223;\red0\green0\blue192;\red0\green0\blue255;\red251\green0\blue7;
+}
+{\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;\cssrgb\c25490\c51373\c76863;\cssrgb\c95294\c95686\c95686;
+\cssrgb\c97255\c97255\c97255;\cssrgb\c87451\c88627\c89804;\cssrgb\c0\c0\c80000;\cssrgb\c0\c0\c100000;\cssrgb\c100000\c0\c0;
+}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{circle\}}{\leveltext\leveltemplateid102\'01\uc0\u9702 ;}{\levelnumbers;}\fi-360\li1440\lin1440 }{\listname ;}\listid2}
+{\list\listtemplateid3\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid201\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid3}
+{\list\listtemplateid4\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid301\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid4}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}{\listoverride\listid4\listoverridecount0\ls4}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww12600\viewh7800\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs72 \cf2 \expnd0\expndtw0\kerning0
+Hands-on-3: Load balance and reverse proxy\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 All files of this hands-on can be downloaded from {\field{\*\fldinst{HYPERLINK "http://ipads.se.sjtu.edu.cn/courses/cse/handson/files/handson-3.assets/handson-3.tar.gz"}}{\fldrslt 
+\b \cf3 \ul \ulc3 THIS LINK}}. Due time is 
+\b 2019-12-16 23:59
+\b0 .\
+In this series of hands-on, we are going to deploy and modify a simple online sock shop to learn how to improve the application's performance with system methods.\
+The sock shop is an open-source project maintained by Weaveworks and Container Solutions, which simulates the user-facing part of an e-commerce website that sells socks. The project intends to demonstrate how to develop a website system using the microservice structure. The structure of this system looks like the following graph where arrow means dependency relationships (e.g., frontend depends on all backend microservices):\
+{{\NeXTGraphic dependency.png \width17940 \height13160 \noorient
+}¬}\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0\cf2 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Frontend: A small static page server and request router written in 
+\f1\fs28\fsmilli14400 \cb4 node.js
+\f0\fs32 \cb1  powered by 
+\f1\fs28\fsmilli14400 \cb4 express
+\f0\fs32 \cb1 . This component is used to serve all the requests from users directly. For static resource requests (like 
+\f1\fs28\fsmilli14400 \cb4 /index.html
+\f0\fs32 \cb1 ), it directly responses the static file in this component to the user; For dynamic requests (like 
+\f1\fs28\fsmilli14400 \cb4 /cart
+\f0\fs32 \cb1 ), it converts the user request to server-side internal request with the data stored in the session (like 
+\f1\fs28\fsmilli14400 \cb4 user id
+\f0\fs32 \cb1  of current logged in user) and redirects it to a proper backend microservice (like 
+\f1\fs28\fsmilli14400 \cb4 Cart
+\f0\fs32 \cb1 ).\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Object DB: A 
+\f1\fs28\fsmilli14400 \cb4 MongoDB
+\f0\fs32 \cb1  instance used to store all necessary objects (like user information). Needed by backend microservices.\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Catalogue DB: A relational database used to store relational data of all socks.\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Backend microservices: All other parts in the graph are backend microservices. Those services are small servers written in Java or Go to handle a series of single proposed requests like adding/deleting items in cart.\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs56 \cf2 1 File Structure\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 This hands-on contains the following files:\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28\fsmilli14400 \cf2 \
+\
+\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb5 handson3\cb1 \
+\cb5     |--load-test\cb1 \
+\cb5         |--correctness.py\cb1 \
+\cb5         |--background-stress.py\cb1 \
+\cb5         |--case1.py\cb1 \
+\cb5         |--case2.py\cb1 \
+\cb5         |--execute.sh\cb1 \
+\cb5         |--Dockerfile\cb1 \
+\cb5     |--load-test.py\cb1 \
+\cb5     |--frontend\cb1 \
+\cb5         |--public\cb1 \
+\cb5         |--config.js\cb1 \
+\cb5         |--server.js\cb1 \
+\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls2\ilvl0
+\f0\fs32 \cf2 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+load-test: Containing files needed when doing the load test\
+\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\partightenfactor0
+\ls2\ilvl1\cf2 \kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+correctness.py: Locust test case for correctness test\
+\ls2\ilvl1\kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+background-stress.py: Locust test case emulating stressful workload\
+\ls2\ilvl1\kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+case1.py: Locust test case for section 3.1\
+\ls2\ilvl1\kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+case2.py: Locust test case for section 3.2\
+\ls2\ilvl1\kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+execute.sh: shell script to run the chosen test script. Used as the entry point of the load-test docker image.\
+\ls2\ilvl1\kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+Dockerfile: Dockerfile used to create the load-test docker image\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls2\ilvl0\cf2 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+load-test.sh: Helper script used to generate a CSV file containing stress/RT values for later drawing stress/RT curve\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+frontend: Files to create 
+\f1\fs28\fsmilli14400 \cb4 dplsming/sockshop-frontend:0.1
+\f0\fs32 \cb1  image. Used in load-testing part to do your optimization\
+\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\partightenfactor0
+\ls2\ilvl1\cf2 \kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+public: All static resources\
+\ls2\ilvl1\kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+config.js: Configuration file for frontend component, just for reference.\
+\ls2\ilvl1\kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+server.js: Routing code for frontend component, just for reference.\
+\ls2\ilvl1\kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+Other files are irrelevant and omitted in this document.\
+\pard\pardeftab720\partightenfactor0
+\cf2 If you are confused by any description above, keep calm and carry on. More detailed information will be described in the following sections.\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs56 \cf2 2 Deploy the website\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 In this part, we are going to deploy the website in any platform with docker (e.g., docker for windows, virtual machine, real Linux, AWS, etc.) as you prefer and store the deployment steps into a shell script for later usage.\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs48 \cf2 2.1 Deploy components\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 The components are deployed in Docker containers and connected using DNS mapping. For example, to start the component 
+\f1\fs28\fsmilli14400 \cb4 Frontend
+\f0\fs32 \cb1 , you need to use 
+\f1\fs28\fsmilli14400 \cb4 docker run -d dplsming/sockshop-frontend:0.1
+\f0\fs32 \cb1  command, which created a container from the corresponding docker image. And for 
+\f1\fs28\fsmilli14400 \cb4 Fontend
+\f0\fs32 \cb1  to find component 
+\f1\fs28\fsmilli14400 \cb4 Cart
+\f0\fs32 \cb1 , it uses name 
+\f1\fs28\fsmilli14400 \cb4 cart
+\f0\fs32 \cb1  instead of IP address like 
+\f1\fs28\fsmilli14400 \cb4 172.20.1.2
+\f0\fs32 \cb1 . \
+Therefore, to deploy this application, you first need to create a docker network using 
+\f1\fs28\fsmilli14400 \cb4 docker network
+\f0\fs32 \cb1  to hold later created containers. Then you can use 
+\f1\fs28\fsmilli14400 \cb4 docker run
+\f0\fs32 \cb1  to download images containing corresponding components and run containers from the images. What's more, don't forget to append 
+\f1\fs28\fsmilli14400 \cb4 --add-host
+\f0\fs32 \cb1  option when using 
+\f1\fs28\fsmilli14400 \cb4 docker run
+\f0\fs32 \cb1  to add the mapping from components' domain names to IP addresses into specific containers' host file. 
+\f1\fs28\fsmilli14400 \cb4 --network
+\f0\fs32 \cb1  option is also necessary for 
+\f1\fs28\fsmilli14400 \cb4 docker run
+\f0\fs32 \cb1  command, which locates the created container into the specified network. Last but not least, don't forget to use 
+\f1\fs28\fsmilli14400 \cb4 -p <hostport>:8079
+\f0\fs32 \cb1  operations when starting the container of 
+\f1\fs28\fsmilli14400 \cb4 Frontend
+\f0\fs32 \cb1  component to generate port mapping in the host machine for your website.\
+
+\b NOTE
+\b0 : By default, the 
+\f1\fs28\fsmilli14400 \cb4 docker network
+\f0\fs32 \cb1  will choose the next available subnet and 
+\f1\fs28\fsmilli14400 \cb4 docker run --network
+\f0\fs32 \cb1  will assign following available IP address in the subnet. Therefore, the deployment steps are non-deterministic. For later scriptwriting convenience, We highly recommend you to allocate fixed IP addresses (check 
+\f1\fs28\fsmilli14400 \cb4 --ip
+\f0\fs32 \cb1  option for 
+\f1\fs28\fsmilli14400 \cb4 docker run
+\f0\fs32 \cb1  and 
+\f1\fs28\fsmilli14400 \cb4 --subnet
+\f0\fs32 \cb1  operation for 
+\f1\fs28\fsmilli14400 \cb4 docker network
+\f0\fs32 \cb1 ) for your components.\
+The following table shows the mapping between a component's name and its corresponding docker image and domain name used by others to locate it.\
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2476\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrnil \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth5767\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrnil \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth7735\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrnil \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\b \cf2 Component\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Docker Image\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Domain name in other components\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2476\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth5767\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth7735\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\b0 \cf2 Frontend\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 dplsming/sockshop-frontend:0.1\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 null\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clcbpat5 \clwWidth2476\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx2880
+\clvertalc \clcbpat5 \clwWidth5767\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx5760
+\clvertalc \clcbpat5 \clwWidth7735\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Shipping\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 weaveworksdemos/shipping:0.4.8\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 shipping\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2476\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth5767\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth7735\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 User\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 weaveworksdemos/user:0.4.4\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 user\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clcbpat5 \clwWidth2476\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx2880
+\clvertalc \clcbpat5 \clwWidth5767\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx5760
+\clvertalc \clcbpat5 \clwWidth7735\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Orders\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 weaveworksdemos/orders:0.4.7\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 orders\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2476\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth5767\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth7735\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Cart\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 weaveworksdemos/carts:0.4.8\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 carts\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clcbpat5 \clwWidth2476\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx2880
+\clvertalc \clcbpat5 \clwWidth5767\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx5760
+\clvertalc \clcbpat5 \clwWidth7735\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Payment\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 weaveworksdemos/payment:0.4.3\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 payment\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2476\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth5767\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth7735\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Catalogue\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 weaveworksdemos/catalogue:0.3.5\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 catalogue\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clcbpat5 \clwWidth2476\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx2880
+\clvertalc \clcbpat5 \clwWidth5767\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx5760
+\clvertalc \clcbpat5 \clwWidth7735\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 ObjectDB\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 mongo:3.4\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 carts-db, user-db, and orders-db for component Cart, User and Orders accordingly\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2476\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth5767\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth7735\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 CatalogueDB\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 dplsming/sockshop-cataloguedb:0.1\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 catalogue-db\cell \lastrow\row
+\pard\pardeftab720\partightenfactor0
+
+\b \cf2 Note
+\b0 : For component 
+\f1\fs28\fsmilli14400 \cb4 User
+\f0\fs32 \cb1 , environment variable 
+\f1\fs28\fsmilli14400 \cb4 MONGO_HOST
+\f0\fs32 \cb1  of its container should be set to 
+\f1\fs28\fsmilli14400 \cb4 user-db:27017
+\f0\fs32 \cb1  with command-line option 
+\f1\fs28\fsmilli14400 \cb4 -e
+\f0\fs32 \cb1 .\
+
+\b QUESTION 1
+\b0 : Please try to deploy the online shop application according to the dependency graph and the table listed above. You should hand in an executable shell script that contains all your deployment steps and can be used later to deploy the website conveniently. \
+\pard\pardeftab720\partightenfactor0
+
+\b\fs48 \cf2 2.2 Check correctness\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 After successfully deploying the sock shop application, you can access the online store with your browser. To do so, please enter the IP address of your host machine (mostly localhost) and port mapped to the frontend component into your browser. You should be able to browse and purchase socks in the online store. What's more, you can also check the correctness of your development using our check script:\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28\fsmilli14400 \cf2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb5 xxxxxxxxxx\cb1 \
+\
+\
+\
+\
+\cb5 docker run \cf7 -it\cf2  \cf7 --rm\cf2  dplsming/sockshop-test:0.1 http://\cf8 $your_ip_address\cf2 :\cf8 $your_port\cf2  correctness\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs32 \cf2 In the script, 
+\f1\fs28\fsmilli14400 \cb4 $your_ip_address
+\f0\fs32 \cb1  means the IP address of your host machine inside a docker container. It can be retrieved by checking the 
+\f1\fs28\fsmilli14400 \cb4 gateway
+\f0\fs32 \cb1  of 
+\f1\fs28\fsmilli14400 \cb4 docker network inspect bridge
+\f0\fs32 \cb1  and is usually  
+\f1\fs28\fsmilli14400 \cb4 172.17.0.1
+\f0\fs32 \cb1 . 
+\f1\fs28\fsmilli14400 \cb4 $your_port
+\f0\fs32 \cb1  is the host port mapped to 
+\f1\fs28\fsmilli14400 \cb4 frontend:8079
+\f0\fs32 \cb1  as you deployed in the previous section.\
+The result should be something that looks like:\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28\fsmilli14400 \cf2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb5 x\cb1 \
+\
+\
+\
+\
+\cb5 [2019-11-25 15:13:41,610] zzm-ubuntu/INFO/locust.main: Run time limit set to 5 seconds\cb1 \
+\cb5 [2019-11-25 15:13:41,610] zzm-ubuntu/INFO/locust.main: Starting Locust 0.12.2\cb1 \
+\cb5 [2019-11-25 15:13:41,610] zzm-ubuntu/INFO/locust.runners: Hatching and swarming 2 clients at the rate 5 clients/s...\cb1 \
+\cb5  #......\cb1 \
+\cb5  Name \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 # reqs \'a0 \'a0 # fails \'a0  Avg \'a0  Min \'a0  Max  |  Median \'a0 req/s\cb1 \
+\cb5 -------------------------------------------------------------------------------------\cb1 \
+\cb5  GET / \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0  57 \'a0  0(0.00%) \'a0 \'a0  5 \'a0 \'a0  2 \'a0 \'a0 11  | \'a0 \'a0 \'a0 3 \'a0  7.67\cb1 \
+\cb5  POST /addresses \'a0 \'a0 \'a0 \'a0 \'a0 2 \'a0  0(0.00%) \'a0 \'a0 47 \'a0 \'a0 44 \'a0 \'a0 51  | \'a0 \'a0  44 \'a0  0.67\cb1 \
+\cb5  GET /basket.html \'a0 \'a0 \'a0 \'a0 55 \'a0  0(0.00%) \'a0 \'a0  5 \'a0 \'a0  2 \'a0 \'a0 10  | \'a0 \'a0 \'a0 4 \'a0  7.67\cb1 \
+\cb5  #......\cb1 \
+\cb5  POST /orders \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 55 \'a0  0(0.00%) \'a0 \'a0 71 \'a0 \'a0 55 \'a0 \'a0 98  | \'a0 \'a0  71 \'a0  7.33\cb1 \
+\cb5  POST /register \'a0 \'a0 \'a0 \'a0 \'a0  2 \'a0  0(0.00%) \'a0 \'a0 16 \'a0 \'a0  9 \'a0 \'a0 23  | \'a0 \'a0 \'a0 9 \'a0  0.67\cb1 \
+\cb5 -------------------------------------------------------------------------------------\cb1 \
+\cb5  Aggregated \'a0 \'a0 \'a0 \'a0 \'a0 \'a0  507 \'a0 \'a0 0(0.00%) \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0  71.67\cb1 \
+\cb5 \uc0\u8203 \cb1 \
+\cb5 Percentage of the requests completed within given times\cb1 \
+\cb5  Name \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 # reqs  50%  66%  75%  80%  90%  95%  98%  99% 100%\cb1 \
+\cb5 -------------------------------------------------------------------------------------\cb1 \
+\cb5  GET / \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0  57 \'a0  3 \'a0  7 \'a0  8 \'a0  9 \'a0 10 \'a0 10 \'a0 11 \'a0 11 \'a0 11\cb1 \
+\cb5 #......\cb1 \
+\cb5  POST /register \'a0 \'a0 \'a0 \'a0 \'a0  2 \'a0 23 \'a0 23 \'a0 23 \'a0 23 \'a0 23 \'a0 23 \'a0 23 \'a0 23 \'a0 23\cb1 \
+\cb5 -------------------------------------------------------------------------------------\cb1 \
+\cb5  Aggregated \'a0 \'a0 \'a0 \'a0 \'a0 \'a0  507 \'a0  8 \'a0 11 \'a0 16 \'a0 45 \'a0 56 \'a0 74 \'a0 86 \'a0 90 \'a0 98\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs32 \cf2 If there are only 
+\f1\fs28\fsmilli14400 \cb4 0(0.00%)
+\f0\fs32 \cb1  in the 
+\f1\fs28\fsmilli14400 \cb4 # fails
+\f0\fs32 \cb1  column and no exceptions printed in the log part, that means you have done a correct deployment.\
+After making sure all things work well, you can continue to load testing parts.\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs56 \cf2 3 Load test\
+\pard\pardeftab720\partightenfactor0
+
+\fs48 \cf2 3.1 Test environment and methodology\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 Since the sock shop application and load test scripts both require many CPU cores and memory resources, laptops are not suitable for later load testing. Therefore, we choose amazon AWS EC2 as our testing platform. Please follow {\field{\*\fldinst{HYPERLINK "http://ipads.se.sjtu.edu.cn/courses/cse/handson/files/handson-3.assets/EC2-environment-configuration.pptx"}}{\fldrslt 
+\b \cf3 \ul \ulc3 this tutorial}} to set up your own AWS EC2 instance and redeploy your sock shop onto the remote server.\
+\pard\pardeftab720\partightenfactor0
+
+\b \cf9 NOTE
+\b0 : 
+\b Since our budget is limited, don't forget to "stop (hibernate)" your EC2 instance when you are not working on this hands-on
+\b0 .\cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\b \cf2 NOTE
+\b0 : The access latency of EC2 instance is high. Please be patient and try to only do the final load test on AWS EC2 instance while leaving other experimental optimizations on your own machine.\
+For load testing, we choose an open-source load testing framework Locust, the same as that we used in previous correctness testing. In each locust process, all users are emulated in the same thread. Therefore, we will run two locust processes for testing, one for background stress emulation (
+\f1\fs28\fsmilli14400 \cb4 background-stress.py
+\f0\fs32 \cb1 ), the other for testing and monitoring. In each process, an emulated user will wait some interval time during two requests to further simulate real user behaviors. More details of each test case can be found in later sections.\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28\fsmilli14400 \cf2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb5 xxxxxxxxxx\cb1 \
+\
+\
+\
+\
+\cb5 [2019-11-25 15:13:41,610] zzm-ubuntu/INFO/locust.main: Run time limit set to 5 seconds\cb1 \
+\cb5 [2019-11-25 15:13:41,610] zzm-ubuntu/INFO/locust.main: Starting Locust 0.13.2\cb1 \
+\cb5 [2019-11-25 15:13:41,610] zzm-ubuntu/INFO/locust.runners: Hatching and swarming 2 clients at the rate 5 clients/s...\cb1 \
+\cb5  #......\cb1 \
+\cb5  Name \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 # reqs \'a0 \'a0 # fails \'a0  Avg \'a0  Min \'a0  Max  |  Median \'a0 req/s\cb1 \
+\cb5 -------------------------------------------------------------------------------------\cb1 \
+\cb5  GET / \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0  57 \'a0  0(0.00%) \'a0 \'a0  5 \'a0 \'a0  2 \'a0 \'a0 11  | \'a0 \'a0 \'a0 3 \'a0  7.67\cb1 \
+\cb5  POST /addresses \'a0 \'a0 \'a0 \'a0 \'a0 2 \'a0  0(0.00%) \'a0 \'a0 47 \'a0 \'a0 44 \'a0 \'a0 51  | \'a0 \'a0  44 \'a0  0.67\cb1 \
+\cb5  GET /basket.html \'a0 \'a0 \'a0 \'a0 55 \'a0  0(0.00%) \'a0 \'a0  5 \'a0 \'a0  2 \'a0 \'a0 10  | \'a0 \'a0 \'a0 4 \'a0  7.67\cb1 \
+\cb5  #......\cb1 \
+\cb5  POST /orders \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 55 \'a0  0(0.00%) \'a0 \'a0 71 \'a0 \'a0 55 \'a0 \'a0 98  | \'a0 \'a0  71 \'a0  7.33\cb1 \
+\cb5  POST /register \'a0 \'a0 \'a0 \'a0 \'a0  2 \'a0  0(0.00%) \'a0 \'a0 16 \'a0 \'a0  9 \'a0 \'a0 23  | \'a0 \'a0 \'a0 9 \'a0  0.67\cb1 \
+\cb5 -------------------------------------------------------------------------------------\cb1 \
+\cb5  Aggregated \'a0 \'a0 \'a0 \'a0 \'a0 \'a0  507 \'a0 \'a0 0(0.00%) \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0  71.67\cb1 \
+\cb5 \uc0\u8203 \cb1 \
+\cb5 Percentage of the requests completed within given times\cb1 \
+\cb5  Name \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 # reqs  50%  66%  75%  80%  90%  95%  98%  99% 100%\cb1 \
+\cb5 -------------------------------------------------------------------------------------\cb1 \
+\cb5  GET / \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0 \'a0  57 \'a0  3 \'a0  7 \'a0  8 \'a0  9 \'a0 10 \'a0 10 \'a0 11 \'a0 11 \'a0 11\cb1 \
+\cb5 #......\cb1 \
+\cb5  POST /register \'a0 \'a0 \'a0 \'a0 \'a0  2 \'a0 23 \'a0 23 \'a0 23 \'a0 23 \'a0 23 \'a0 23 \'a0 23 \'a0 23 \'a0 23\cb1 \
+\cb5 -------------------------------------------------------------------------------------\cb1 \
+\cb5  Aggregated \'a0 \'a0 \'a0 \'a0 \'a0 \'a0  507 \'a0  8 \'a0 11 \'a0 16 \'a0 45 \'a0 56 \'a0 74 \'a0 86 \'a0 90 \'a0 98\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs32 \cf2 The sample output of Locust are listed as below, where some critical metrics are:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls3\ilvl0
+\f1\fs28\fsmilli14400 \cf2 \cb4 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+NAME
+\f0\fs32 \cb1 : the request executed in the test case\
+\ls3\ilvl0
+\f1\fs28\fsmilli14400 \cb4 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+#reqs
+\f0\fs32 \cb1 : number of requests finished during running locust\
+\ls3\ilvl0
+\f1\fs28\fsmilli14400 \cb4 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Avg
+\f0\fs32 \cb1 : average response time (RT) of finished requests\
+\ls3\ilvl0
+\f1\fs28\fsmilli14400 \cb4 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+req/s
+\f0\fs32 \cb1 : count of requests finished each second.\
+\ls3\ilvl0
+\f1\fs28\fsmilli14400 \cb4 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+XX%
+\f0\fs32 \cb1 : the response time (RT) of the shortest XX% requests, used to show the tail latency, which is very important in practical websites.\
+\pard\pardeftab720\partightenfactor0
+
+\b \cf2 Note
+\b0 : There may be some failures in the load testing results due to the server can't handle such high pressure. Don't worry, ignore them.\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs48 \cf2 3.2 Case 1: Static pages accessing\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 The first test case of our load testing is to simulate some users accessing the static assets, especially the images (
+\f1\fs28\fsmilli14400 \cb4 case1.py
+\f0\fs32 \cb1 ), while other users are purchasing socks as usual (
+\f1\fs28\fsmilli14400 \cb4 background-stress.py
+\f0\fs32 \cb1 ). You can try this test case by using the command:\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28\fsmilli14400 \cf2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb5 xxxxxxxxxx\cb1 \
+\
+\
+\
+\
+\cb5 docker run \cf7 -it\cf2  \cf7 --rm\cf2  dplsming/sockshop-test:0.1 \cf7 -l\cf2  \cf8 $LOAD\cf2  \cf7 -t\cf2  \cf8 $TIME\cf2  http://\cf8 $your_ip_address\cf2 :\cf8 $your_port\cf2  case1\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs32 \cf2 Where 
+\f1\fs28\fsmilli14400 \cb4 $LOAD
+\f0\fs32 \cb1  means how many background-stress users are simulated and 
+\f1\fs28\fsmilli14400 \cb4 $TIME
+\f0\fs32 \cb1  refers to the load-testing time. We highly recommend not using a 
+\f1\fs28\fsmilli14400 \cb4 $LOAD
+\f0\fs32 \cb1  higher than 150. This is because a higher load makes no sense since the single thread locust process cannot send requests at a very high throughput. 
+\f1\fs28\fsmilli14400 \cb4 $TIME
+\f0\fs32 \cb1  can be set to 30s for experimental tests and is set to 120s in 
+\f1\fs28\fsmilli14400 \cb4 load-test.py
+\f0\fs32 \cb1  to gain a more stable result.\
+To use the 
+\f1\fs28\fsmilli14400 \cb4 load-test.py
+\f0\fs32 \cb1 , try the following command:\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28\fsmilli14400 \cf2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb5 xxxxxxxxxx\cb1 \
+\
+\
+\
+\
+\cb5 ./load-test.py http://\cf8 $your_ip_address\cf2 :\cf8 $your_port\cf2  case1 > out.csv\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs32 \cf2 This script will last for about 20 minutes and will test 10 points at different stress. The result will be printed to screen in CSV format containing 
+\f1\fs28\fsmilli14400 \cb4 Load, Throughput, Average Response Time, 95% Response Time, 99% Response Time
+\f0\fs32 \cb1  tuples. The output CSV looks like follows:\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28\fsmilli14400 \cf2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb5 x\cb1 \
+\
+\
+\
+\
+\cb5 Load,Throughput,Avg,95%,99%\cb1 \
+\cb5 0,0.0,0,1,1\cb1 \
+\cb5 10,90.59,1,4,5\cb1 \
+\cb5 20,180.85,0,1,2\cb1 \
+\cb5 #.....\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs32 \cf2 Question 2
+\b0 : Please try the command by yourself and draw some curves to show the trend of RT and throughput under different loads.\
+
+\b Question 3
+\b0 : Please describe and explain the phenomenon you find in the curve you have just drawn.\
+Under this workload, the 
+\f1\fs28\fsmilli14400 \cb4 Express
+\f0\fs32 \cb1  web server in the frontend component serving both dynamic requests and static pages, which slowdowns the response of static response. Luckily, 
+\f1\fs28\fsmilli14400 \cb4 Nginx
+\f0\fs32 \cb1  has much better performance compared to express according to {\field{\*\fldinst{HYPERLINK "https://stackoverflow.com/questions/44796056/whats-the-better-approach-serving-static-files-with-express-or-nginx"}}{\fldrslt \cf3 \ul \ulc3 this link}}. Therefore, use 
+\f1\fs28\fsmilli14400 \cb4 Nginx
+\f0\fs32 \cb1  to dispatch static and dynamic requests may help in this situation.\
+
+\b Question 4
+\b0 : Try to optimize the static page accessing response time using 
+\f1\fs28\fsmilli14400 \cb4 Nginx
+\f0\fs32 \cb1 . Please briefly describe what you have done and draw the curves to show the effect of your optimization.\
+
+\b Hint
+\b0 : To do so, you need to create another docker image from 
+\f1\fs28\fsmilli14400 \cb4 Nginx
+\f0\fs32 \cb1  to divide static asset requests and dynamic service requests apart. The source code and docker files of the frontend are given in the 
+\f1\fs28\fsmilli14400 \cb4 frontend
+\f0\fs32 \cb1  folder. In the source code, the folder 
+\f1\fs28\fsmilli14400 \cb4 public
+\f0\fs32 \cb1  contains all the static assets, which can be moved out and be served by 
+\f1\fs28\fsmilli14400 \cb4 Nginx
+\f0\fs32 \cb1 .\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs48 \cf2 3.3 Case 2: Dynamic service accessing\
+\pard\pardeftab720\partightenfactor0
+
+\fs32 \cf2 Note
+\b0 : This test should be done based on your first optimization.\
+The second test case of our load testing is simulating when many users are purchasing socks together like 11.11. To try this workload, use scripts below where $LOAD and $TIME remains the same meaning as before:\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28\fsmilli14400 \cf2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb5 xxxxxxxxxx\cb1 \
+\
+\
+\
+\
+\cb5 docker run \'a0\cf7 -it\cf2  \cf7 --rm\cf2  dplsming/sockshop-test:0.1 \cf7 -l\cf2  \cf8 $LOAD\cf2  \cf7 -t\cf2  \cf8 $TIME\cf2  http://\cf8 $your_ip_address\cf2 :\cf8 $your_port\cf2  case2\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs32 \cf2 And for drawing the curves, use the script below:\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28\fsmilli14400 \cf2 \
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb5 xxxxxxxxxx\cb1 \
+\
+\
+\
+\
+\cb5 ./load-test.sh http://\cf8 $your_ip_address\cf2 :\cf8 $your_port\cf2  case2 > out.csv\cb1 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs32 \cf2 In this case, all components of the application are all suffering from high loads, among which the 
+\f1\fs28\fsmilli14400 \cb4 frontend
+\f0\fs32 \cb1  suffers the most. This imbalance is due to all requested are routed by the frontend while other components only serve requests in their responsibility.\
+Instead of re-implementing the 
+\f1\fs28\fsmilli14400 \cb4 frontend
+\f0\fs32 \cb1  component or optimizing 
+\f1\fs28\fsmilli14400 \cb4 Express
+\f0\fs32 \cb1 , load-balancing can be applied to improve the performance under this situation. To do so, you need to create multiple 
+\f1\fs28\fsmilli14400 \cb4 frontend
+\f0\fs32 \cb1  components and route user requests to them using 
+\f1\fs28\fsmilli14400 \cb4 Nginx
+\f0\fs32 \cb1 . \
+
+\b Question 5
+\b0 : Try to optimize the performance of the application under this workload with load-balancing. Please briefly describe your modification. You also need to re-run 
+\f1\fs28\fsmilli14400 \cb4 load-test.sh
+\f0\fs32 \cb1  and generate figures to show how well your optimization works.\
+
+\b HINT
+\b0 : The 
+\f1\fs28\fsmilli14400 \cb4 frontend
+\f0\fs32 \cb1  component manages all user sessions, so some environment variables may need to be set since 
+\f1\fs28\fsmilli14400 \cb4 frontend
+\f0\fs32 \cb1  containers don't know sessions maintained by others. Check 
+\f1\fs28\fsmilli14400 \cb4 server.js
+\f0\fs32 \cb1  and 
+\f1\fs28\fsmilli14400 \cb4 config.js
+\f0\fs32 \cb1  for more details.\
+
+\b Question 6
+\b0 : Try your optimization under the situation where all frontend containers are enforced with a CPU limitation using 
+\f1\fs28\fsmilli14400 \cb4 --cpus 0.5
+\f0\fs32 \cb1  when created. Is your optimization more effective or less effective? Why?\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs56 \cf2 4 Hands in\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 To hand in, please compress the following files into a compressed file with a title like 516037910xxx.zip.\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls4\ilvl0\cf2 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Deployment scripts for Question 1 (named as deploy.sh).\
+\ls4\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Figures and answers for Question 2 - Question 6 (named as answers.pdf).\
+\pard\pardeftab720\partightenfactor0
+\cf2 After that, please upload your compressed file to our public FTP (ftp://public.sjtu.edu.cn/upload/handson3, username: followmoon, password: public) before 2019-12-16 23:59.\
+
+\b Note
+\b0 : Please don't add images with too large file size into your document due to the size limit of the public FTP.}
