@@ -356,9 +356,9 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
             //       allocate 24 bytes of space on the stack
 
             auto moveInstr = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( var1.first, nullptr ) );
-            auto opInstr   = new AS::OperInstr( assem, new TEMP::TempList( r, nullptr ), new TEMP::TempList( var2.first, new TEMP::TempList( var1.first, nullptr ) ), nullptr );
+            auto opInstr   = new AS::OperInstr( assem, new TEMP::TempList( r, nullptr ), new TEMP::TempList( var2.first, nullptr ), nullptr );
             // auto opInstr   = new AS::OperInstr( assem, new TEMP::TempList( r, nullptr ), new TEMP::TempList( r, new TEMP::TempList( var2.first, nullptr ) ), nullptr );
-            return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( moveInstr, new AS::InstrList( opInstr, nullptr ) ) ) ) );
+            return smart_pair( r, combine( var1.second, combine( new AS::InstrList( moveInstr, nullptr ), combine( var2.second, new AS::InstrList( opInstr, nullptr ) ) ) ) );
         }
         else if ( e->op == T::MUL_OP ) {
             auto r             = TEMP::Temp::NewTemp();

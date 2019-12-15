@@ -33,7 +33,7 @@ F::Frame* newFrame( TEMP::Label name, U::BoolList* formals, F::Frame* lastFrame 
 
     F::Frame* f = new F::Frame( name );
     f->putInfo( F::Frame::Kind::ARGUMENT, argCount, formalAcList );
-    f->putInfo( F::Frame::Kind::VARIABLE, 0, nullptr );
+    f->putInfo( F::Frame::Kind::VARIABLE, 1, nullptr );
     f->lastFrame = lastFrame;
     return f;
 }
@@ -509,7 +509,7 @@ TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
         auto varP = reinterpret_cast< E::VarEntry* >( var );
         std::cout << "gotta varP: " << varP << std::endl;
         auto acc = varP->access;
-        std::cout << "gotta acc: " << varP->access << std::endl;
+        std::cout << "gotta acc: " << varP->access << ", acc.offset = " << reinterpret_cast<F::InFrameAccess*>(acc->access)->offset  << std::endl;
         exp = new TR::ExExp( getExp( acc->access, findStaticLink( level, acc->level )->UnEx() ) );
     }
     else {
@@ -1039,9 +1039,10 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
     auto envEntry = new E::VarEntry( loopVar, TY::IntTy::Instance(), true );
 
     venv->Enter( this->var, envEntry );
+    ++level->frame->varCount;
     auto newAccess     = new F::InFrameAccess( level->frame->varCount * ( -F::wordSize ) );
     level->frame->vars = new F::AccessList( newAccess, level->frame->vars );
-    ++level->frame->varCount;
+    
 
     auto bodyTrans = this->body->Translate( venv, tenv, level, done );
 
