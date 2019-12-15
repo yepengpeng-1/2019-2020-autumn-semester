@@ -64,27 +64,29 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                     // auto head = src->head;
                     if ( src->head == tl->head ) {
                         // auto temp  = TEMP::Temp::NewTemp();
-                        auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister(), nullptr ),
+                        auto load          = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister(), nullptr ),
                                                        new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
-                        src->head  = f->idiotRegister();
-                        prev->tail = new AS::InstrList( load, now );
-                        prev       = prev->tail;
+                        src->head          = f->idiotRegister();
+                        prev->tail         = new AS::InstrList( load, now );
+                        prev               = prev->tail;
+                        idiotRegisterAlter = !idiotRegisterAlter;
                         break;
                     }
                 }
                 else {
                     if ( src->head == tl->head ) {
                         // auto temp  = TEMP::Temp::NewTemp();
-                        auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister2(), nullptr ),
+                        auto load          = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister2(), nullptr ),
                                                        new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
-                        src->head  = f->idiotRegister2();
-                        prev->tail = new AS::InstrList( load, now );
-                        prev       = prev->tail;
+                        src->head          = f->idiotRegister2();
+                        prev->tail         = new AS::InstrList( load, now );
+                        prev               = prev->tail;
+                        idiotRegisterAlter = !idiotRegisterAlter;
                         break;
                     }
                 }
-                idiotRegisterAlter = !idiotRegisterAlter;
-                src                = src->tail;
+
+                src = src->tail;
             }
 
             while ( dst ) {
@@ -94,30 +96,31 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                     // auto head = dst->head;
                     if ( dst->head == tl->head ) {
                         // auto temp  = TEMP::Temp::NewTemp();
-                        auto store = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr,
+                        auto store         = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr,
                                                         new TEMP::TempList( f->framePointer(), new TEMP::TempList( f->smartRegister(), nullptr ) ), nullptr );
-                        dst->head  = f->smartRegister();
-                        prev       = now;
-                        now->tail  = new AS::InstrList( store, now->tail );
-                        now        = now->tail;
+                        dst->head          = f->smartRegister();
+                        prev               = now;
+                        now->tail          = new AS::InstrList( store, now->tail );
+                        now                = now->tail;
+                        smartRegisterAlter = !smartRegisterAlter;
                         break;
                     }
                 }
                 else {
                     if ( dst->head == tl->head ) {
                         // auto temp  = TEMP::Temp::NewTemp();
-                        auto store = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr,
+                        auto store         = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr,
                                                         new TEMP::TempList( f->framePointer(), new TEMP::TempList( f->smartRegister2(), nullptr ) ), nullptr );
-                        dst->head  = f->smartRegister2();
-                        prev       = now;
-                        now->tail  = new AS::InstrList( store, now->tail );
-                        now        = now->tail;
+                        dst->head          = f->smartRegister2();
+                        prev               = now;
+                        now->tail          = new AS::InstrList( store, now->tail );
+                        now                = now->tail;
+                        smartRegisterAlter = !smartRegisterAlter;
                         break;
                     }
                 }
 
-                smartRegisterAlter = !smartRegisterAlter;
-                dst                = dst->tail;
+                dst = dst->tail;
             }
 
             prev = now;
@@ -169,7 +172,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     auto temps = moveInstr->dst;
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                        if ( true || std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                             if ( !isExcept( f, temps->head ) ) {
                                 tempset.push_back( temps->head );
                             }
@@ -182,7 +185,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     auto temps = moveInstr->src;
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                        if ( true || std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                             if ( !isExcept( f, temps->head ) ) {
                                 tempset.push_back( temps->head );
                             }
@@ -197,7 +200,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     auto temps = operInstr->dst;
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                        if ( true || std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                             if ( !isExcept( f, temps->head ) ) {
                                 tempset.push_back( temps->head );
                             }
@@ -210,7 +213,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     auto temps = operInstr->src;
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                        if ( true || std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                             if ( !isExcept( f, temps->head ) ) {
                                 tempset.push_back( temps->head );
                             }
@@ -226,17 +229,16 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
             }
         }
 
-        TEMP::TempList* tList = nullptr;
-
-        std::cout << "\n\n\n\nSPILLED TEMP SHOW\n\n" << std::endl;
-        for ( size_t i = 0; i < tempset.size(); i++ ) {
-            // spill them all
-            tList = new TEMP::TempList( tempset[ i ], tList );
-            // std::cout << "gotta spilled temp #" << i << ": t" << tempset[ i ]->Int() << std::endl;
-        }
-        std::cout << "\n\n\n\nSPILLED TEMP SHOW OVER\n\n" << std::endl;
-
         if ( tempset.size() != 0 ) {
+            TEMP::TempList* tList = nullptr;
+            std::cout << "\n\n\n\nSPILLED TEMP SHOW\n\n" << std::endl;
+            for ( int i = tempset.size() - 1; i >= 0; --i ) {
+                // spill them all
+                tList = new TEMP::TempList( tempset[ i ], tList );
+                std::cout << "gotta spilled temp #" << i << ": t" << tempset[ i ]->Int() << std::endl;
+            }
+            std::cout << "\n\n\n\nSPILLED TEMP SHOW OVER\n\n" << std::endl;
+
             std::cout << "[regalloc] relsama houwy" << std::endl;
             // relsama houwy
             il = spillTemp( f, il, tList );

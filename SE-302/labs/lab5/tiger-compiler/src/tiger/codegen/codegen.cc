@@ -1,23 +1,45 @@
 #include "tiger/codegen/codegen.h"
 #include "tiger/translate/translate.h"
-
+#include <vector>
 namespace CG {
 
+static const std::string argRegs[] = { "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9" };
+
 static AS::InstrList* munchArgs( F::Frame* f, int index, T::ExpList* args ) {
-    if ( !args ) {
-        return nullptr;
+
+    // if ( !args ) {
+    //     return nullptr;
+    // }
+
+    // auto next  = CG::munchArgs( f, index + 1, args->tail );
+    // auto r     = munchExp( f, args->head );
+    // auto instr = AS::OperInstr( "pushq `s0", nullptr, new TEMP::TempList( r.first, nullptr ), nullptr );
+
+    // return combine( r.second, next );
+    std::vector< T::Exp* > argV;
+    auto                   argT = args;
+
+    while ( argT ) {
+        auto head = argT->head;
+        argV.push_back( head );
+        argT = argT->tail;
     }
 
-    auto next  = CG::munchArgs( f, index + 1, args->tail );
-    auto r     = munchExp( f, args->head );
-    auto instr = AS::OperInstr( "pushl `s0", nullptr, new TEMP::TempList( r.first, nullptr ), nullptr );
+    // we can't handle more than 6 arguments = =
 
-    return combine( r.second, next );
+    assert( argV.size() < 7 );
+    AS::InstrList* head = nullptr;
+    for ( size_t i = 0; i < argV.size(); i++ ) {
+        auto r = munchExp( f, argV[ i ] );
+        head   = new AS::InstrList( new AS::OperInstr( "movq `s0, " + argRegs[ i ], nullptr, new TEMP::TempList( r.first, nullptr ), nullptr ), head );
+        head   = combine( r.second, head );
+    }
+    return head;
 }
 
 static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
     std::cout << "[codegen] entered munchStm. stmNode: " << stmNode << std::endl;
-    if ( stmNode->kind == T::Stm::Kind::MOVE && reinterpret_cast< T::MoveStm* >( stmNode )->dst->kind == T::Exp::Kind::MEM
+    if ( false && stmNode->kind == T::Stm::Kind::MOVE && reinterpret_cast< T::MoveStm* >( stmNode )->dst->kind == T::Exp::Kind::MEM
          && reinterpret_cast< T::MemExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->dst )->exp->kind == T::Exp::Kind::BINOP
          && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->dst )->exp )->op == T::BinOp::PLUS_OP
          //  && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->dst )->exp )->left->kind == T::Exp::Kind::TEMP
@@ -34,7 +56,7 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
         auto e1munch = munchExp( f, e1 );
         auto e2munch = munchExp( f, e2 );
 
-        auto instr = new AS::OperInstr( "movq `s1, " + std::to_string( i ) + "(`s0)", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
+        auto instr = new AS::OperInstr( "movq " + std::to_string( i ) + "(`s0), `s1", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
 
         return combine( combine( e1munch.second, e2munch.second ), new AS::InstrList( instr, nullptr ) );
     }
@@ -54,7 +76,7 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
 
         auto e1munch = munchExp( f, e1 );
         auto e2munch = munchExp( f, e2 );
-        auto instr   = new AS::OperInstr( "movq `s1, " + std::to_string( i ) + "(`s0)", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
+        auto instr   = new AS::OperInstr( "movq " + std::to_string( i ) + "(`s0), `s1", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
         return combine( combine( e1munch.second, e2munch.second ), new AS::InstrList( instr, nullptr ) );
     }
     else if ( stmNode->kind == T::Stm::Kind::MOVE
@@ -70,7 +92,7 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
         // auto r     = TEMP::Temp::NewTemp();
         auto e1munch = munchExp( f, e1 );
         auto e2munch = munchExp( f, e2 );
-        auto instr   = new AS::OperInstr( "movq (`s1), (`s0)", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
+        auto instr   = new AS::OperInstr( "movq (`s0), (`s1)", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
         return combine( combine( e1munch.second, e2munch.second ), new AS::InstrList( instr, nullptr ) );
     }
     else if ( stmNode->kind == T::Stm::Kind::MOVE && reinterpret_cast< T::MoveStm* >( stmNode )->dst->kind == T::Exp::Kind::MEM
@@ -83,7 +105,7 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
         auto e2 = reinterpret_cast< T::MoveStm* >( stmNode )->src;
         // auto r     = TEMP::Temp::NewTemp();
         auto e2munch = munchExp( f, e2 );
-        auto instr   = new AS::OperInstr( "movq `s0, $" + std::to_string( i ), nullptr, new TEMP::TempList( e2munch.first, nullptr ), nullptr );
+        auto instr   = new AS::OperInstr( "movq $, `s0" + std::to_string( i ), nullptr, new TEMP::TempList( e2munch.first, nullptr ), nullptr );
         return combine( e2munch.second, new AS::InstrList( instr, nullptr ) );
     }
     else if ( stmNode->kind == T::Stm::Kind::MOVE && reinterpret_cast< T::MoveStm* >( stmNode )->dst->kind == T::Exp::Kind::MEM
@@ -96,7 +118,7 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
         // auto r     = TEMP::Temp::NewTemp();
         auto e1munch = munchExp( f, e1 );
         auto e2munch = munchExp( f, e2 );
-        auto instr   = new AS::OperInstr( "movq `s1, (`s0)", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
+        auto instr   = new AS::OperInstr( "movq (`s0), `s1", nullptr, new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
         return combine( combine( e1munch.second, e2munch.second ), new AS::InstrList( instr, nullptr ) );
     }
     else if ( stmNode->kind == T::Stm::Kind::MOVE && reinterpret_cast< T::MoveStm* >( stmNode )->dst->kind == T::Exp::Kind::TEMP
@@ -201,7 +223,7 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
 static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* expNode ) {
 
     std::cout << "[codegen] entered munchExp. expNode: " << expNode << std::endl;
-    if ( expNode->kind == T::Exp::MEM && reinterpret_cast< T::MemExp* >( expNode )->exp->kind == T::Exp::BINOP
+    if ( false && expNode->kind == T::Exp::MEM && reinterpret_cast< T::MemExp* >( expNode )->exp->kind == T::Exp::BINOP
          && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->op == T::PLUS_OP
          && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->right->kind == T::Exp::CONST )
 
@@ -216,7 +238,7 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         auto instr   = new AS::OperInstr( "movq " + std::to_string( i ) + "(`s0), `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, nullptr ), nullptr );
         return smart_pair( r, combine( e1munch.second, new AS::InstrList( instr, nullptr ) ) );
     }
-    else if ( expNode->kind == T::Exp::MEM && reinterpret_cast< T::MemExp* >( expNode )->exp->kind == T::Exp::BINOP
+    else if ( false && expNode->kind == T::Exp::MEM && reinterpret_cast< T::MemExp* >( expNode )->exp->kind == T::Exp::BINOP
               && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->op == T::PLUS_OP
               && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( expNode )->exp )->left->kind == T::Exp::CONST ) {
         std::cout << "[codegen] fallen into MEM(BINOP(PLUS, CONST(i), e1))" << std::endl;
@@ -247,27 +269,29 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         auto instr   = new AS::OperInstr( "movq (`s0), `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, nullptr ), nullptr );
         return smart_pair( r, combine( e1munch.second, new AS::InstrList( instr, nullptr ) ) );
     }
-    else if ( false && expNode->kind == T::Exp::BINOP && reinterpret_cast< T::BinopExp* >( expNode )->op == T::PLUS_OP && reinterpret_cast< T::BinopExp* >( expNode )->right->kind == T::Exp::CONST ) {
-        std::cout << "[codegen] fallen into BINOP(PLUS, e1, CONST(i))" << std::endl;
-        // NEVER GET THIS: BINOP(PLUS, e1, CONST(i))
-        auto e1 = reinterpret_cast< T::BinopExp* >( expNode )->left;
-        auto i  = reinterpret_cast< T::ConstExp* >( reinterpret_cast< T::BinopExp* >( expNode )->right )->consti;
-        auto r  = TEMP::Temp::NewTemp();
-        CG::temp_map->Enter( r, nullptr );
-        auto e1munch = munchExp( f, e1 );
-        auto instr   = new AS::OperInstr( "addq `d0, `s0+" + std::to_string( i ) + "\n", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, nullptr ), nullptr );
-        return smart_pair( r, combine( e1munch.second, new AS::InstrList( instr, nullptr ) ) );
-    }
-    else if ( false && expNode->kind == T::Exp::BINOP && reinterpret_cast< T::BinopExp* >( expNode )->op == T::PLUS_OP && reinterpret_cast< T::BinopExp* >( expNode )->left->kind == T::Exp::CONST ) {
-        std::cout << "[codegen] fallen into BINOP(PLUS(CONST(i), e1)" << std::endl;
-        // NEVER GET THIS: BINOP(PLUS, CONST(i), e1)
-        auto e1      = reinterpret_cast< T::BinopExp* >( expNode )->right;
-        auto i       = reinterpret_cast< T::ConstExp* >( reinterpret_cast< T::BinopExp* >( expNode )->left )->consti;
-        auto r       = TEMP::Temp::NewTemp();
-        auto e1munch = munchExp( f, e1 );
-        auto instr   = new AS::OperInstr( "addq `d0, `s0 + " + std::to_string( i ) + "\n", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, nullptr ), nullptr );
-        return smart_pair( r, combine( e1munch.second, new AS::InstrList( instr, nullptr ) ) );
-    }
+    // else if ( false && expNode->kind == T::Exp::BINOP && reinterpret_cast< T::BinopExp* >( expNode )->op == T::PLUS_OP && reinterpret_cast< T::BinopExp* >( expNode )->right->kind == T::Exp::CONST )
+    // {
+    //     std::cout << "[codegen] fallen into BINOP(PLUS, e1, CONST(i))" << std::endl;
+    //     // NEVER GET THIS: BINOP(PLUS, e1, CONST(i))
+    //     auto e1 = reinterpret_cast< T::BinopExp* >( expNode )->left;
+    //     auto i  = reinterpret_cast< T::ConstExp* >( reinterpret_cast< T::BinopExp* >( expNode )->right )->consti;
+    //     auto r  = TEMP::Temp::NewTemp();
+    //     CG::temp_map->Enter( r, nullptr );
+    //     auto e1munch = munchExp( f, e1 );
+    //     auto instr   = new AS::OperInstr( "addq `d0, `s0+" + std::to_string( i ) + "\n", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, nullptr ), nullptr );
+    //     return smart_pair( r, combine( e1munch.second, new AS::InstrList( instr, nullptr ) ) );
+    // }
+    // else if ( false && expNode->kind == T::Exp::BINOP && reinterpret_cast< T::BinopExp* >( expNode )->op == T::PLUS_OP && reinterpret_cast< T::BinopExp* >( expNode )->left->kind == T::Exp::CONST )
+    // {
+    //     std::cout << "[codegen] fallen into BINOP(PLUS(CONST(i), e1)" << std::endl;
+    //     // NEVER GET THIS: BINOP(PLUS, CONST(i), e1)
+    //     auto e1      = reinterpret_cast< T::BinopExp* >( expNode )->right;
+    //     auto i       = reinterpret_cast< T::ConstExp* >( reinterpret_cast< T::BinopExp* >( expNode )->left )->consti;
+    //     auto r       = TEMP::Temp::NewTemp();
+    //     auto e1munch = munchExp( f, e1 );
+    //     auto instr   = new AS::OperInstr( "addq `d0, `s0 + " + std::to_string( i ) + "\n", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, nullptr ), nullptr );
+    //     return smart_pair( r, combine( e1munch.second, new AS::InstrList( instr, nullptr ) ) );
+    // }
     else if ( expNode->kind == T::Exp::CONST ) {
         std::cout << "[codegen] fallen into CONST(i)" << std::endl;
         // // CONST(i)
@@ -281,20 +305,20 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         auto r = TEMP::Temp::NewTemp();
         CG::temp_map->Enter( r, nullptr );
         auto instr = new AS::OperInstr( "movq $" + std::to_string( i ) + ", `d0", new TEMP::TempList( r, nullptr ), nullptr, nullptr );
-        return smart_pair( r, nullptr );
+        return smart_pair( r, new AS::InstrList( instr, nullptr ) );
     }
-    else if ( false && expNode->kind == T::Exp::BINOP && reinterpret_cast< T::BinopExp* >( expNode )->op == T::PLUS_OP ) {
-        std::cout << "[codegen] fallen into BINOP(PLUS(e1, e2)" << std::endl;
-        // BINOP(PLUS, e1, e2)
-        auto e1 = reinterpret_cast< T::BinopExp* >( expNode )->left;
-        auto e2 = reinterpret_cast< T::BinopExp* >( expNode )->right;
-        auto r  = TEMP::Temp::NewTemp();
-        CG::temp_map->Enter( r, nullptr );
-        auto e1munch = munchExp( f, e1 );
-        auto e2munch = munchExp( f, e2 );
-        auto instr   = new AS::OperInstr( "ADD `d0 <- `s0+`s1\n", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
-        return smart_pair( r, combine( combine( e1munch.second, e2munch.second ), new AS::InstrList( instr, nullptr ) ) );
-    }
+    // else if ( false && expNode->kind == T::Exp::BINOP && reinterpret_cast< T::BinopExp* >( expNode )->op == T::PLUS_OP ) {
+    //     std::cout << "[codegen] fallen into BINOP(PLUS(e1, e2)" << std::endl;
+    //     // BINOP(PLUS, e1, e2)
+    //     auto e1 = reinterpret_cast< T::BinopExp* >( expNode )->left;
+    //     auto e2 = reinterpret_cast< T::BinopExp* >( expNode )->right;
+    //     auto r  = TEMP::Temp::NewTemp();
+    //     CG::temp_map->Enter( r, nullptr );
+    //     auto e1munch = munchExp( f, e1 );
+    //     auto e2munch = munchExp( f, e2 );
+    //     auto instr   = new AS::OperInstr( "ADD `d0 <- `s0+`s1\n", new TEMP::TempList( r, nullptr ), new TEMP::TempList( e1munch.first, new TEMP::TempList( e2munch.first, nullptr ) ), nullptr );
+    //     return smart_pair( r, combine( combine( e1munch.second, e2munch.second ), new AS::InstrList( instr, nullptr ) ) );
+    // }
     else if ( expNode->kind == T::Exp::BINOP ) {
         std::cout << "[codegen] fallen into BINOP" << std::endl;
         auto e  = reinterpret_cast< T::BinopExp* >( expNode );
@@ -309,10 +333,10 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
             assem = "subq ";
             break;
         case T::MUL_OP:
-            assem = "mulq ";
+            assem = "imulq ";
             break;
         case T::DIV_OP:
-            assem = "divq ";
+            assem = "idivq ";
             break;
         default:
             std::cout << "No idea what op code it is. " << e->op << std::endl;
@@ -333,16 +357,16 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         }
         else if ( e->op == T::MUL_OP ) {
             auto r             = TEMP::Temp::NewTemp();
-            auto moveInstr     = new AS::MoveInstr( "movq `d0, `s0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
-            auto mulqInstr     = new AS::OperInstr( "mulq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
-            auto moveBackInstr = new AS::MoveInstr( "movq `d0, `s0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
+            auto moveInstr     = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
+            auto mulqInstr     = new AS::OperInstr( "imulq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
+            auto moveBackInstr = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
             return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( moveInstr, new AS::InstrList( mulqInstr, new AS::InstrList( moveBackInstr, nullptr ) ) ) ) ) );
         }
         else if ( e->op == T::DIV_OP ) {
             auto r             = TEMP::Temp::NewTemp();
-            auto moveInstr     = new AS::MoveInstr( "movq `d0, `s0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
-            auto divqInstr     = new AS::OperInstr( "divq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
-            auto moveBackInstr = new AS::MoveInstr( "movq `d0, `s0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
+            auto moveInstr     = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
+            auto divqInstr     = new AS::OperInstr( "idivq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
+            auto moveBackInstr = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
             return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( moveInstr, new AS::InstrList( divqInstr, new AS::InstrList( moveBackInstr, nullptr ) ) ) ) ) );
         }
     }

@@ -1,0 +1,14 @@
+gcc runtime.s bsearch.tig.s -o bsearch.out
+gcc runtime.s dec2bin.tig.s -o dec2bin.out
+gcc runtime.s merge.tig.s -o merge.out
+gcc runtime.s prime.tig.s -o prime.out
+gcc runtime.s qsort.tig.s -o qsort.out
+gcc runtime.s queens.tig.s -o queens.out
+gcc runtime.s tbi.tig.s -o tbi.out
+gcc runtime.s tfact.tig.s -o tfact.out
+gcc runtime.s tfo.tig.s -o tfo.out
+gcc runtime.s tif.tig.s -o tif.out
+gcc runtime.s tifn.tig.s -o tifn.out
+gcc runtime.s tlink.tig.s -o tlink.out
+gcc runtime.s trec.tig.s -o trec.out
+gcc runtime.s twhi.tig.s -o twhi.out
