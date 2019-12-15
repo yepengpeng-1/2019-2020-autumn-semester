@@ -150,6 +150,19 @@ public:
         return ir2;
     }
 
+    static TEMP::Temp* idiotRegister3() {
+        // std::cout << "idiot register2 requested" << std::endl;
+        static TEMP::Temp* ir3 = nullptr;
+        if ( !ir3 ) {
+            std::cout << "gonna return new idiot register2" << std::endl;
+            ir3 = TEMP::Temp::NewTemp();
+        }
+        else {
+            // std::cout << "gonna return existed idiot register2" << std::endl;
+        }
+        return ir3;
+    }
+
     static TEMP::Temp* smartRegister() {
         // std::cout << "smart register requested" << std::endl;
         static TEMP::Temp* sr = nullptr;

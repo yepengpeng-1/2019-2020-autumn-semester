@@ -65,6 +65,7 @@ static AS::Proc* F_procEntryExit3( F::Frame* frame, AS::InstrList* body ) {
         // new AS::OperInstr( "movq " + argRegs[ argCounter ] + ", " + std::to_string( argAccess->offset ) + "(`s0)", nullptr, new TEMP::TempList( frame->framePointer(), nullptr ), nullptr );
 
         prologue << "movq " << argRegs[ argCounter ] << ", " << argAccess->offset << "(%rbp)" << std::endl;
+        std::cout << "[codegen] gotta a arg managing instr: movq " << argRegs[ argCounter ] << ", " << argAccess->offset << "(%rbp)" << std::endl;
         argT = argT->tail;
         argCounter += 1;
     }

@@ -294,14 +294,14 @@ F::FragList* TranslateProgram( A::Exp* root ) {
     addFragment( new F::ProcFrag( totalProgram.exp->UnNx(), mainLevel->frame ) );
 
     std::cout << " ~~~~ Completed Translation ~~~~" << std::endl;
-    // FILE* fptr;
-    // fptr = fopen( "uncanoned.s", "a" );
-    // fprintf( fptr, "\n\n\n============================\n\n\n\n" );
+    FILE* fptr;
+    fptr = fopen( "uncanoned.s", "a" );
+    fprintf( fptr, "\n\n\n============================\n\n\n\n" );
 
-    // totalProgram.exp->UnEx()->Print( fptr, 0 );
+    totalProgram.exp->UnEx()->Print( fptr, 0 );
 
-    // std::cout << " ~~~~ Completed Printing ~~~~" << std::endl;
-    // fclose( fptr );
+    std::cout << " ~~~~ Completed Printing ~~~~" << std::endl;
+    fclose( fptr );
     return addFragment();
 }
 
@@ -879,7 +879,7 @@ TR::ExpAndTy SeqExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
 
     T::EseqExp* node       = new T::EseqExp( exps[ 0 ]->UnNx(), nullptr );
     auto        returnNode = node;
-    for ( size_t i = 0; i < exps.size(); ++i ) {
+    for ( size_t i = 1; i < exps.size(); ++i ) {
         if ( i == exps.size() - 1 ) {
             node->exp = exps[ i ]->UnEx();
         }

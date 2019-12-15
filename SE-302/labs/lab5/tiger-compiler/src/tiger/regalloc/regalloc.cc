@@ -6,7 +6,7 @@
 namespace RA {
 
 static bool smartRegisterAlter = false;
-static bool idiotRegisterAlter = false;
+static int  idiotRegisterAlter = 0;
 
 static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempList* spillL ) {
     auto now = instrL->tail, prev = instrL;
@@ -59,29 +59,41 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
 
             while ( src ) {
 
-                if ( RA::idiotRegisterAlter ) {
+                if ( RA::idiotRegisterAlter % 3 == 0 ) {
                     // std::cout << "while loop of src: " << src << ", which->head = " << src->head << std::endl;
                     // auto head = src->head;
                     if ( src->head == tl->head ) {
                         // auto temp  = TEMP::Temp::NewTemp();
-                        auto load          = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister(), nullptr ),
+                        auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister(), nullptr ),
                                                        new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
-                        src->head          = f->idiotRegister();
-                        prev->tail         = new AS::InstrList( load, now );
-                        prev               = prev->tail;
-                        idiotRegisterAlter = !idiotRegisterAlter;
+                        src->head  = f->idiotRegister();
+                        prev->tail = new AS::InstrList( load, now );
+                        prev       = prev->tail;
+                        ++idiotRegisterAlter;
+                        break;
+                    }
+                }
+                else if ( RA::idiotRegisterAlter % 3 == 1 ) {
+                    if ( src->head == tl->head ) {
+                        // auto temp  = TEMP::Temp::NewTemp();
+                        auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister2(), nullptr ),
+                                                       new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
+                        src->head  = f->idiotRegister2();
+                        prev->tail = new AS::InstrList( load, now );
+                        prev       = prev->tail;
+                        ++idiotRegisterAlter;
                         break;
                     }
                 }
                 else {
                     if ( src->head == tl->head ) {
                         // auto temp  = TEMP::Temp::NewTemp();
-                        auto load          = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister2(), nullptr ),
+                        auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister3(), nullptr ),
                                                        new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
-                        src->head          = f->idiotRegister2();
-                        prev->tail         = new AS::InstrList( load, now );
-                        prev               = prev->tail;
-                        idiotRegisterAlter = !idiotRegisterAlter;
+                        src->head  = f->idiotRegister3();
+                        prev->tail = new AS::InstrList( load, now );
+                        prev       = prev->tail;
+                        ++idiotRegisterAlter;
                         break;
                     }
                 }
@@ -132,10 +144,9 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
 }
 
 inline bool isExcept( F::Frame* f, TEMP::Temp* temp ) {
-    static const TEMP::Temp* excepts[] = {
-        f->framePointer(), f->idiotRegister(), f->returnValue(), f->stackPointer(), f->smartRegister(), f->radioRegister(), f->smartRegister2(), f->idiotRegister2()
-    };
-    for ( size_t i = 0; i < 8; i++ ) {
+    static const TEMP::Temp* excepts[] = { f->framePointer(),  f->idiotRegister(),  f->returnValue(),    f->stackPointer(),  f->smartRegister(),
+                                           f->radioRegister(), f->smartRegister2(), f->idiotRegister2(), f->idiotRegister3() };
+    for ( size_t i = 0; i < 9; i++ ) {
         if ( temp == excepts[ i ] ) {
             return true;
         }
