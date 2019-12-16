@@ -614,10 +614,8 @@ TR::ExpAndTy IntExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
 }
 
 TR::ExpAndTy StringExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
-    std::cout << "Entered StringExp::Translate." << std::endl;
-
+    std::cout << "Entered StringExp::Translate. s = " << this->s << std::endl;
     auto newLabel = TEMP::NewLabel();
-
     TR::addFragment( new F::StringFrag( newLabel, this->s ) );
     return TR::ExpAndTy( new TR::ExExp( new T::NameExp( newLabel ) ), TY::StringTy::Instance() );
 }
@@ -638,12 +636,15 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
     TY::Ty*     retType;
 
     venv->BeginScope();
-    while ( arg || formals ) {
+
+    // do not enter this place. will cause duplicate fragment creation. Evil!
+    while (false && (arg || formals) ) {
         if ( arg && formals ) {
             std::cout << "comparing arg->head and formals->head" << std::endl;
-            if ( !arg->head->Translate( venv, tenv, level, label ).ty->IsSameType( formals->head ) ) {
+            auto argT = arg->head->Translate( venv, tenv, level, label );
+            if ( !argT.ty->IsSameType( formals->head ) ) {
                 std::cout << "para type mismatch" << std::endl;
-                std::cout << "ty1: " << arg->head->Translate( venv, tenv, level, label ).ty << "; ty2:" << formals->head << std::endl;
+                std::cout << "ty1: " << argT.ty << "; ty2:" << formals->head << std::endl;
                 break;
             }
 
@@ -1151,9 +1152,10 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
     std::cout << "Entered FunctionDec::Translate." << std::endl;
     std::vector< TR::Exp* > exps;
     FunDecList*             func = this->functions;
+
     while ( func ) {
         A::FunDec* f = func->head;
-        std::cout << "Analyzing function " << f->name << ", return type: " << f->result->Name() << std::endl;
+        std::cout << "Analyzing function " << f->name << std::endl;
         auto returnType  = f->result == nullptr ? TY::VoidTy::Instance() : tenv->Look( f->result )->ActualTy();
         auto formalTypes = TR::make_formal_tylist( tenv, f->params );
 

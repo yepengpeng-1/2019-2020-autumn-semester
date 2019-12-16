@@ -114,10 +114,12 @@ s:
     */
     int length = strFrag->str.size();
 
-    fprintf( out, ".globl %s\n", strFrag->label->Name().c_str() );
-    fprintf( out, ".type %s, @object\n", strFrag->label->Name().c_str() );
-    fprintf( out, ".size %s, %d\n", strFrag->label->Name().c_str(), length );
+    // fprintf( out, ".globl %s\n", strFrag->label->Name().c_str() );
+    // fprintf( out, ".type %s, @object\n", strFrag->label->Name().c_str() );
+    // fprintf( out, ".size %s, %d\n", strFrag->label->Name().c_str(), length );
     fprintf( out, "%s:\n", strFrag->label->Name().c_str() );
+    fprintf( out, ".long %d\n", length );
+
     // it may contains zeros in the middle of string. To keep this work, we need
     // to print all the charactors instead of using fprintf(str)
 

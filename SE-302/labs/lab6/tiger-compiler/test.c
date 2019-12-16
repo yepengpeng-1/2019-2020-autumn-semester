@@ -1,15 +1,10 @@
 #include <stdio.h>
-#include <time.h>
-
-const char s[] = "abcdef";
-const char t[] = "dbhsakjlfhbnl;ojiohubkjnlmjhuibjkn";
-
 int main() {
-    int i = time( NULL ) % 4;
+    int i = srand( time( NULL ) );
     if ( i < 2 ) {
-        printf( "%s", s );
+        printf( "ahahahha, i'm the dirtest dirt\n" );
     }
     else {
-        printf( "%s", t );
+        printf( "the gunk in the gutter\n" );
     }
 }
