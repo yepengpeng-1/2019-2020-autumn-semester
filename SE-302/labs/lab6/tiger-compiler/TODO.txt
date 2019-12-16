@@ -1,0 +1,9 @@
+TODO:
+
+* Fix Break (loop list): fixed.
+* Fix Linking issues and missing references. fixed
+* 每个函数应该要附加上自己的 frame symbol “name:”。fixed
+
+* ForExp 生成的 Exp 在做 CodeGEn 的时候，done Label 丢失了。fixed
+
+* .rodata 格式不对fixed(maybe?)
