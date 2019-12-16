@@ -386,13 +386,6 @@ T::Exp* getExp( F::Access* acc, T::Exp* framePtr ) {
     assert(0);
 }
 
-struct SLTrace {
-    TR::Level* current;
-    TR::Level* declare;
-    T::Exp*    r;
-};
-
-static std::vector< SLTrace* > traces = {};
 
 static TR::Exp* findStaticLink( TR::Level* current, TR::Level* declare ) {
     std::cout << "called findStaticLink " << std::endl;
@@ -404,16 +397,6 @@ static TR::Exp* findStaticLink( TR::Level* current, TR::Level* declare ) {
         return new TR::ExExp( result );
     }
 
-    SLTrace* trace = nullptr;
-    for ( size_t i = 0; i < traces.size(); i++ ) {
-        if ( traces[ i ]->declare == declare ) {
-            trace = traces[ i ];
-        }
-    }
-    if ( trace && trace->current == current && trace->declare == declare ) {
-        // found existed cached target trace
-        return new TR::ExExp( trace->r );
-    }
 
     TR::Level* node;
     for ( node = current; node != declare; node = node->parent ) {
@@ -425,23 +408,6 @@ static TR::Exp* findStaticLink( TR::Level* current, TR::Level* declare ) {
         // }
         result        = getExp( sl->head, result );
     }
-    auto t1 = TEMP::Temp::NewTemp();
-    auto t2 = TEMP::Temp::NewTemp();
-
-    /*
-    ESEQ(SEQ(
-        MOVE(t2, result),
-        MOVE(t1, t2)
-    ), t2);
-    use two registers as internal
-    */
-    result = new T::EseqExp( new T::SeqStm( new T::MoveStm( new T::TempExp( t2 ), result ), new T::MoveStm( new T::TempExp( t1 ), new T::TempExp( t2 ) ) ), new T::TempExp( t2 ) );
-
-    // cache it for next usage
-    SLTrace* nextTrace = reinterpret_cast< SLTrace* >( calloc( 1, sizeof( SLTrace ) ) );
-    nextTrace->current = current;
-    nextTrace->declare = declare;
-    nextTrace->r       = new T::TempExp( t1 );
 
     return new TR::ExExp( result );
 }
