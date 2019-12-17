@@ -686,8 +686,11 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         }
         rawExps = rawExps->tail;
     }
-
-    finExps->tail = new T::ExpList( new T::TempExp(level->frame->framePointer()), nullptr );
+    if (finExps) {
+        finExps->tail = new T::ExpList( new T::TempExp(level->frame->framePointer()), nullptr );
+    } else {
+        headExp = new T::ExpList( new T::TempExp(level->frame->framePointer()), nullptr );
+    }
     venv->EndScope();
     auto finExp = new TR::ExExp( new T::CallExp( new T::NameExp( TEMP::NamedLabel( this->func->Name() ) ),  headExp ));
     return TR::ExpAndTy( finExp, result );
