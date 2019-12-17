@@ -1,14 +1,89 @@
 #include "tiger/regalloc/regalloc.h"
+#include "tiger/codegen/assem.h"
 #include "tiger/translate/translate.h"
 #include <algorithm>
+#include <map>
+#include <utility>
 #include <vector>
 
 namespace RA {
 
-static bool smartRegisterAlter = false;
-static int  idiotRegisterAlter = 0;
+TEMP::Temp* nth_temp( TEMP::TempList* list, int i ) {
+    assert( list );
+    if ( i == 0 )
+        return list->head;
+    else
+        return nth_temp( list->tail, i - 1 );
+}
 
-static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempList* spillL ) {
+static std::string formatAssembly( std::string assem, TEMP::TempList* dst, TEMP::TempList* src, TEMP::Map* m ) {
+    std::cout << "[instr] reduced format called. assem = " << assem << ", dst = " << dst << ", src = " << src << std::endl;
+
+    std::string result;
+    for ( int i = 0; i < assem.size(); i++ ) {
+        char ch = assem.at( i );
+        if ( ch == '`' ) {
+            i++;
+            switch ( assem.at( i ) ) {
+            case 's': {
+                i++;
+                int n = assem.at( i ) - '0';
+                std::cout << "\t[instr] [format] got a `s = " << nth_temp( src, n )->Int() << std::endl;
+                std::string* s = m->Look( nth_temp( src, n ) );
+                if ( s ) {
+                    result += *s;
+                }
+                else {
+                    std::cout << "**** 灾变 **** cannot find the " << n << "th param of the src. original assem: " << assem << std::endl;
+                    result += "t" + std::to_string( nth_temp( src, n )->Int() );
+                }
+            } break;
+            case 'd': {
+                i++;
+                int n = assem.at( i ) - '0';
+                std::cout << "\t[instr] [format] got a `d = " << nth_temp( dst, n )->Int() << std::endl;
+                std::string* s = m->Look( nth_temp( dst, n ) );
+                if ( s ) {
+                    result += *s;
+                }
+                else {
+                    std::cout << "**** 灾变 **** cannot find the " << n << "th param of the dst. original assem: " << assem << std::endl;
+                    result += "t" + std::to_string( nth_temp( dst, n )->Int() );
+                }
+            } break;
+            case 'j': {
+                result += "j";
+            } break;
+            case '`': {
+                result += '`';
+            } break;
+            default:
+                assert( 0 );
+            }
+        }
+        else {
+            result += ch;
+        }
+    }
+    return result;
+}
+
+// static bool smartRegisterAlter = false;
+// static int  idiotRegisterAlter = 0;
+
+static std::string stringBuffers[] = { "%rbp", "%rsp", "%rax" };
+
+static AS::InstrList* spillTempFoolishly( F::Frame* f, AS::InstrList* instrL, TEMP::TempList* spillL ) {
+    // warning: this function is extremely foolish.
+    // intelligence quantity collapsing may occur.
+    // read it at your own risk.
+
+    std::cout << "[regalloc] entered apillTempFoolishly." << std::endl;
+    std::cout << "\tcurrently, framePointer = t" << f->framePointer()->Int() << std::endl;
+    std::cout << "\t           stackPointer = t" << f->stackPointer()->Int() << std::endl;
+    std::cout << "\t           returnValue = t" << f->returnValue()->Int() << std::endl;
+    std::vector< AS::Instr* > instrs;
+
     auto now = instrL->tail, prev = instrL;
 
     while ( now ) {
@@ -26,128 +101,150 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
     }
 
     // now = instrL->tail, prev = instrL;
+
+    std::map< TEMP::Temp*, std::string > offset_pair;
+
     auto tl = spillL;
     while ( tl ) {
         // std::cout << "[regalloc] handling temp t" << tl->head->Int << std::endl;
         // std::cout << "[regalloc] in while(tl). tl = " << tl << std::endl;
         auto head   = tl->head;
         auto newAcc = TR::AllocLocalWrapped( f, "t" + std::to_string( head->Int() ) );
-
         int  offset = reinterpret_cast< F::InFrameAccess* >( newAcc )->offset;
-        auto now = instrL->tail, prev = instrL;
-        while ( now ) {
-            // std::cout << "[regalloc] in while(now). now = " << now << std::endl;
-            TEMP::TempList *src, *dst;
-            auto            head = now->head;
-            if ( head->kind == AS::Instr::Kind::LABEL ) {
-                // no need to spill anything
-                prev = now;
-                now  = now->tail;
-                continue;
-            }
-            else if ( head->kind == AS::Instr::Kind::MOVE ) {
-                src = reinterpret_cast< AS::MoveInstr* >( head )->src;
-                dst = reinterpret_cast< AS::MoveInstr* >( head )->dst;
-            }
-            else if ( head->kind == AS::Instr::Kind::OPER ) {
-                src = reinterpret_cast< AS::OperInstr* >( head )->src;
-                dst = reinterpret_cast< AS::OperInstr* >( head )->dst;
-            }
-            else {
-                std::cout << "[regalloc] invalid head->kind - " << head->kind << std::endl;
-                assert( 0 );
-            }
-
-            while ( src ) {
-
-                if ( RA::idiotRegisterAlter % 3 == 0 ) {
-
-                    // std::cout << "while loop of src: " << src << ", which->head = " << src->head << std::endl;
-                    // auto head = src->head;
-                    if ( src->head == tl->head ) {
-                        std::cout << "[regalloc] handling temp t" << tl->head->Int() << " as a src, using idiotRegister()" << std::endl;
-                        // auto temp  = TEMP::Temp::NewTemp();
-                        auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister(), nullptr ),
-                                                       new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
-                        src->head  = f->idiotRegister();
-                        prev->tail = new AS::InstrList( load, now );
-                        prev       = prev->tail;
-                        ++idiotRegisterAlter;
-                        break;
-                    }
-                }
-                else if ( RA::idiotRegisterAlter % 3 == 1 ) {
-                    if ( src->head == tl->head ) {
-                        std::cout << "[regalloc] handling temp t" << tl->head->Int() << " as a src, using idiotRegister2()" << std::endl;
-                        // auto temp  = TEMP::Temp::NewTemp();
-                        auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister2(), nullptr ),
-                                                       new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
-                        src->head  = f->idiotRegister2();
-                        prev->tail = new AS::InstrList( load, now );
-                        prev       = prev->tail;
-                        ++idiotRegisterAlter;
-                        break;
-                    }
-                }
-                else {
-                    if ( src->head == tl->head ) {
-                        // auto temp  = TEMP::Temp::NewTemp();
-                        std::cout << "[regalloc] handling temp t" << tl->head->Int() << " as a src, using idiotRegister3()" << std::endl;
-                        auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister3(), nullptr ),
-                                                       new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
-                        src->head  = f->idiotRegister3();
-                        prev->tail = new AS::InstrList( load, now );
-                        prev       = prev->tail;
-                        ++idiotRegisterAlter;
-                        break;
-                    }
-                }
-
-                src = src->tail;
-            }
-
-            while ( dst ) {
-
-                if ( RA::smartRegisterAlter ) {
-                    // std::cout << "while loop of dst: " << dst << std::endl;
-                    // auto head = dst->head;
-                    if ( dst->head == tl->head ) {
-                        std::cout << "[regalloc] handling temp t" << tl->head->Int() << " as a dst, using smartRegister()" << std::endl;
-                        // auto temp  = TEMP::Temp::NewTemp();
-                        auto store         = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr,
-                                                        new TEMP::TempList( f->framePointer(), new TEMP::TempList( f->smartRegister(), nullptr ) ), nullptr );
-                        dst->head          = f->smartRegister();
-                        prev               = now;
-                        now->tail          = new AS::InstrList( store, now->tail );
-                        now                = now->tail;
-                        smartRegisterAlter = !smartRegisterAlter;
-                        break;
-                    }
-                }
-                else {
-                    if ( dst->head == tl->head ) {
-                        // auto temp  = TEMP::Temp::NewTemp();
-                        std::cout << "[regalloc] handling temp t" << tl->head->Int() << " as a dst, using smartRegister2()" << std::endl;
-                        auto store         = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr,
-                                                        new TEMP::TempList( f->framePointer(), new TEMP::TempList( f->smartRegister2(), nullptr ) ), nullptr );
-                        dst->head          = f->smartRegister2();
-                        prev               = now;
-                        now->tail          = new AS::InstrList( store, now->tail );
-                        now                = now->tail;
-                        smartRegisterAlter = !smartRegisterAlter;
-                        break;
-                    }
-                }
-
-                dst = dst->tail;
-            }
-
-            prev = now;
-            now  = now->tail;
-        }
+        offset_pair.insert( { head, std::to_string( offset ) + "(%rbp)" } );
         tl = tl->tail;
     }
-    return instrL;
+
+    offset_pair.insert( { f->framePointer(), "%rbp" } );
+    offset_pair.insert( { f->stackPointer(), "%rsp" } );
+    offset_pair.insert( { f->returnValue(), "%rax" } );
+
+    auto instrLT = instrL;
+    while ( instrLT ) {
+        std::string globalUselessRegs[] = { "%r10", "%r11" };
+        auto        head                = instrLT->head;
+        instrLT                         = instrLT->tail;
+
+        if ( head->kind == AS::Instr::MOVE ) {
+            auto                       moveInstr = reinterpret_cast< AS::MoveInstr* >( head );
+            std::vector< TEMP::Temp* > unmatchedTemps;
+            auto                       d = moveInstr->dst;
+            while ( d ) {
+                if ( d->head != f->framePointer() ) {
+                    unmatchedTemps.push_back( d->head );
+                }
+                d = d->tail;
+            }
+
+            auto s = moveInstr->src;
+            while ( s ) {
+                if ( s->head != f->framePointer() ) {
+                    unmatchedTemps.push_back( s->head );
+                }
+                s = s->tail;
+            }
+
+            std::cout << "going to assert unmatchedTemps count = " << unmatchedTemps.size() << ". should < 3" << std::endl;
+            assert( unmatchedTemps.size() < 3 );
+
+            auto map = TEMP::Map::Empty();
+
+            TEMP::Temp* tempBuffers[] = { f->framePointer(), f->stackPointer(), f->returnValue() };
+            for ( size_t i = 0; i < 3; i++ ) {
+                map->Enter( tempBuffers[ i ], &stringBuffers[ i ] );
+            }
+
+            AS::InstrList* finalInstr = nullptr;
+            for ( size_t i = 0; i < unmatchedTemps.size(); i++ ) {
+                auto pair_find = offset_pair.find( unmatchedTemps[ i ] );
+                std::cout << "satisfying the #" << i << " (t" << unmatchedTemps[ i ]->Int() << ") unmatchedTemps." << std::endl;
+                assert( pair_find != offset_pair.end() );
+                instrs.push_back( new AS::MoveInstr( "movq " + pair_find->second + ", " + globalUselessRegs[ i ], nullptr, nullptr ) );
+                std::cout << "[regalloc] [move] 起头, assem = "
+                          << "movq " + pair_find->second + ", " + globalUselessRegs[ i ] << std::endl;
+                map->Enter( unmatchedTemps[ i ], &globalUselessRegs[ i ] );
+            }
+
+            instrs.push_back( new AS::MoveInstr( formatAssembly( moveInstr->assem, moveInstr->dst, moveInstr->src, map ), nullptr, nullptr ) );
+
+            for ( size_t i = 0; i < unmatchedTemps.size(); i++ ) {
+                auto pair_find = offset_pair.find( unmatchedTemps[ i ] );
+                std::cout << "satisfying the #" << i << " (t" << unmatchedTemps[ i ]->Int() << ") unmatchedTemps." << std::endl;
+                assert( pair_find != offset_pair.end() );
+                instrs.push_back( new AS::MoveInstr( "movq " + globalUselessRegs[ i ] + ", " + pair_find->second, nullptr, nullptr ) );
+
+                std::cout << "[regalloc] [move] 收尾, assem = "
+                          << "movq " + globalUselessRegs[ i ] + ", " + pair_find->second << std::endl;
+                map->Enter( unmatchedTemps[ i ], &globalUselessRegs[ i ] );
+            }
+        }
+        else if ( head->kind == AS::Instr::OPER ) {
+            auto                       operInstr = reinterpret_cast< AS::OperInstr* >( head );
+            std::vector< TEMP::Temp* > unmatchedTemps;
+
+            auto d = operInstr->dst;
+            while ( d ) {
+                unmatchedTemps.push_back( d->head );
+                d = d->tail;
+            }
+
+            auto s = operInstr->src;
+            while ( s ) {
+                unmatchedTemps.push_back( s->head );
+                s = s->tail;
+            }
+
+            std::cout << "going to assert unmatchedTemps count = " << unmatchedTemps.size() << ". should < 3" << std::endl;
+            assert( unmatchedTemps.size() < 3 );
+
+            auto map = TEMP::Map::Empty();
+
+            AS::InstrList* finalInstr = nullptr;
+            for ( size_t i = 0; i < unmatchedTemps.size(); i++ ) {
+                auto pair_find = offset_pair.find( unmatchedTemps[ i ] );
+                std::cout << "satisfying the #" << i << " (t" << unmatchedTemps[ i ]->Int() << ") unmatchedTemps." << std::endl;
+                assert( pair_find != offset_pair.end() );
+                instrs.push_back( new AS::MoveInstr( "movq " + pair_find->second + ", " + globalUselessRegs[ i ], nullptr, nullptr ) );
+                std::cout << "[regalloc] [oper] 起头, assem = "
+                          << "movq " + pair_find->second + ", " + globalUselessRegs[ i ] << std::endl;
+                map->Enter( unmatchedTemps[ i ], &globalUselessRegs[ i ] );
+            }
+
+            instrs.push_back( new AS::OperInstr( formatAssembly( operInstr->assem, operInstr->dst, operInstr->src, map ), nullptr, nullptr, operInstr->jumps ) );
+
+            for ( size_t i = 0; i < unmatchedTemps.size(); i++ ) {
+                auto pair_find = offset_pair.find( unmatchedTemps[ i ] );
+                std::cout << "satisfying the #" << i << " (t" << unmatchedTemps[ i ]->Int() << ") unmatchedTemps." << std::endl;
+                assert( pair_find != offset_pair.end() );
+                instrs.push_back( new AS::MoveInstr( "movq " + globalUselessRegs[ i ] + ", " + pair_find->second, nullptr, nullptr ) );
+                std::cout << "[regalloc] [oper] 收尾, assem = "
+                          << "movq " + globalUselessRegs[ i ] + ", " + pair_find->second << std::endl;
+                map->Enter( unmatchedTemps[ i ], &globalUselessRegs[ i ] );
+            }
+        }
+        else if ( head->kind == AS::Instr::LABEL ) {
+            instrs.push_back( head );
+        }
+        else {
+            // who are you?
+            assert( 0 );
+        }
+    }
+
+    AS::InstrList *head = nullptr, *node = nullptr;
+
+    for ( size_t i = 0; i < instrs.size(); i++ ) {
+        if ( node ) {
+            node->tail = new AS::InstrList( instrs[ i ], nullptr );
+            node       = node->tail;
+        }
+        else {
+            node = new AS::InstrList( instrs[ i ], nullptr );
+            head = node;
+        }
+    }
+
+    return head;
 }
 
 inline bool isExcept( F::Frame* f, TEMP::Temp* temp ) {
@@ -190,7 +287,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     auto temps = moveInstr->dst;
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                        if ( true || std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                             if ( !isExcept( f, temps->head ) ) {
                                 tempset.push_back( temps->head );
                             }
@@ -203,7 +300,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     auto temps = moveInstr->src;
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                        if ( true || std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                             if ( !isExcept( f, temps->head ) ) {
                                 tempset.push_back( temps->head );
                             }
@@ -218,7 +315,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     auto temps = operInstr->dst;
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                        if ( true || std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                             if ( !isExcept( f, temps->head ) ) {
                                 tempset.push_back( temps->head );
                             }
@@ -231,7 +328,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
                     auto temps = operInstr->src;
                     while ( temps ) {
                         std::cout << "[regalloc] [spillcheck] on t" << temps->head->Int() << std::endl;
-                        if ( true || std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
+                        if ( std::find( tempset.begin(), tempset.end(), temps->head ) == tempset.end() ) {
                             if ( !isExcept( f, temps->head ) ) {
                                 tempset.push_back( temps->head );
                             }
@@ -259,7 +356,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
 
             std::cout << "[regalloc] relsama houwy" << std::endl;
             // relsama houwy
-            il = spillTemp( f, il, tList );
+            il = spillTempFoolishly( f, il, tList );
         }
         else {
             std::cout << "[regalloc] over then, I suppose." << std::endl;
