@@ -671,8 +671,12 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
     std::cout << "[callexp] start traversing rawExps" << std::endl;
     while ( rawExps ) {
         std::cout << "[callexp] while (rawExps) => " << rawExps << std::endl;
-        finExps = new T::ExpList( rawExps->head->Translate( venv, tenv, level, label ).exp->UnEx(), finExps );
-        if ( !headExp ) {
+        if (finExps) {
+            finExps->tail = new T::ExpList( rawExps->head->Translate( venv, tenv, level, label ).exp->UnEx(), nullptr );
+            finExps = finExps->tail;
+        }
+        else {
+            finExps = new T::ExpList( rawExps->head->Translate( venv, tenv, level, label ).exp->UnEx(), nullptr );
             headExp = finExps;
         }
         rawExps = rawExps->tail;

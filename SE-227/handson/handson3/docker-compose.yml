@@ -8,7 +8,6 @@ services:
     image: weaveworksdemos/shipping:0.4.8
   user:
     image: weaveworksdemos/user:0.4.4
-    image: weaveworksdemos/orders:0.4.7
     depends_on:
       user-db:
         condition: service_healthy

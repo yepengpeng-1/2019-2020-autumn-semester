@@ -1,0 +1,26 @@
+version : '2.1'
+services:
+  frontend:
+    image: dplsming/sockshop-frontend:0.1
+    ports:
+      - "8079:8079"
+  shipping:
+    image: weaveworksdemos/shipping:0.4.8
+  user:
+    image: weaveworksdemos/user:0.4.4
+  orders:
+    image: weaveworksdemos/orders:0.4.7
+  carts:
+    image: weaveworksdemos/carts:0.4.8
+  payment:
+    image: weaveworksdemos/payment:0.4.3
+  catalogue:
+    image: weaveworksdemos/catalogue:0.3.5
+  carts-db:
+    image: mongo:3.4
+  user-db:
+    image: mongo:3.4
+  orders-db:
+    image: mongo:3.4
+  catalogue-db:
+    image: dplsming/sockshop-cataloguedb:0.1
