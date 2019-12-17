@@ -91,12 +91,14 @@ void do_proc( FILE* out, F::ProcFrag* procFrag ) {
     fprintf( out, "%s", proc->prolog.c_str() );
     // body
     proc->body->Print( out, TEMP::Map::LayerMap( temp_map, allocation.coloring ) );
+
     FILE* fptr_c;
     fptr_c = fopen( "unallocated.s", "a" );
     fprintf( fptr_c, "\n\n\n============================\n\n\n\n" );
     proc->body->Print( fptr_c, TEMP::Map::Empty() );
     std::cout << " ~~~~ Completed Printing ~~~~" << std::endl;
     fclose( fptr_c );
+
     // epilog
     fprintf( out, "%s", proc->epilog.c_str() );
     fprintf( out, ".size %s, .-%s\n", procName.c_str(), procName.c_str() );

@@ -28,6 +28,7 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
     // now = instrL->tail, prev = instrL;
     auto tl = spillL;
     while ( tl ) {
+        // std::cout << "[regalloc] handling temp t" << tl->head->Int << std::endl;
         // std::cout << "[regalloc] in while(tl). tl = " << tl << std::endl;
         auto head   = tl->head;
         auto newAcc = TR::AllocLocalWrapped( f, "t" + std::to_string( head->Int() ) );
@@ -57,12 +58,15 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                 assert( 0 );
             }
 
+            bool onlyOnceFlag = false;
             while ( src ) {
 
                 if ( RA::idiotRegisterAlter % 3 == 0 ) {
+
                     // std::cout << "while loop of src: " << src << ", which->head = " << src->head << std::endl;
                     // auto head = src->head;
                     if ( src->head == tl->head ) {
+                        std::cout << "[regalloc] handling temp t" << tl->head->Int() << " as a src, using idiotRegister()" << std::endl;
                         // auto temp  = TEMP::Temp::NewTemp();
                         auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister(), nullptr ),
                                                        new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
@@ -70,11 +74,13 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                         prev->tail = new AS::InstrList( load, now );
                         prev       = prev->tail;
                         ++idiotRegisterAlter;
+                        onlyOnceFlag = true;
                         break;
                     }
                 }
                 else if ( RA::idiotRegisterAlter % 3 == 1 ) {
                     if ( src->head == tl->head ) {
+                        std::cout << "[regalloc] handling temp t" << tl->head->Int() << " as a src, using idiotRegister2()" << std::endl;
                         // auto temp  = TEMP::Temp::NewTemp();
                         auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister2(), nullptr ),
                                                        new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
@@ -82,23 +88,29 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                         prev->tail = new AS::InstrList( load, now );
                         prev       = prev->tail;
                         ++idiotRegisterAlter;
+                        onlyOnceFlag = true;
                         break;
                     }
                 }
                 else {
                     if ( src->head == tl->head ) {
                         // auto temp  = TEMP::Temp::NewTemp();
+                        std::cout << "[regalloc] handling temp t" << tl->head->Int() << " as a src, using idiotRegister3()" << std::endl;
                         auto load  = new AS::OperInstr( "movq " + std::to_string( offset ) + "(`s0), `d0", new TEMP::TempList( f->idiotRegister3(), nullptr ),
                                                        new TEMP::TempList( f->framePointer(), nullptr ), nullptr );
                         src->head  = f->idiotRegister3();
                         prev->tail = new AS::InstrList( load, now );
                         prev       = prev->tail;
                         ++idiotRegisterAlter;
+                        onlyOnceFlag = true;
                         break;
                     }
                 }
 
                 src = src->tail;
+            }
+            if ( onlyOnceFlag ) {
+                continue;
             }
 
             while ( dst ) {
@@ -107,6 +119,7 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                     // std::cout << "while loop of dst: " << dst << std::endl;
                     // auto head = dst->head;
                     if ( dst->head == tl->head ) {
+                        std::cout << "[regalloc] handling temp t" << tl->head->Int() << " as a dst, using smartRegister()" << std::endl;
                         // auto temp  = TEMP::Temp::NewTemp();
                         auto store         = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr,
                                                         new TEMP::TempList( f->framePointer(), new TEMP::TempList( f->smartRegister(), nullptr ) ), nullptr );
@@ -121,6 +134,7 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                 else {
                     if ( dst->head == tl->head ) {
                         // auto temp  = TEMP::Temp::NewTemp();
+                        std::cout << "[regalloc] handling temp t" << tl->head->Int() << " as a dst, using smartRegister2()" << std::endl;
                         auto store         = new AS::OperInstr( "movq `s1, " + std::to_string( offset ) + "(`s0)", nullptr,
                                                         new TEMP::TempList( f->framePointer(), new TEMP::TempList( f->smartRegister2(), nullptr ) ), nullptr );
                         dst->head          = f->smartRegister2();

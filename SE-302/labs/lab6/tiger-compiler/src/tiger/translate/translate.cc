@@ -89,7 +89,7 @@ public:
             frame->functionName = "";
             return new Level( frame, this );
         } else {
-            auto frame          = FRM::newFrame( *name, new U::BoolList(true, "", nullptr), this->frame );
+            auto frame          = FRM::newFrame( *name, new U::BoolList(true, "__static_link__", nullptr), this->frame );
             frame->functionName = "";
             return new Level( frame, this );
         }
@@ -376,8 +376,10 @@ T::Exp* getExp( F::Access* acc, T::Exp* framePtr ) {
     std::cout << "called getExp. input framePtr = " << framePtr << std::endl;
     switch ( acc->kind ) {
     case F::Access::Kind::INFRAME: {
-        std::cout << "with a INFRAME access" << std::endl;
-        return new T::MemExp( new T::BinopExp( T::BinOp::PLUS_OP, framePtr, new T::ConstExp( reinterpret_cast< F::InFrameAccess* >( acc )->offset ) ) );
+        
+        auto acc_m = reinterpret_cast< F::InFrameAccess* >( acc );
+        std::cout << "with a INFRAME access, acc->sym = '" << acc->sym << "', offset = " << acc_m->offset << std::endl;
+        return new T::MemExp( new T::BinopExp( T::BinOp::PLUS_OP, framePtr, new T::ConstExp( acc_m->offset ) ) );
     }
 
     case F::Access::Kind::INREG: {
@@ -923,7 +925,7 @@ TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
         }
     }
     else {
-        if ( !this->exp->Translate( venv, tenv, level, label ).ty->IsSameType( varKind.ty ) ) {
+        if ( !expT.ty->IsSameType( varKind.ty ) ) {
             std::cout << "unmatched assign exp" << std::endl;
         }
     }
@@ -1134,9 +1136,15 @@ TR::ExpAndTy ArrayExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::T
     std::cout << "Entered ArrayExp::Translate." << std::endl;
     auto    initTsl  = this->init->Translate( venv, tenv, level, label );
     auto    sizeTsl  = this->size->Translate( venv, tenv, level, label );
-    T::Exp* arrayExp = new T::CallExp( new T::NameExp( TEMP::NamedLabel( "initArray" ) ), new T::ExpList( sizeTsl.exp->UnEx(), new T::ExpList( sizeTsl.exp->UnEx(), nullptr ) ) );
+    T::Exp* arrayAlloc = new T::CallExp( new T::NameExp( TEMP::NamedLabel( "initArray" ) ), new T::ExpList( sizeTsl.exp->UnEx(), new T::ExpList( initTsl.exp->UnEx(), nullptr ) ) );
+    
 
-    return TR::ExpAndTy( new TR::ExExp( arrayExp ), tenv->Look( this->typ ) );
+    auto acc = TR::AllocLocal( level, true, "" );
+    auto r = getExp( acc->access, new T::TempExp( level->frame->framePointer() ) );
+    auto init        = new T::MoveStm( r, arrayAlloc );
+    // return TR::ExpAndTy( new TR::ExExp( arrayAlloc ), tenv->Look( this->typ ) );
+
+    return TR::ExpAndTy( new TR::ExExp( new T::EseqExp( init, r ) ), tenv->Look(this->typ) );
 }
 
 TR::ExpAndTy VoidExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
@@ -1198,7 +1206,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
 
         auto newlevel = level->NewLevel( level, TEMP::NamedLabel( f->name->Name() ), start );
         
-        level         = newlevel;
+        // level         = newlevel;
         // newlevel->frame->name = *TEMP::NamedLabel(f->name->Name());
         newlevel->frame->functionName = f->name->Name();
         A::FieldList* fl              = nullptr;

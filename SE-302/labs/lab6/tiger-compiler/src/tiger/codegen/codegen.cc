@@ -1,6 +1,31 @@
 #include "tiger/codegen/codegen.h"
 #include "tiger/translate/translate.h"
 #include <vector>
+
+/*
+
+ MOVE(
+  MEM(
+   TEMP t279),
+  TEMP t278)
+
+=====================
+
+movq t101, t106
+movq t106, -104(t100)
+movq -64(t100), t110
+movq -104(t100), t110
+movq t110, (t110)
+
+=====================
+
+movq %rax, %r12
+movq %r12, -104(%rbp)
+movq -64(%rbp), %r15
+movq -104(%rbp), %r15
+movq %r15, (%r15)
+*/
+
 namespace CG {
 
 static const std::string argRegs[] = { "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9" };
@@ -72,6 +97,19 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
         auto temp   = reinterpret_cast< T::TempExp* >( reinterpret_cast< T::MemExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->dst )->exp )->temp;
         auto consti = reinterpret_cast< T::ConstExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->src )->consti;
         auto instr  = new AS::OperInstr( "movq $" + std::to_string( consti ) + ", (`s0)", nullptr, new TEMP::TempList( temp, nullptr ), nullptr );
+        return new AS::InstrList( instr, nullptr );
+    }
+    // MOVE(MEM(TEMP), TEMP)
+    else if ( stmNode->kind == T::Stm::MOVE && reinterpret_cast< T::MoveStm* >( stmNode )->dst->kind == T::Exp::MEM
+              && reinterpret_cast< T::MemExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->dst )->exp->kind == T::Exp::TEMP
+              && reinterpret_cast< T::MoveStm* >( stmNode )->src->kind == T::Exp::TEMP ) {
+        std::cout << "[codegen] fallen into MOVE(MEM(TEMP), TEMP)" << std::endl;
+
+        auto temp1 = reinterpret_cast< T::TempExp* >( reinterpret_cast< T::MemExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->dst )->exp )->temp;
+        auto temp2 = reinterpret_cast< T::TempExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->src )->temp;
+
+        std::cout << "my temp1 = t" << temp1->Int() << ", temp2 = t" << temp2->Int() << std::endl;
+        auto instr = new AS::OperInstr( "movq `s1, (`s0)", nullptr, new TEMP::TempList( temp1, new TEMP::TempList( temp2, nullptr ) ), nullptr );
         return new AS::InstrList( instr, nullptr );
     }
     else if ( stmNode->kind == T::Stm::Kind::MOVE && reinterpret_cast< T::MoveStm* >( stmNode )->dst->kind == T::Exp::Kind::MEM
@@ -204,12 +242,22 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
 
         auto leftMunch = munchExp( f, left ), rightMunch = munchExp( f, right );
 
-        auto compareInstr = new AS::OperInstr( "cmpq `s1, `s0", nullptr, new TEMP::TempList( leftMunch.first, new TEMP::TempList( rightMunch.first, nullptr ) ), nullptr );
+        auto t1 = TEMP::Temp::NewTemp(), t2 = TEMP::Temp::NewTemp();
+        std::cout << "[CODEGEN] alloc t1 = t" << t1->Int() << ", t2 = t" << t2->Int() << std::endl;
+        auto moveInstr1   = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( t1, nullptr ), new TEMP::TempList( leftMunch.first, nullptr ) );
+        auto moveInstr2   = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( t2, nullptr ), new TEMP::TempList( rightMunch.first, nullptr ) );
+        auto compareInstr = new AS::OperInstr( "cmpq `s1, `s0", nullptr, new TEMP::TempList( t1, new TEMP::TempList( t2, nullptr ) ), nullptr );
         auto cjumpInstr =
             new AS::OperInstr( assem + " " + e->true_label->Name(), nullptr, nullptr, new AS::Targets( new TEMP::LabelList( e->true_label, new TEMP::LabelList( e->false_label, nullptr ) ) ) );
 
-        auto instrList = new AS::InstrList( compareInstr, new AS::InstrList( cjumpInstr, nullptr ) );
-        return combine( leftMunch.second, combine( rightMunch.second, instrList ) );
+        auto rst = combine( combine( leftMunch.second, new AS::InstrList( moveInstr1, rightMunch.second ) ),
+                            new AS::InstrList( moveInstr2, new AS::InstrList( compareInstr, new AS::InstrList( cjumpInstr, nullptr ) ) ) );
+
+        // FILE* special_out;
+        // special_out = fopen( "./special_out.s", "a" );
+        // rst->Print( special_out, TEMP::Map::Empty() );
+        // fclose( special_out );
+        return rst;
     }
     else if ( stmNode->kind == T::Stm::EXP ) {
         std::cout << "[codegen] fallen into EXP" << std::endl;
