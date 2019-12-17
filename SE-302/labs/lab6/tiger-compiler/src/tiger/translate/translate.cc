@@ -1215,7 +1215,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
 
         auto newlevel = level->NewLevel( level, TEMP::NamedLabel( f->name->Name() ), start );
         
-        // level         = newlevel;
+        level         = newlevel;
         // newlevel->frame->name = *TEMP::NamedLabel(f->name->Name());
         newlevel->frame->functionName = f->name->Name();
         A::FieldList* fl              = nullptr;
