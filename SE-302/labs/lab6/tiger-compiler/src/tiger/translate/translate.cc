@@ -319,8 +319,13 @@ F::FragList* TranslateProgram( A::Exp* root ) {
     fptr = fopen( "uncanoned.s", "a" );
     fprintf( fptr, "\n\n\n============================\n\n\n\n" );
 
-    totalProgram.exp->UnEx()->Print( fptr, 0 );
-
+    auto fragment = addFragment();
+    while (fragment) {
+        if (fragment->head->kind == F::Frag::PROC) {
+            reinterpret_cast<F::ProcFrag*>(fragment->head)->body->Print(fptr, 0);
+        }
+        fragment = fragment->tail;
+    }
     std::cout << " ~~~~ Completed Printing ~~~~" << std::endl;
     fclose( fptr );
     return addFragment();
@@ -906,6 +911,8 @@ TR::ExpAndTy AssignExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
     std::cout << "translated expT. which exp = " << expT.exp << std::endl;
 
     if ( varKind.ty->kind == TY::Ty::Kind::VOID ) {
+        std::cout << "seriously? assign to VOID? " << std::endl;
+        assert(0);
     }
     else if ( varKind.ty->kind == TY::Ty::Kind::RECORD ) {
         if ( !expT.ty->IsSameType( varKind.ty ) ) {
@@ -961,8 +968,7 @@ TR::ExpAndTy IfExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >
 
     auto t = TEMP::NewLabel(), f = TEMP::NewLabel(), done = TEMP::NewLabel();
     if ( ifReturnType ) {
-        auto access = TR::AllocLocal( level, true, "__RETURN__" );
-        r           = getExp( access->access, new T::TempExp( level->frame->framePointer() ) );
+        r = new T::TempExp(level->frame->returnValue());
     }
     auto cx = testT.exp->UnCx();
     TR::do_patch( cx.trues, t );
@@ -1211,9 +1217,18 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
 
         auto e = f->body->Translate( venv, tenv, newlevel, nullptr );
 
-        auto finalExp = returnType->kind == TY::Ty::Kind::VOID ? e.exp : new TR::NxExp( new T::MoveStm( new T::TempExp( newlevel->frame->returnValue() ), e.exp->UnEx() ) );
-        exps.push_back( finalExp );
-        // Tr_procEntryExit(new_level, final_exp, Tr_formals(new_level));
+        std::cout << "returnType->kind = " <<returnType->kind << ". For reference, TY::Ty::Kind::VOID = " << TY::Ty::Kind::VOID << std::endl;
+
+        TR::Exp* finalExp = nullptr;
+        if (returnType->kind == TY::Ty::Kind::VOID) {
+            std::cout << "no return value. directly use e.exp" << std::endl;
+            finalExp = e.exp;
+        } else {
+            // wrap a exp => %rax moveStm
+            std::cout << "has return value. use wrapped moveStm." << std::endl;
+            finalExp = new TR::NxExp( new T::MoveStm( new T::TempExp( newlevel->frame->returnValue() ), e.exp->UnEx() ) );
+        }
+        // exps.push_back( finalExp );
         venv->EndScope();
 
         TR::addFragment( new F::ProcFrag( finalExp->UnNx(), newlevel->frame ) );
@@ -1221,7 +1236,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
     }
 
     if ( false ) {
-        // misused return of functiondec. don't fall into this branch.
+        // misusage return of functiondec. don't fall into this branch.
         assert( exps.size() );
         if ( exps.size() == 1 ) {
             return new TR::NxExp( exps[ 0 ]->UnNx() );

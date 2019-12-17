@@ -60,6 +60,20 @@ static AS::InstrList* munchStm( F::Frame* f, T::Stm* stmNode ) {
 
         return combine( combine( e1munch.second, e2munch.second ), new AS::InstrList( instr, nullptr ) );
     }
+    // MOVE(
+    //   MEM(
+    //    TEMP t111),
+    //   CONST 1)
+    else if ( stmNode->kind == T::Stm::MOVE && reinterpret_cast< T::MoveStm* >( stmNode )->dst->kind == T::Exp::MEM
+              && reinterpret_cast< T::MemExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->dst )->exp->kind == T::Exp::TEMP
+              && reinterpret_cast< T::MoveStm* >( stmNode )->src->kind == T::Exp::CONST ) {
+        std::cout << "[codegen] fallen into MOVE(MEM(TEMP), CONST)" << std::endl;
+
+        auto temp   = reinterpret_cast< T::TempExp* >( reinterpret_cast< T::MemExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->dst )->exp )->temp;
+        auto consti = reinterpret_cast< T::ConstExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->src )->consti;
+        auto instr  = new AS::OperInstr( "movq $" + std::to_string( consti ) + ", (`s0)", nullptr, new TEMP::TempList( temp, nullptr ), nullptr );
+        return new AS::InstrList( instr, nullptr );
+    }
     else if ( stmNode->kind == T::Stm::Kind::MOVE && reinterpret_cast< T::MoveStm* >( stmNode )->dst->kind == T::Exp::Kind::MEM
               && reinterpret_cast< T::MemExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->dst )->exp->kind == T::Exp::Kind::BINOP
               && reinterpret_cast< T::BinopExp* >( reinterpret_cast< T::MemExp* >( reinterpret_cast< T::MoveStm* >( stmNode )->dst )->exp )->op == T::BinOp::PLUS_OP
