@@ -112,6 +112,7 @@ static AS::InstrList* spillTempFoolishly( F::Frame* f, AS::InstrList* instrL, TE
         auto newAcc = TR::AllocLocalWrapped( f, "t" + std::to_string( head->Int() ) );
         int  offset = reinterpret_cast< F::InFrameAccess* >( newAcc )->offset;
         offset_pair.insert( { head, std::to_string( offset ) + "(%rbp)" } );
+        std::cout << "[regalloc] spill out t" << head->Int() << " => " << offset << "(%rbp)." << std::endl;
         tl = tl->tail;
     }
 
@@ -182,6 +183,13 @@ static AS::InstrList* spillTempFoolishly( F::Frame* f, AS::InstrList* instrL, TE
             auto                       operInstr = reinterpret_cast< AS::OperInstr* >( head );
             std::vector< TEMP::Temp* > unmatchedTemps;
 
+            std::string ass = operInstr->assem;
+
+            bool isLeaq = false;
+            if ( ass.size() >= 4 && ass[ 0 ] == 'l' && ass[ 1 ] == 'e' && ass[ 2 ] == 'a' && ass[ 3 ] == 'q' ) {
+                isLeaq = true;
+            }
+
             auto d = operInstr->dst;
             while ( d ) {
                 unmatchedTemps.push_back( d->head );
@@ -199,17 +207,30 @@ static AS::InstrList* spillTempFoolishly( F::Frame* f, AS::InstrList* instrL, TE
 
             auto map = TEMP::Map::Empty();
 
-            AS::InstrList* finalInstr = nullptr;
-            for ( size_t i = 0; i < unmatchedTemps.size(); i++ ) {
-                auto pair_find = offset_pair.find( unmatchedTemps[ i ] );
-                std::cout << "satisfying the #" << i << " (t" << unmatchedTemps[ i ]->Int() << ") unmatchedTemps." << std::endl;
-                assert( pair_find != offset_pair.end() );
-                instrs.push_back( new AS::MoveInstr( "movq " + pair_find->second + ", " + globalUselessRegs[ i ], nullptr, nullptr ) );
-                std::cout << "[regalloc] [oper] 起头, assem = "
-                          << "movq " + pair_find->second + ", " + globalUselessRegs[ i ] << std::endl;
-                map->Enter( unmatchedTemps[ i ], &globalUselessRegs[ i ] );
+            if ( isLeaq ) {
+                AS::InstrList* finalInstr = nullptr;
+                for ( size_t i = 0; i < unmatchedTemps.size(); i++ ) {
+                    auto pair_find = offset_pair.find( unmatchedTemps[ i ] );
+                    std::cout << "satisfying the #" << i << " (t" << unmatchedTemps[ i ]->Int() << ") unmatchedTemps." << std::endl;
+                    assert( pair_find != offset_pair.end() );
+                    instrs.push_back( new AS::MoveInstr( "leaq " + pair_find->second + ", " + globalUselessRegs[ i ], nullptr, nullptr ) );
+                    std::cout << "[regalloc] [oper] 起头, assem = "
+                              << "leaq " + pair_find->second + ", " + globalUselessRegs[ i ] << std::endl;
+                    map->Enter( unmatchedTemps[ i ], &globalUselessRegs[ i ] );
+                }
             }
-
+            else {
+                AS::InstrList* finalInstr = nullptr;
+                for ( size_t i = 0; i < unmatchedTemps.size(); i++ ) {
+                    auto pair_find = offset_pair.find( unmatchedTemps[ i ] );
+                    std::cout << "satisfying the #" << i << " (t" << unmatchedTemps[ i ]->Int() << ") unmatchedTemps." << std::endl;
+                    assert( pair_find != offset_pair.end() );
+                    instrs.push_back( new AS::MoveInstr( "movq " + pair_find->second + ", " + globalUselessRegs[ i ], nullptr, nullptr ) );
+                    std::cout << "[regalloc] [oper] 起头, assem = "
+                              << "movq " + pair_find->second + ", " + globalUselessRegs[ i ] << std::endl;
+                    map->Enter( unmatchedTemps[ i ], &globalUselessRegs[ i ] );
+                }
+            }
             instrs.push_back( new AS::OperInstr( formatAssembly( operInstr->assem, operInstr->dst, operInstr->src, map ), nullptr, nullptr, operInstr->jumps ) );
 
             for ( size_t i = 0; i < unmatchedTemps.size(); i++ ) {

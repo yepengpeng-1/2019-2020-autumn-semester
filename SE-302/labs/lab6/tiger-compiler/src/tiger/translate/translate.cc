@@ -696,7 +696,12 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         headExp = new T::ExpList( new T::TempExp(level->frame->framePointer()), nullptr );
     }
     venv->EndScope();
-    auto finExp = new TR::ExExp( new T::CallExp( new T::NameExp( TEMP::NamedLabel( this->func->Name() ) ),  headExp ));
+
+    std::string callName = this->func->Name();
+    if (callName == "getchar") {
+        callName = "__wrap_getchar";
+    }
+    auto finExp = new TR::ExExp( new T::CallExp( new T::NameExp( TEMP::NamedLabel( callName ) ),  headExp ));
     return TR::ExpAndTy( finExp, result );
 }
 
@@ -1053,11 +1058,14 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
 
     venv->BeginScope();
     auto loopVar  = TR::AllocLocal( level, true, this->var->Name() );
+    std::cout << "loopvar offset: " << reinterpret_cast<F::InFrameAccess*>(loopVar->access)->offset << std::endl;
     auto envEntry = new E::VarEntry( loopVar, TY::IntTy::Instance(), true );
 
     venv->Enter( this->var, envEntry );
     ++level->frame->varCount;
+    // limit var
     auto newAccess     = new F::InFrameAccess( -level->frame->varCount * ( F::wordSize ) );
+    std::cout << "limit offset: " << newAccess->offset << std::endl;
     level->frame->vars = new F::AccessList( newAccess, level->frame->vars );
     
 
@@ -1138,15 +1146,14 @@ TR::ExpAndTy ArrayExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::T
     std::cout << "Entered ArrayExp::Translate." << std::endl;
     auto    initTsl  = this->init->Translate( venv, tenv, level, label );
     auto    sizeTsl  = this->size->Translate( venv, tenv, level, label );
-    T::Exp* arrayAlloc = new T::CallExp( new T::NameExp( TEMP::NamedLabel( "initArray" ) ), new T::ExpList( sizeTsl.exp->UnEx(), new T::ExpList( initTsl.exp->UnEx(), nullptr ) ) );
+    auto arrayAlloc = new T::CallExp( new T::NameExp( TEMP::NamedLabel( "initArray" ) ), new T::ExpList( sizeTsl.exp->UnEx(), new T::ExpList( initTsl.exp->UnEx(), nullptr ) ) );
     
-
-    auto acc = TR::AllocLocal( level, true, "" );
-    auto r = getExp( acc->access, new T::TempExp( level->frame->framePointer() ) );
-    auto init        = new T::MoveStm( r, arrayAlloc );
+    // auto acc = TR::AllocLocal( level, true, "" );
+    // auto r = getExp( acc->access, new T::TempExp( level->frame->framePointer() ) );
+    // auto init        = new T::MoveStm( r, arrayAlloc );
     // return TR::ExpAndTy( new TR::ExExp( arrayAlloc ), tenv->Look( this->typ ) );
 
-    return TR::ExpAndTy( new TR::ExExp( new T::EseqExp( init, r ) ), tenv->Look(this->typ) );
+    return TR::ExpAndTy(  new TR::ExExp( arrayAlloc ), tenv->Look(this->typ) );
 }
 
 TR::ExpAndTy VoidExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
