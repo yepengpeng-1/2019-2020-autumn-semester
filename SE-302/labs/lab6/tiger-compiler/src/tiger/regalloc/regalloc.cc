@@ -58,7 +58,6 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                 assert( 0 );
             }
 
-            bool onlyOnceFlag = false;
             while ( src ) {
 
                 if ( RA::idiotRegisterAlter % 3 == 0 ) {
@@ -74,7 +73,6 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                         prev->tail = new AS::InstrList( load, now );
                         prev       = prev->tail;
                         ++idiotRegisterAlter;
-                        onlyOnceFlag = true;
                         break;
                     }
                 }
@@ -88,7 +86,6 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                         prev->tail = new AS::InstrList( load, now );
                         prev       = prev->tail;
                         ++idiotRegisterAlter;
-                        onlyOnceFlag = true;
                         break;
                     }
                 }
@@ -102,15 +99,11 @@ static AS::InstrList* spillTemp( F::Frame* f, AS::InstrList* instrL, TEMP::TempL
                         prev->tail = new AS::InstrList( load, now );
                         prev       = prev->tail;
                         ++idiotRegisterAlter;
-                        onlyOnceFlag = true;
                         break;
                     }
                 }
 
                 src = src->tail;
-            }
-            if ( onlyOnceFlag ) {
-                continue;
             }
 
             while ( dst ) {
