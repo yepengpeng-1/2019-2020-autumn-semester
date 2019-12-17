@@ -567,24 +567,26 @@ TR::ExpAndTy SubscriptVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< T
     // if ( recT->kind == E ) {
     auto recEnt = recT.ty;
 
-    std::string type_names[] = { "SIMPLE", "FIELD", "SUBSCRIPT" };
+    // std::string type_names[] = { "SIMPLE", "FIELD", "SUBSCRIPT" };
 
     if ( this->var->kind != A::Var::Kind::SUBSCRIPT ) {
-        std::cout << "this->var->kind = " << type_names[ this->var->kind ] << std::endl;
+        // std::cout << "this->var->kind = " << type_names[ this->var->kind ] << std::endl;
         std::cout << "array type required" << std::endl;
     }
 
-    std::string ty_names[] = { "RECORD", "NIL", "INT", "STRING", "ARRAY", "NAME", "VOID" };
-    std::cout << "before we call recEnt->ty->kind" << std::endl;
-    std::cout << recEnt->kind << std::endl;
-    std::cout << "recEnt->ty->kind = " << ty_names[ recEnt->kind ] << std::endl;
+    // std::string ty_names[] = { "RECORD", "NIL", "INT", "STRING", "ARRAY", "NAME", "VOID" };
+    // std::cout << "before we call recEnt->ty->kind" << std::endl;
+    // std::cout << recEnt->kind << std::endl;
+    // std::cout << "recEnt->ty->kind = " << ty_names[ recEnt->kind ] << std::endl;
 
     if ( recEnt->kind == TY::Ty::Kind::ARRAY ) {
         auto indexT = this->subscript->Translate( venv, tenv, level, label );
         std::cout << "Translated indexT, which .exp = " << indexT.exp << std::endl;
-        auto subscriptExp = new TR::ExExp( new T::MemExp( new T::BinopExp( T::PLUS_OP, recT.exp->UnEx(), new T::BinopExp( T::MUL_OP, indexT.exp->UnEx(), new T::ConstExp( F::wordSize ) ) ) ) );
+        auto subscriptExp = new TR::ExExp( new T::MemExp( new T::BinopExp( T::PLUS_OP, recT.exp->UnEx(), new T::BinopExp( T::MUL_OP, indexT.exp->UnEx(), new T::ConstExp( F::wordSize ) ) )) );
         return TR::ExpAndTy( subscriptExp, ( ( TY::ArrayTy* )( recEnt ) )->ty );
     }
+    std::cout << "误入 subscriptVar 但那却不是个数组" << std::endl;
+    assert(0);
 }
 
 TR::ExpAndTy VarExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {

@@ -483,10 +483,10 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
             assem = "subq ";
             break;
         case T::MUL_OP:
-            assem = "imulq ";
+            assem = "mulq ";
             break;
         case T::DIV_OP:
-            assem = "idivq ";
+            assem = "divq ";
             break;
         default:
             std::cout << "No idea what op code it is. " << e->op << std::endl;
@@ -520,7 +520,7 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         else if ( e->op == T::DIV_OP ) {
             auto r             = TEMP::Temp::NewTemp();
             auto moveInstr     = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
-            auto divqInstr     = new AS::OperInstr( "idivq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
+            auto divqInstr     = new AS::OperInstr( "xorq %rdx, %rdx\nidivq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
             auto moveBackInstr = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
             return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( moveInstr, new AS::InstrList( divqInstr, new AS::InstrList( moveBackInstr, nullptr ) ) ) ) ) );
         }
