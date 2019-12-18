@@ -821,6 +821,7 @@ TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
         std::cout << "undefined type rectype" << std::endl;
     }
 
+    // for the static link spreading
     auto acc = TR::AllocLocal( level, true, "" );
 
     auto r = getExp( acc->access, new T::TempExp( level->frame->framePointer() ) );
@@ -849,7 +850,7 @@ TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
             new T::MoveStm( new T::MemExp( new T::BinopExp( T::PLUS_OP, r, new T::ConstExp( counter * F::wordSize ) ) ), actual->exp->Translate( venv, tenv, level, label ).exp->UnEx() );
 
         if ( statements != nullptr ) {
-            statements = new T::SeqStm( statements, fieldInitExp );
+            statements = new T::SeqStm( fieldInitExp, statements );
         }
         else {
             statements = fieldInitExp;
@@ -1224,8 +1225,23 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         TY::TyList*   t               = formalTys;
         std::cout << "gonna build formals." << std::endl;
         auto formals = buildFormals( newlevel );
+        // TODO：重写 buildFormals。生成个倒序链表太难受
+        
+        if (formals && formals->tail) {  
+            auto prev = formals, cur = formals->tail, temp = formals->tail->tail;
+            while (cur) {
+                temp = cur->tail; //temp 作为中间节点，记录当前结点的下一个节点的位置
+                cur->tail = prev;  //当前结点指向前一个节点
+                prev = cur;     //指针后移
+                cur = temp;  //指针后移，处理下一个节点
+            }
+            formals->tail = nullptr;
+            formals = prev;
+        } 
+
         std::cout << "formals built." << std::endl;
         fl = f->params;
+        
         while ( fl ) {
             std::cout << "while #3. name: " << fl->head->name->Name() << ". fl, t, formals: " << fl << ", " << t << ", " << formals << std::endl;
             venv->Enter( fl->head->name, new E::VarEntry( formals->head, t->head ) );
