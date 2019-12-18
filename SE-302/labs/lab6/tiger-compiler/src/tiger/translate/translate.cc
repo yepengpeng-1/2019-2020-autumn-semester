@@ -744,10 +744,30 @@ TR::ExpAndTy OpExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >
         isBinOpButNotRelOp = true;
         break;
     case A::EQ_OP:
+    if (leftT.ty->kind == TY::Ty::STRING) {
+        // 特别处理: 调 stringEqual(struct string*, struct string*)
+        auto callStringEq = new T::CallExp(new T::NameExp(TEMP::NamedLabel("stringEqual")), new T::ExpList(leftT.exp->UnEx(), new T::ExpList(rightT.exp->UnEx(), nullptr)));
+        auto stm    = new T::CjumpStm( T::EQ_OP, callStringEq, new T::ConstExp(1), nullptr, nullptr );
+        // 瞩目：这个 stringEqual，1 代表相等，0 代表不等（奇葩
+        auto trues  = new TR::PatchList( &stm->true_label, nullptr );
+        auto falses = new TR::PatchList( &stm->false_label, nullptr );
+        auto finExp      = new TR::CxExp( TR::Cx( trues, falses, stm ) );
+        return TR::ExpAndTy( finExp, TY::IntTy::Instance() );
+    }
         rop                = T::EQ_OP;
         isBinOpButNotRelOp = false;
         break;
     case A::NEQ_OP:
+    if (leftT.ty->kind == TY::Ty::STRING) {
+        // 特别处理: 调 stringEqual(struct string*, struct string*)
+        auto callStringEq = new T::CallExp(new T::NameExp(TEMP::NamedLabel("stringEqual")), new T::ExpList(leftT.exp->UnEx(), new T::ExpList(rightT.exp->UnEx(), nullptr)));
+        auto stm    = new T::CjumpStm( T::NE_OP, callStringEq, new T::ConstExp(1), nullptr, nullptr );
+        // 瞩目：这个 stringEqual，1 代表相等，0 代表不等（奇葩
+        auto trues  = new TR::PatchList( &stm->true_label, nullptr );
+        auto falses = new TR::PatchList( &stm->false_label, nullptr );
+        auto finExp      = new TR::CxExp( TR::Cx( trues, falses, stm ) );
+        return TR::ExpAndTy( finExp, TY::IntTy::Instance() );
+    }
         rop                = T::NE_OP;
         isBinOpButNotRelOp = false;
         break;
