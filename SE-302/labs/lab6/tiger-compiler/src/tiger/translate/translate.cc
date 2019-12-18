@@ -376,7 +376,6 @@ T::Exp* getExp( F::Access* acc, T::Exp* framePtr ) {
     std::cout << "called getExp. input framePtr = " << framePtr << std::endl;
     switch ( acc->kind ) {
     case F::Access::Kind::INFRAME: {
-        
         auto acc_m = reinterpret_cast< F::InFrameAccess* >( acc );
         std::cout << "with a INFRAME access, acc->sym = '" << acc->sym << "', offset = " << acc_m->offset << std::endl;
         return new T::MemExp( new T::BinopExp( T::BinOp::PLUS_OP, framePtr, new T::ConstExp( acc_m->offset ) ) );
@@ -405,15 +404,15 @@ static TR::Exp* findStaticLink( TR::Level* current, TR::Level* declare ) {
     }
 
 
-    TR::Level* node;
-    for ( node = current; node != declare; node = node->parent ) {
-        std::cout << "[translate] [fSL] going another layer. current = " << node << "; declare = " << declare << std::endl;
-        auto sl = node->frame->args;
-        // while (sl->tail) {
-            // std::cout << "Getting tail" << std::endl;
-            // sl = sl->tail;
-        // }
-        result        = getExp( sl->head, result );
+    TR::Level* node = current;
+    while (node != declare) {
+        std::cout << "entered one loop. node = " << node << ", node->parent = " << node->parent << std::endl;
+        auto acc = node->frame->args;
+        std::cout << "[translate] [fSL] static link traverse: acc->kind = " << acc->head->kind << ", (should be inframe == " << F::Access::INFRAME << ")." << std::endl;
+        std::cout << "           and the offset = " << reinterpret_cast<F::InFrameAccess*>(acc->head)->offset << ", sym = " << reinterpret_cast<F::InFrameAccess*>(acc->head)->sym << std::endl;
+        result = getExp(acc->head, result);
+        std::cout << "getExp done" << std::endl;
+        node = node->parent;
     }
 
     return new TR::ExExp( result );
@@ -690,10 +689,13 @@ TR::ExpAndTy CallExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         }
         rawExps = rawExps->tail;
     }
+
+    // goes forward the level
+    auto staticLinkField = findStaticLink(level, reinterpret_cast<E::FunEntry*>(fun)->level )->UnEx();
     if (finExps) {
-        finExps->tail = new T::ExpList( new T::TempExp(level->frame->framePointer()), nullptr );
+        finExps->tail = new T::ExpList( staticLinkField, nullptr );
     } else {
-        headExp = new T::ExpList( new T::TempExp(level->frame->framePointer()), nullptr );
+        headExp = new T::ExpList( staticLinkField, nullptr );
     }
     venv->EndScope();
 
@@ -1215,7 +1217,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
 
         auto newlevel = level->NewLevel( level, TEMP::NamedLabel( f->name->Name() ), start );
         
-        level         = newlevel;
+        // level         = newlevel;
         // newlevel->frame->name = *TEMP::NamedLabel(f->name->Name());
         newlevel->frame->functionName = f->name->Name();
         A::FieldList* fl              = nullptr;
