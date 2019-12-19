@@ -124,70 +124,70 @@ public:
         return rr;
     }
 
-    static TEMP::Temp* idiotRegister() {
-        // std::cout << "idiot register requested" << std::endl;
-        static TEMP::Temp* ir = nullptr;
-        if ( !ir ) {
-            std::cout << "gonna return new idiot register" << std::endl;
-            ir = TEMP::Temp::NewTemp();
-        }
-        else {
-            // std::cout << "gonna return existed idiot register" << std::endl;
-        }
-        return ir;
-    }
+    // static TEMP::Temp* idiotRegister() {
+    //     // std::cout << "idiot register requested" << std::endl;
+    //     static TEMP::Temp* ir = nullptr;
+    //     if ( !ir ) {
+    //         std::cout << "gonna return new idiot register" << std::endl;
+    //         ir = TEMP::Temp::NewTemp();
+    //     }
+    //     else {
+    //         // std::cout << "gonna return existed idiot register" << std::endl;
+    //     }
+    //     return ir;
+    // }
 
-    static TEMP::Temp* idiotRegister2() {
-        // std::cout << "idiot register2 requested" << std::endl;
-        static TEMP::Temp* ir2 = nullptr;
-        if ( !ir2 ) {
-            std::cout << "gonna return new idiot register2" << std::endl;
-            ir2 = TEMP::Temp::NewTemp();
-        }
-        else {
-            // std::cout << "gonna return existed idiot register2" << std::endl;
-        }
-        return ir2;
-    }
+    // static TEMP::Temp* idiotRegister2() {
+    //     // std::cout << "idiot register2 requested" << std::endl;
+    //     static TEMP::Temp* ir2 = nullptr;
+    //     if ( !ir2 ) {
+    //         std::cout << "gonna return new idiot register2" << std::endl;
+    //         ir2 = TEMP::Temp::NewTemp();
+    //     }
+    //     else {
+    //         // std::cout << "gonna return existed idiot register2" << std::endl;
+    //     }
+    //     return ir2;
+    // }
 
-    static TEMP::Temp* idiotRegister3() {
-        // std::cout << "idiot register2 requested" << std::endl;
-        static TEMP::Temp* ir3 = nullptr;
-        if ( !ir3 ) {
-            std::cout << "gonna return new idiot register2" << std::endl;
-            ir3 = TEMP::Temp::NewTemp();
-        }
-        else {
-            // std::cout << "gonna return existed idiot register2" << std::endl;
-        }
-        return ir3;
-    }
+    // static TEMP::Temp* idiotRegister3() {
+    //     // std::cout << "idiot register2 requested" << std::endl;
+    //     static TEMP::Temp* ir3 = nullptr;
+    //     if ( !ir3 ) {
+    //         std::cout << "gonna return new idiot register2" << std::endl;
+    //         ir3 = TEMP::Temp::NewTemp();
+    //     }
+    //     else {
+    //         // std::cout << "gonna return existed idiot register2" << std::endl;
+    //     }
+    //     return ir3;
+    // }
 
-    static TEMP::Temp* smartRegister() {
-        // std::cout << "smart register requested" << std::endl;
-        static TEMP::Temp* sr = nullptr;
-        if ( !sr ) {
-            std::cout << "gonna return new smart register" << std::endl;
-            sr = TEMP::Temp::NewTemp();
-        }
-        else {
-            // std::cout << "gonna return existed smart register" << std::endl;
-        }
-        return sr;
-    }
+    // static TEMP::Temp* smartRegister() {
+    //     // std::cout << "smart register requested" << std::endl;
+    //     static TEMP::Temp* sr = nullptr;
+    //     if ( !sr ) {
+    //         std::cout << "gonna return new smart register" << std::endl;
+    //         sr = TEMP::Temp::NewTemp();
+    //     }
+    //     else {
+    //         // std::cout << "gonna return existed smart register" << std::endl;
+    //     }
+    //     return sr;
+    // }
 
-    static TEMP::Temp* smartRegister2() {
-        // std::cout << "smart register2 requested" << std::endl;
-        static TEMP::Temp* sr2 = nullptr;
-        if ( !sr2 ) {
-            std::cout << "gonna return new smart register2" << std::endl;
-            sr2 = TEMP::Temp::NewTemp();
-        }
-        else {
-            // std::cout << "gonna return existed smart register2" << std::endl;
-        }
-        return sr2;
-    }
+    // static TEMP::Temp* smartRegister2() {
+    //     // std::cout << "smart register2 requested" << std::endl;
+    //     static TEMP::Temp* sr2 = nullptr;
+    //     if ( !sr2 ) {
+    //         std::cout << "gonna return new smart register2" << std::endl;
+    //         sr2 = TEMP::Temp::NewTemp();
+    //     }
+    //     else {
+    //         // std::cout << "gonna return existed smart register2" << std::endl;
+    //     }
+    //     return sr2;
+    // }
 
     inline void putInfo( F::Frame::Kind kind, int count, F::AccessList* list ) {
         switch ( kind ) {

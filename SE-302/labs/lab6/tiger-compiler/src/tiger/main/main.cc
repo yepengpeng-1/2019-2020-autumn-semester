@@ -27,17 +27,17 @@ void do_proc( FILE* out, F::ProcFrag* procFrag ) {
     // Init temp_map
     // remove %rbp later.
 
-    static std::string regNames[] = { "%rbp", "%rsp", "%rax", "%r13", "%r12", "%rdx", "%r11", "%r10", "%r15" };
+    static std::string regNames[] = { "%rbp", "%rsp", "%rax" /*, "%r13", "%r12", "%rdx", "%r11", "%r10", "%r15"*/ };
 
     temp_map->Enter( procFrag->frame->framePointer(), &regNames[ 0 ] );
     temp_map->Enter( procFrag->frame->stackPointer(), &regNames[ 1 ] );
     temp_map->Enter( procFrag->frame->returnValue(), &regNames[ 2 ] );
-    temp_map->Enter( procFrag->frame->idiotRegister(), &regNames[ 3 ] );
-    temp_map->Enter( procFrag->frame->smartRegister(), &regNames[ 4 ] );
-    temp_map->Enter( procFrag->frame->radioRegister(), &regNames[ 5 ] );
-    temp_map->Enter( procFrag->frame->smartRegister2(), &regNames[ 6 ] );
-    temp_map->Enter( procFrag->frame->idiotRegister2(), &regNames[ 7 ] );
-    temp_map->Enter( procFrag->frame->idiotRegister3(), &regNames[ 8 ] );
+    // temp_map->Enter( procFrag->frame->idiotRegister(), &regNames[ 3 ] );
+    // temp_map->Enter( procFrag->frame->smartRegister(), &regNames[ 4 ] );
+    // temp_map->Enter( procFrag->frame->radioRegister(), &regNames[ 5 ] );
+    // temp_map->Enter( procFrag->frame->smartRegister2(), &regNames[ 6 ] );
+    // temp_map->Enter( procFrag->frame->idiotRegister2(), &regNames[ 7 ] );
+    // temp_map->Enter( procFrag->frame->idiotRegister3(), &regNames[ 8 ] );
 
     //  printf("doProc for function %s:\n", this->frame->label->Name().c_str());
     //  (new T::StmList(proc->body, nullptr))->Print(stdout);
