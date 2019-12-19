@@ -1184,23 +1184,6 @@ TR::ExpAndTy VoidExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
     return TR::ExpAndTy( new TR::NxExp( nullptr ), TY::VoidTy::Instance() );
 }
 
-static TR::AccessList* wrapList( TR::Level* level, F::AccessList* f_accl ) {
-    if ( !f_accl ) {
-        return nullptr;
-    }
-    auto head = new TR::Access( level, f_accl->head );
-    auto tail = wrapList( level, f_accl->tail );
-    return new TR::AccessList( head, tail );
-}
-
-TR::AccessList* buildFormals( TR::Level* level ) {
-    std::cout << "buildFormals called. level->frame: " << level->frame << std::endl;
-    auto f_accl = level->frame->args;
-    std::cout << "f_accl = " << f_accl << std::endl;
-    auto tr_accl = wrapList( level, f_accl->tail );
-    return tr_accl;
-}
-
 TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered FunctionDec::Translate." << std::endl;
     std::vector< TR::Exp* > exps;
@@ -1244,20 +1227,13 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
         A::FieldList* fl              = nullptr;
         TY::TyList*   t               = formalTys;
         std::cout << "gonna build formals." << std::endl;
-        auto formals = buildFormals( newlevel );
-        // TODO：重写 buildFormals。生成个倒序链表太难受
-        
-        if (formals && formals->tail) {  
-            auto prev = formals, cur = formals->tail, temp = formals->tail->tail;
-            while (cur) {
-                temp = cur->tail; //temp 作为中间节点，记录当前结点的下一个节点的位置
-                cur->tail = prev;  //当前结点指向前一个节点
-                prev = cur;     //指针后移
-                cur = temp;  //指针后移，处理下一个节点
-            }
-            formals->tail = nullptr;
-            formals = prev;
-        } 
+    
+        auto argsT = newlevel->frame->args;
+        TR::AccessList* node = nullptr, *formals = nullptr;
+        while (argsT) {
+            formals = new TR::AccessList(new TR::Access(newlevel, argsT->head), formals);
+            argsT = argsT->tail;
+        }
 
         std::cout << "formals built." << std::endl;
         fl = f->params;
