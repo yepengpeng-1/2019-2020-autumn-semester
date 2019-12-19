@@ -497,7 +497,6 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         auto var2 = munchExp( f, e2 );
 
         if ( e->op == T::PLUS_OP || e->op == T::MINUS_OP ) {
-
             auto r = TEMP::Temp::NewTemp();
             // CG::temp_map->Enter( r, nullptr );
             assem += "`s0, `d0";
