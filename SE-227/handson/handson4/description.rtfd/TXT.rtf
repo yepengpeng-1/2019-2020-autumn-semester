@@ -1,0 +1,264 @@
+{\rtf1\ansi\ansicpg950\cocoartf1504\cocoasubrtf840
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fmodern\fcharset0 Courier;\f2\fnil\fcharset0 LucidaGrande;
+}
+{\colortbl;\red255\green255\blue255;\red38\green38\blue38;\red52\green110\blue183;\red246\green246\blue246;
+\red240\green241\blue241;\red215\green219\blue223;}
+{\*\expandedcolortbl;;\cssrgb\c20000\c20000\c20000;\cssrgb\c25490\c51373\c76863;\cssrgb\c97255\c97255\c97255;
+\cssrgb\c95294\c95686\c95686;\cssrgb\c87451\c88627\c89804;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{circle\}}{\leveltext\leveltemplateid102\'01\uc0\u9702 ;}{\levelnumbers;}\fi-360\li1440\lin1440 }{\listname ;}\listid2}
+{\list\listtemplateid3\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid201\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid3}
+{\list\listtemplateid4\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid301\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid4}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}{\listoverride\listid4\listoverridecount0\ls4}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww12600\viewh7800\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\b\fs72 \cf2 \expnd0\expndtw0\kerning0
+Hands-on-4: Name Service and Database Partitioning\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 \'a0\
+All files of this hands-on can be downloaded from {\field{\*\fldinst{HYPERLINK "http://ipads.se.sjtu.edu.cn/courses/cse/handson/files/handson-4.assets/handson-4.tar.gz"}}{\fldrslt 
+\b \cf3 \ul \ulc3 THIS LINK}}.\
+This hands-on is based on the sock shop we deployed and optimized in {\field{\*\fldinst{HYPERLINK "https://ipads.se.sjtu.edu.cn/courses/cse/handson/handson-3.html"}}{\fldrslt \cf3 \ul \ulc3 hands-on 3}}. In this hands-on, we are going to further optimize the architecture of the website for easier management and better performance. \
+\pard\pardeftab720\partightenfactor0
+
+\b\fs56 \cf2 1 File Structure\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 This hands-on contains the following files:\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28\fsmilli14400 \cf2 \
+\
+\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb4 handson4\cb1 \
+\cb4     |--dockerfiles\cb1 \
+\cb4         |--XX.dockerfile\cb1 \
+\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0
+\f0\fs32 \cf2 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+dockerfiles: containing docker files of all docker images you need to deploy in this hands-on. Just for reference\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs56 \cf2 2 Configuration Management\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 In hands-on 3, we have deployed the website using docker containers. However, as you may have suffered, the docker command-line based naming service using 
+\f1\fs28\fsmilli14400 \cb5 --add-host
+\f0\fs32 \cb1  is very inconvenient and inflexible. For example, to redeploy a component with another IP address, redeployment of all depending components is needed.\
+Therefore, in this section, we are going to implement another reliable naming service based on {\field{\*\fldinst{HYPERLINK "https://zookeeper.apache.org/"}}{\fldrslt \cf3 \ul \ulc3 Apache Zookeeper}} cluster.\
+\pard\pardeftab720\partightenfactor0
+
+\b \cf2 Question 1
+\b0 : What's relationship between Apache Zookeeper and paxos protocol?\
+The architecture of the naming service looks like:\
+\pard\pardeftab720\partightenfactor0
+\cf2 {{\NeXTGraphic watcher-architecture.png \width28960 \height14600 \noorient
+}¬}\pard\pardeftab720\partightenfactor0
+\cf2 \
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls2\ilvl0\cf2 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Container: one of the docker containers deployed in Lab3\
+\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\partightenfactor0
+\ls2\ilvl1\cf2 \kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+Microservice: the microservice running inside the docker container\
+\ls2\ilvl1\kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+/etc/hosts: host file of the container. Containing IP to name mappings for other components. \
+\ls2\ilvl1\kerning1\expnd0\expndtw0 {\listtext	
+\f2 \uc0\u9702 
+\f0 	}\expnd0\expndtw0\kerning0
+Zookeeper Watcher: a small program registering self to the Zookeeper Cluster and monitoring updates in the Zookeeper Cluster. When name mappings in Zookeeper Cluster have changed, update the host file accordingly.\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls2\ilvl0\cf2 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Zookeeper Cluster: A cluster of Zookeeper instances deployed using docker containers. It is used to store the name to IP address mapping.\
+\pard\pardeftab720\partightenfactor0
+\cf2 All components in the sock shop resolve the IP address of other components according to the container's host file. In previous hands-on, all name mappings in
+\f1\fs28\fsmilli14400 \cb5 /etc/hosts
+\f0\fs32 \cb1  are added by hard-coded 
+\f1\fs28\fsmilli14400 \cb5 --add-host
+\f0\fs32 \cb1  parameter in 
+\f1\fs28\fsmilli14400 \cb5 docker run
+\f0\fs32 \cb1  command line. Now, we are going to store those mappings in Zookeeper Cluster and write a small program to update the host file according to the cluster automatically.\
+Please follow those steps to implement the naming service:\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs48 \cf2 Step 1: Deploy the Zookeeper cluster\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 A Zookeeper cluster is needed to store the configuration data reliably. To store configuration data, one single Zookeeper instance is enough. However, for reliability and availability consideration, multiple replicated Zookeeper instances are needed. Although distributing instances to different physical machines further improves the reliability and availability, we deploy all instances on one single machine in this hands-on due to resource limitation.\
+\pard\pardeftab720\partightenfactor0
+
+\b \cf2 Question 2
+\b0 : Many databases or file systems also provide distributed replication support. However, many real-world applications choose Zookeeper for configurations management. Why? What feature of Zookeeper makes it an excellent choice for configuration management?\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs48 \cf2 Step 2: Write the watcher application\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 The watcher application has three functionalities: registering, initializing, and monitoring.\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls3\ilvl0\cf2 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Registering: Once the container starts, the watcher should register the container to the Zookeeper cluster. To do so, the watcher should maintain the container's IP address and store the component's domain name to IP mapping into the Zookeeper cluster.\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Initializing: When the container starts, the system's host file in the container is nearly empty. To connect all components, the watcher thread should retrieve all domain-name-to-IP mappings stored in the Zookeeper cluster and update them to the container's host file.\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Monitoring: While running, the watcher should watch all store operations to the Zookeeper cluster and update the container's host file accordingly.\
+\pard\pardeftab720\partightenfactor0
+\cf2  
+\b HINT
+\b0 : Zookeeper has provided its client libraries in two languages: Java and C. For more comfortable developing and distributing, we suggest you use the Java version. The programmer's guide for zookeeper's client can be found {\field{\*\fldinst{HYPERLINK "https://zookeeper.apache.org/doc/current/zookeeperProgrammers.html"}}{\fldrslt \cf3 \ul \ulc3 HERE}}, and the {\field{\*\fldinst{HYPERLINK "https://github.com/sgroschupf/zkclient"}}{\fldrslt \cf3 \ul \ulc3 ZKClient}} library can make your development much more straightforward. The IP address and port of the Zookeeper cluster can be passed to the watcher program via environment variables or command line arguments.\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs48 \cf2 Step 3: Add watcher into docker images\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 The watcher application should be deployed into each microservice's container to update components' host files. To do so, we need to rebuild all docker images by rewriting docker files and build them. The new docker files should inherit from previous docker files using 
+\f1\fs28\fsmilli14400 \cb5 FROM
+\f0\fs32 \cb1  command. Your application files can be added to the docker image using 
+\f1\fs28\fsmilli14400 \cb5 ADD
+\f0\fs32 \cb1  or 
+\f1\fs28\fsmilli14400 \cb5 COPY
+\f0\fs32 \cb1  command. The 
+\f1\fs28\fsmilli14400 \cb5 CMD
+\f0\fs32 \cb1  or 
+\f1\fs28\fsmilli14400 \cb5 ENTRYPOINT
+\f0\fs32 \cb1  field of the docker file should also be overridden to start your application at the container's start-up time.\
+All docker files of microservices are provided in the 
+\f1\fs28\fsmilli14400 \cb5 dockerfiles
+\f0\fs32 \cb1  folder for your reference. For your convenience, we have also updated all docker images with Java support. The new docker images of each component are listed below. You can choose to inherit from either the original images or our new images with Java support.\
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth4783\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrnil \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth11197\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrnil \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\b \cf2 Component\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Docker image with Java support\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth4783\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth11197\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\b0 \cf2 Frontend\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 dplsming/sockshop-frontend:0.2\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clcbpat4 \clwWidth4783\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx4320
+\clvertalc \clcbpat4 \clwWidth11197\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Shipping\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 dplsming/sockshop-shipping:0.1\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth4783\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth11197\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 User\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 dplsming/sockshop-user:0.1\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clcbpat4 \clwWidth4783\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx4320
+\clvertalc \clcbpat4 \clwWidth11197\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Orders\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 dplsming/sockshop-orders:0.1\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth4783\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth11197\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Cart\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 dplsming/sockshop-cart:0.1\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clcbpat4 \clwWidth4783\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx4320
+\clvertalc \clcbpat4 \clwWidth11197\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Payment\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 dplsming/sockshop-payment:0.1\cell \row
+
+\itap1\trowd \taflags1 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth4783\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth11197\clftsWidth3 \clbrdrt\brdrs\brdrw20\brdrcf6 \clbrdrl\brdrs\brdrw20\brdrcf6 \clbrdrb\brdrs\brdrw20\brdrcf6 \clbrdrr\brdrs\brdrw20\brdrcf6 \clpadt120 \clpadl260 \clpadb120 \clpadr260 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 Catalogue\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf2 dplsming/sockshop-catalogue:0.1\cell \lastrow\row
+\pard\pardeftab720\partightenfactor0
+
+\b\fs48 \cf2 Step 4: Enjoy redeploying your application\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 After all previous steps, you can now redeploy your application again using the new naming service. Although components can register themselves automatically, the deployment order of components should still conform to the dependency relationship to avoid initialization errors.\
+\pard\pardeftab720\partightenfactor0
+
+\b \cf2 Question 3
+\b0 : Please implement the naming service by yourself. You need to submit your source codes and all extended docker files in the final answer package and briefly describe your implementation in the document.\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs56 \cf2 3 Database Partition\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 In hands-on 3, we have only deployed one MongoDB instance to serve all no-SQL database requests. However, this makes the database sometimes a performance bottleneck.\
+Consider a workload where many users are trying to log into the website while other users are trying to purchase socks. Both types of requests are accessing the same database, which makes them interfere with each other. What's more, too much load on a single database instance may further affect the database's performance.\
+Therefore, it is a better choice to provide each component with a separated database instance. To do so, we need to deploy three MongoDB instances and assign them with domain names 
+\f1\fs28\fsmilli14400 \cb5 carts-db
+\f0\fs32 \cb1 , 
+\f1\fs28\fsmilli14400 \cb5 user-db
+\f0\fs32 \cb1 , and 
+\f1\fs28\fsmilli14400 \cb5 orders-db
+\f0\fs32 \cb1  for component 
+\f1\fs28\fsmilli14400 \cb5 Cart
+\f0\fs32 \cb1 , 
+\f1\fs28\fsmilli14400 \cb5 User
+\f0\fs32 \cb1 , and 
+\f1\fs28\fsmilli14400 \cb5 Orders
+\f0\fs32 \cb1 . After that, those microservices can directly access separated databases using different domain names.\
+Unfortunately, the poor implementation of backend microservices makes it hard to achieve the database's maximum throughput in our website. Therefore, no test cases are provided for this part, and we only need to change our deployment.\
+\pard\pardeftab720\partightenfactor0
+
+\b \cf2 Question 4
+\b0 : Please partition the database according to the previous description and briefly introduct your solution.\
+\pard\pardeftab720\partightenfactor0
+
+\b\fs56 \cf2 4 Hands in\
+\pard\pardeftab720\partightenfactor0
+
+\b0\fs32 \cf2 To hand in, please compress the following files into a compressed file with a title like 516037910xxx.zip.\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls4\ilvl0\cf2 \kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Program source code for Question 3 
+\b without
+\b0  any executable files or libraries.\
+\ls4\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Docker files for Questions 3.\
+\ls4\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Deployment scripts for Question 4 (named as deploy.sh).\
+\ls4\ilvl0\kerning1\expnd0\expndtw0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+Answers for Question 1 - Question 4 (named as answers.pdf).\
+\pard\pardeftab720\partightenfactor0
+\cf2 After that, please upload your compressed file to our public FTP (ftp://public.sjtu.edu.cn/upload/handson4, username: followmoon, password: public) before 2019-01-05 23:59.\
+\pard\pardeftab720\partightenfactor0
+
+\b \cf2 Note
+\b0 : Please don't add images with too large file size into your document due to the size limit of our public FTP.\
+\'a0}
