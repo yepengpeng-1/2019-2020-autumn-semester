@@ -380,3 +380,39 @@ Conflict Serializable 最严苛；他要求 Data Dependency 都不出错。
 所以他们什么都不加限制，直到出现了问题，说：Conflict! Abort, clear history and retry!
 
 基于这种思路的策略主要是 OCC。
+
+#### Global Lock
+
+这个锁就非常暴力了…全局挂一把大锁，每进入一个 Transaction 就拿锁，退出 Transaction 就解锁。
+
+>   那这怎么可能会不 Serializable……你这个本身就是 Serialized
+
+#### Simple Lock
+
+稍微正常一点的上锁办法。
+
+这个上锁办法的关键在于：
+
+*   在进入 Transaction 之前，预先把所有会用到的 Shared Data 都上锁
+*   遇到了 Commit 或者 Abort 之后就按照拿锁的反序放锁
+
+这个有一点好处：完全没有利益相关的 Transaction 就不会 Block 彼此了。
+
+但是存在问题：
+
+*   怎么 Enumerate（遍历）全部需要加锁的 Shared Object？
+*   或许我们加锁的对象可能比实际访问的对象要更多。这就太浪费了……
+
+#### Two-phase Locking
+
+两步加锁法。听名字就很精妙（
+
+*   每一个共享变量天生就带着一把自己的锁
+*   要对这个变量进行任何操作，都必须先拿跟这个变量对应的锁
+*   一旦一个 Transaction 释放了一把锁之后，他就不可以再拿新锁了
+
+>   ？？？
+
+这种加锁的方法，好处主要在不需要提前知道到底需要拿锁集合。而是采用「到了要访问数据的最后关头，再去拿锁」这种策略。
+
+这样能使拿锁时间段最短，最小地影响其他 Transactions。
