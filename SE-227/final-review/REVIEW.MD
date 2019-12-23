@@ -416,3 +416,37 @@ Conflict Serializable 最严苛；他要求 Data Dependency 都不出错。
 这种加锁的方法，好处主要在不需要提前知道到底需要拿锁集合。而是采用「到了要访问数据的最后关头，再去拿锁」这种策略。
 
 这样能使拿锁时间段最短，最小地影响其他 Transactions。
+
+---
+
+#### Fix: Two-phase Locking
+
+两步拿锁法有个致命的问题：可能会死锁。我等你，你等我。
+
+因为没有办法保证顺序拿锁反序放锁。
+
+所以有两个解决方案：
+
+1.  提供一个全局的拿锁顺序（Dirty，不推荐）
+2.  出现死锁，就 Abort 其中一个 Transaction 再来！
+
+方法 2 也是基于上面的 Optimistic 的解决方案，而且很好地利用了 原子性。绝好。
+
+#### Concurrency Control
+
+>   并行控制策略
+
+CC 就是 Concurrency Control，也就是并行控制策略，负责调度那些运行时间上有重合的进程们。与此同时，还要保证上面提到的 Serializability。
+
+这对于一个 CC 来说，并不是一件容易做的事情。
+
+因此，Kung 和 Johnson 提出了一套基于乐观心态的 OCC 策略。
+
+#### OCC: Optimistic CC
+
+>    乐观的并行控制策略。
+
+![image-20191223164052253](REVIEW.assets/image-20191223164052253.png)
+
+![image-20191223164106534](REVIEW.assets/image-20191223164106534.png)
+
