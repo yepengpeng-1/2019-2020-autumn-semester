@@ -4,7 +4,7 @@
 
 需要复习的内容主要是 Lecture 14～28。实际上最後两 Lecture 主要用于复习，所以我们还是从现在开始瞧一瞧。
 
-## Lecture 14: AoN & BoA
+## Lecture 14 & 15: AoN & BoA
 
 赌博有个常用术语：Double or Nothing。意思是参加一场赌局，有可能获得 100% 收益，即拿到 100% 赌资的回报，要么全部输光全部赌资。
 
@@ -258,9 +258,125 @@ Recover: needless to do anything
 
 目前的实现，Logging 的长度是完全不设限的；很可能会无限扩张。
 
-我们应该在 Logging 超过一定长度的时候，选择将其割断（Truncate），在某些特定的点（叫做 Checkpoint）处，将比这更早的 Operation 都压平，以限制 Logging 大小。
+我们应该在 Logging 超过一定长度的时候，选择将其割断（Truncate），在某些特定的点（叫做 Checkpoint）处，将比这更早的 Operation 都*压平*，以限制 Logging 大小。
 
 #### Synchronize with I/O
 
 Doesn't matter here...
 
+### Before or After
+
+这里，我们开始考虑如何真正地实现 Before or After；即，保证表面上的「一先一後」。在多核心多线程的环境下，这件事并不那么容易。
+
+#### Race Condition
+
+最容易出现的问题就是 Race Condition 了：在两个线程交错执行的情况下，几乎没法保证最终结果的正确性。
+
+![image-20191223140751527](REVIEW.assets/image-20191223140751527.png)
+
+当然我们可以严厉地要求两个线程必须工作在 SERIALLY 模式下（严格按顺序）；但那样就无法发挥多线程多核心的优势了。
+
+#### Compromise Solution
+
+我们最终的目的还是在「不可靠」之上抽象出「可靠」。尽量不要给底层强加限制，那样没法保障效率。
+
+回忆我们在 All or Nothing 中所做的事情：我们引入了 Transaction 抽象，借此保证了 AoN。
+
+而在 BoA 之中，我们也要做类似的事情：这里我们的抽象是这两位：
+
+*   **2PL** (Two-phase locking) 
+*   **OCC** (Optimistic Concurrency Control)
+
+待会我们详细讲讲。
+
+#### Goal
+
+最后，我们提一句我们的最终目标：目标是什么？
+
+run transactions T1, T2, .., TN concurrently, and have it "**appeared**" as if they ran sequentially
+
+本质上让一系列 Transaction 并行执行，但却让他「**表现得**」像是顺序执行的一样。
+
+#### ...appeared?
+
+表面上看起来是什么意思？
+
+意思就是，我们可以随便让 T1 跟 T2 的 Body 执行，但我们要保证最终产生的结果要么是 SEQ(T1, T2) 的结果，要么是 SEQ(T2, T1) 的结果。
+
+>   A schedule is final-state serializable if its final written state is equivalent to that of some serial schedule.
+
+只要最终的结果是排列组合原子的 Transaction 所能拿到的结果，那么就认定为一个合理的调度（Schedule）。
+
+### Conflict Serializability
+
+有冲突的顺序化。
+
+在什么情况下会出现两个操作冲突的情况？
+
+但或许首先该问：啥是冲突？
+
+#### Conflict
+
+这里有一些规则：
+
+![image-20191223142202183](REVIEW.assets/image-20191223142202183.png)
+
+1.  两个操作操作了同一个对象
+2.  其中至少有一个是 WRITE
+3.  这两个操作分属不同的 Transaction
+
+#### Serializability
+
+如果一个 Schedule 中所有的冲突出现的顺序都和一个原子性的正常 Schedule 中的冲突先后顺序一致，那么就把这个叫做 Conflict Serializability。
+
+这个判别法看起来好简单，实际上无法实际使用的。
+
+后面会提到我们该用什么。
+
+#### Conflict Graph
+
+我们把每个 Transaction 画成 Graph 中的结点（Node）；然后，把有冲突的两个结点连接在一起。
+
+留意这个边是有向的；由冲突始发结点指向冲突收束结点。
+
+结论：如果这个 Graph 是 acyclic（非周期性の、非環式の）的话，这一系列 Transaction 就是 C.S.（可冲突序列化）的了。
+
+#### Conflict Equal
+
+如果两个 Transaction Schedule 的 Conflicts Order 一致，我们就称他们二位是 Conflict Equal 的。
+
+### View Serializability
+
+A schedule is view serializable if the final written state as well as intermediate reads are the same as in some serial schedule.
+
+假如一个 Schedule 最终的结果以及**中间包含的读**结果也都跟某个特定的 Serial Schedule 的结果相同，那么可以说这个 Schedule 是 View  Serializable 的。
+
+简单说，Final-state Serializable 只关心最终对数据产生的影响，而不管程序内部的 READ 是不是正确；
+
+View Serializable 关心了读和最终结果。
+
+Conflict Serializable 最严苛；他要求 Data Dependency 都不出错。
+
+![image-20191223144522507](REVIEW.assets/image-20191223144522507.png)
+
+但是生成 View S. 比起生成 Conflict S. 要更困难一些：判断图是否成环还是不难的；但是要判断 VS 就很难了，是个 NP-Hard 问题。
+
+况且，一个 Conflict S. 的调度一定也是 View S. 的（这显然），所以我们在实践中一般追求一个 Conflict Serializability 的调度。
+
+###  Generate Conflict Serializable Schedules
+
+最后一个问题：怎么生成 Conflict Serializable 的 Schedules 呢？
+
+#### Pessimistic
+
+悲观的人对什么都不信任，所以她选择给任何有可能产生冲突的地方挂锁，以此来防止产生数据的 Race Condition。
+
+基于这种思路的策略包括：Global Lock, 2-Phase Locking。
+
+#### Optimistic
+
+乐观的人总是倾向于觉得所有的事情都不会出问题。
+
+所以他们什么都不加限制，直到出现了问题，说：Conflict! Abort, clear history and retry!
+
+基于这种思路的策略主要是 OCC。
