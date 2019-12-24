@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include "utilities.h"
 
 using namespace tinyply;
 
@@ -25,24 +26,7 @@ public:
     }
 };
 
-struct float2 {
-    float x, y;
-};
-struct float3 {
-    float x, y, z;
-};
-struct double3 {
-    double x, y, z;
-};
-struct uint3 {
-    uint32_t x, y, z;
-};
-struct uint4 {
-    uint32_t x, y, z, w;
-};
-struct triangle {
-    float3 a, b, c;
-};
+
 struct geometry {
     std::vector< float3 > vertices;
     std::vector< float3 > normals;

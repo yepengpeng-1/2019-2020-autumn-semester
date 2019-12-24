@@ -8,3 +8,22 @@ enum SceneIndex {
     BOMB_SCENE,      /* used for the bombing stone scene*/
     BUDDHA_SCENE     /* used for the ridiculous foolish buddha statue scene*/
 };
+
+struct float2 {
+    float x, y;
+};
+struct float3 {
+    float x, y, z;
+};
+struct double3 {
+    double x, y, z;
+};
+struct uint3 {
+    uint32_t x, y, z;
+};
+struct uint4 {
+    uint32_t x, y, z, w;
+};
+struct triangle {
+    float3 a, b, c;
+};
