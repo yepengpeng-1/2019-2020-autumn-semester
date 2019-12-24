@@ -1,0 +1,4 @@
+﻿  GraveRobber.cpp
+Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass4\src\GraveRobber\GraveRobber\GraveRobber.cpp(83,13): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+LINK : warning LNK4076: 增量状态文件“Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass4\src\GraveRobber\x64\Debug\GraveRobber.ilk”无效(将删除)；正以非增量方式链接
+  GraveRobber.vcxproj -> Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass4\src\GraveRobber\x64\Debug\GraveRobber.exe

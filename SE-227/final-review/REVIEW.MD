@@ -449,4 +449,3 @@ CC 就是 Concurrency Control，也就是并行控制策略，负责调度那些
 ![image-20191223164052253](REVIEW.assets/image-20191223164052253.png)
 
 ![image-20191223164106534](REVIEW.assets/image-20191223164106534.png)
-
