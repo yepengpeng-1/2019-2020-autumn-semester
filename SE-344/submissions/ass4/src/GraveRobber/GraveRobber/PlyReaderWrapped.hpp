@@ -50,7 +50,9 @@ struct geometry {
     std::vector< uint3 >  triangles;
 };
 
-std::vector< triangle > read_ply_file( const std::string& filepath ) {
+
+
+std::vector< triangle > read_ply_file( const std::string& filepath, float scale_ratio = 1.0 ) {
 
     std::vector< triangle > returns;
     try {
@@ -131,6 +133,11 @@ std::vector< triangle > read_ply_file( const std::string& filepath ) {
         std::vector< uint3 > trigs( faces->count );
         std::memcpy( trigs.data(), faces->buffer.get(), numFacesBytes );
 
+        for (size_t i = 0; i < verts.size(); ++i) {
+            verts[i].x *= scale_ratio;
+            verts[i].y *= scale_ratio;
+            verts[i].z *= scale_ratio;
+        }
         for ( size_t i = 0; i < trigs.size(); ++i ) {
             auto raw = trigs[ i ];
             auto t   = triangle();

@@ -104,7 +104,6 @@ static void onRender() {
 		glRotatef(rotationZ, 0.0, 0.0, 1.0);
 		updateRotation();
 
-		double ratio = 0.3;
 		glBegin(GL_TRIANGLES);
 
 		giveRandomBrush();
@@ -114,17 +113,17 @@ static void onRender() {
 			auto point = i.a;
 			// glColor3d(point.r, point.g, point.b);
 			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
+			glVertex3d(point.x, point.y, point.z);
 
 			point = i.b;
 			// glColor3d(point.r, point.g, point.b);
 			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
+			glVertex3d(point.x, point.y, point.z);
 
 			point = i.c;
 			// glColor3d(point.r, point.g, point.b);
 			// std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-			glVertex3d(point.x / ratio, point.y / ratio, point.z / ratio);
+			glVertex3d(point.x, point.y, point.z);
 
 			// std::cout << "draw a triangle #" << counter << std::endl;
 			// counter += 1;
@@ -151,7 +150,8 @@ int main(int argc, char** argv)
 {
     std::cout << "Assignment #4 initializing\n";
 
-	fragments = read_ply_file("./happy_recon/happy_vrip_res4.ply");
+	// fragments = read_ply_file("./happy_recon/happy_vrip_res4.ply");
+	fragments = read_ply_file("./models/book.ply", 0.1f);
 
 	glutInit(&argc, argv);
 

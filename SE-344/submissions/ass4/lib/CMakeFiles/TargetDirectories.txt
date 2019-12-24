@@ -1,0 +1,3 @@
+Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4/lib/CMakeFiles/soil.dir
+Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4/lib/CMakeFiles/ALL_BUILD.dir
+Z:/文稿/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4/lib/CMakeFiles/ZERO_CHECK.dir
