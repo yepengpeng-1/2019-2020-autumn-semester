@@ -166,9 +166,11 @@
     <ClCompile Include="GraveRobber.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ObjLoader\tiny_obj_loader.h" />
     <ClInclude Include="PlyLoader\tinyply.h" />
     <ClInclude Include="PlyReaderWrapped.hpp" />
+    <ClInclude Include="Shader.hpp" />
     <ClInclude Include="Texture\TextureMapper.hpp" />
     <ClInclude Include="Triangle\Triangle.hpp" />
     <ClInclude Include="utilities.h" />

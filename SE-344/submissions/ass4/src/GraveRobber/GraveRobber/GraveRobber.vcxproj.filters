@@ -38,5 +38,11 @@
     <ClInclude Include="Texture\TextureMapper.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Shader.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
