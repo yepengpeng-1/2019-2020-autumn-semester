@@ -136,11 +136,14 @@
   <ItemGroup>
     <ClInclude Include="libraries\stbi\stb_image.h" />
     <ClInclude Include="source\Core.h" />
+    <ClInclude Include="source\PlyLoader\tinyply.h" />
+    <ClInclude Include="source\PlyReaderWrapped.hpp" />
     <ClInclude Include="source\rendering\IndexBuffer.h" />
     <ClInclude Include="source\rendering\Renderer.h" />
     <ClInclude Include="source\rendering\VertexArray.h" />
     <ClInclude Include="source\rendering\VertexBuffer.h" />
     <ClInclude Include="source\rendering\VertexBufferLayout.h" />
+    <ClInclude Include="source\utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

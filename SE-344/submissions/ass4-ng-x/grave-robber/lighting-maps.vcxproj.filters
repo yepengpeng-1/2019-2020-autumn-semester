@@ -65,5 +65,14 @@
     <ClInclude Include="source\Core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\PlyLoader\tinyply.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\PlyReaderWrapped.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
