@@ -4,6 +4,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <GL/glew.h>
+// avoiding idiot clang-format from adjusting #include sequence
 #include <GL/freeglut.h>
 #include <algorithm>
 #include <ctime>
@@ -161,28 +162,70 @@ static void onRender() {
 
         glBegin( GL_TRIANGLES );
         // giveRandomBrush();
-        // int counter = 1;
+        int counter = 1;
+
         for ( const auto& i : fragments ) {
-            glTexCoord2f(0.0f, 0.0f);
-            auto point = i.a;
-            // glColor3d(point.r, point.g, point.b);
-            // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-            glVertex3d( point.x, point.y, point.z );
+            if ( counter == 11 ) {
+                glTexCoord2f( 1.0f, 0.0f );
+                auto point = i.a;
+                // glColor3d(point.r, point.g, point.b);
+                // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+                glVertex3d( point.x, point.y, point.z );
 
-            glTexCoord2f(1.0f, 0.0f);
-            point = i.b;
-            // glColor3d(point.r, point.g, point.b);
-            // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-            glVertex3d( point.x, point.y, point.z );
+                glTexCoord2f( 0.0f, 0.0f );
+                point = i.b;
+                // glColor3d(point.r, point.g, point.b);
+                // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+                glVertex3d( point.x, point.y, point.z );
 
-            glTexCoord2f(0.0f, 1.0f);
-            point = i.c;
-            // glColor3d(point.r, point.g, point.b);
-            // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-            glVertex3d( point.x, point.y, point.z );
+                glTexCoord2f( 0.0f, 1.0f );
+                point = i.c;
+                // glColor3d(point.r, point.g, point.b);
+                // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+                glVertex3d( point.x, point.y, point.z );
 
-            // std::cout << "draw a triangle #" << counter << std::endl;
-            // counter += 1;
+                // std::cout << "draw a triangle #" << counter << std::endl;
+            }
+            else if ( counter == 12 ) {
+                glTexCoord2f( 1.0f, 0.0f );
+                auto point = i.a;
+                // glColor3d(point.r, point.g, point.b);
+                // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+                glVertex3d( point.x, point.y, point.z );
+
+                glTexCoord2f( 0.0f, 1.0f );
+                point = i.b;
+                // glColor3d(point.r, point.g, point.b);
+                // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+                glVertex3d( point.x, point.y, point.z );
+
+                glTexCoord2f( 1.0f, 1.0f );
+                point = i.c;
+                // glColor3d(point.r, point.g, point.b);
+                // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+                glVertex3d( point.x, point.y, point.z );
+
+                // std::cout << "draw a triangle #" << counter << std::endl;
+            }
+            else {
+                auto point = i.a;
+                // glColor3d(point.r, point.g, point.b);
+                // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+                glVertex3d( point.x, point.y, point.z );
+
+                point = i.b;
+                // glColor3d(point.r, point.g, point.b);
+                // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+                glVertex3d( point.x, point.y, point.z );
+
+                point = i.c;
+                // glColor3d(point.r, point.g, point.b);
+                // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
+                glVertex3d( point.x, point.y, point.z );
+
+                // std::cout << "draw a triangle #" << counter << std::endl;
+            }
+            counter += 1;
         }
         glEnd();
     } break;
