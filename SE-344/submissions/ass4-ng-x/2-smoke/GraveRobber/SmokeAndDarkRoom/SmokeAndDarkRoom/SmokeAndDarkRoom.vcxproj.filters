@@ -19,4 +19,24 @@
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PlyLoader\tinyply.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PlyLoader\PlyReaderWrapped.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="triangle\Triangle.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="particles\particle_generator.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjLoader\tiny_obj_loader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

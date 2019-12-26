@@ -1,6 +1,6 @@
 #pragma once
 #define TINYPLY_IMPLEMENTATION
-#include "PlyLoader/tinyply.h"
+#include "tinyply.h"
 // #include "Triangle/Triangle.hpp"
 #include <chrono>
 #include <fstream>

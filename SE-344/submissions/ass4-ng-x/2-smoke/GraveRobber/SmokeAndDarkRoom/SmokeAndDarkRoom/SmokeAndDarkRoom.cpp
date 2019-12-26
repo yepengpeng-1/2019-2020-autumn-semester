@@ -1,8 +1,14 @@
 ﻿// SmokeAndDarkRoom.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
 //
 
+#define TINYOBJLOADER_IMPLEMENTATION
+
 #include <GL/glew.h>
 // idiot clang-format
+#include "ObjLoader/tiny_obj_loader.h"
+#include "PlyLoader/PlyReaderWrapped.hpp"
+#include "particles/particle_generator.hpp"
+#include "triangle/Triangle.hpp"
 #include <GL/freeglut.h>
 #include <algorithm>
 #include <assert.h>
@@ -11,13 +17,11 @@
 #include <random>
 #include <vector>
 
-#include "ObjLoader/tiny_obj_loader.h"
-#include "PlyLoader/PlyReaderWrapped.hpp"
-#include "triangle/Triangle.hpp"
-
 #define PREDEF_SCALE_RATIO 40.0
 
-static int windowWidth = 1024, windowHeight = 1024;
+static int windowWidth = 800, windowHeight = 450;
+
+ParticleMaster* master = nullptr;
 
 static void onWindowResized( int w, int h ) {
     windowWidth = w, windowHeight = h;
@@ -29,98 +33,40 @@ static void onWindowResized( int w, int h ) {
 
 std::vector< Triangle > fragments;
 
+inline void _glVertex2f( GLfloat x, GLfloat y ) {
+    glVertex2f( x / (windowWidth / 2) - 1.0f, y / (windowHeight / 2) - 1.0f);
+}
+
+inline void _glVertex3f(GLfloat x, GLfloat y, GLfloat z) {
+    glVertex3f(x / (windowWidth / 2) - 1.0f, y / (windowHeight / 2) - 1.0f, z);
+}
+
 static void onRender() {
-    GLfloat sparkx, sparky, sparkz;
+    master->updateParticles();
+
+    glClear( GL_COLOR_BUFFER_BIT );
 
     glLoadIdentity();
-    updateRotation();
-
-    glRotatef( rotationX, 1.0, 0.0, 0.0 );
-    glRotatef( rotationY, 0.0, 1.0, 0.0 );
-    glRotatef( rotationZ, 0.0, 0.0, 1.0 );
-
-    glColor3d( 0.6, 0.6, 0.7 );
-    for ( float i = -50; i <= 50; i += 0.2f ) {
-
-        glBegin( GL_LINES );
-
-        glVertex3f( -50, 0, i );
-        glVertex3f( 50, 0, i );
-
-        glVertex3f( i, 0, -50 );
-        glVertex3f( i, 0, 50 );
-
-        glEnd();
-    }
-
-    double ratio = 150.0;
-
     glBegin( GL_TRIANGLES );
 
     // int counter = 1;
-    for ( auto i : bombBody ) {
-        auto point = i.tPoint1;
-        glColor3d( point.r, point.g, point.b );
-        // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-        glVertex3d( point.x / ratio, point.y / ratio, point.z / ratio );
 
-        point = i.tPoint2;
-        glColor3d( point.r, point.g, point.b );
-        // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-        glVertex3d( point.x / ratio, point.y / ratio, point.z / ratio );
+    float radius = 50.0f;
 
-        point = i.tPoint3;
-        glColor3d( point.r, point.g, point.b );
-        // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-        glVertex3d( point.x / ratio, point.y / ratio, point.z / ratio );
+    master->keepRetrobriting = false;
+    
+    for ( auto i : master->particles ) {
+        
+        glColor4f(1.0f, 1.0f, 1.0f, i.alpha);
+        _glVertex3f( i.posx, i.posy, 0.0 );
 
-        // std::cout << "draw a triangle #" << counter << std::endl;
-        // counter += 1;
-    }
+        glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
+        _glVertex3f(i.posx - radius, i.posy - radius, 0.0);
+        _glVertex3f(i.posx - radius, i.posy + radius, 0.0);
 
-    GLfloat line_ambient[] = { 0.9f, 0.5f, 0.0f, 1.0f };
-
-    GLfloat line_diffuse[] = { 0.8f, 0.4f, 0.0f, 1.0f };
-
-    GLfloat line_specular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-
-    GLfloat line_emission[] = { 0.0f, 0.0f, 0.0f, 1.f };
-
-    GLfloat line_shininess = 0.0f;
-
-    glMaterialfv( GL_FRONT, GL_AMBIENT, line_ambient );
-
-    glMaterialfv( GL_FRONT, GL_DIFFUSE, line_diffuse );
-
-    glMaterialfv( GL_FRONT, GL_SPECULAR, line_specular );
-
-    glMaterialfv( GL_FRONT, GL_EMISSION, line_emission );
-
-    glMaterialf( GL_FRONT, GL_SHININESS, line_shininess );
-
-    // int counter = 1;
-    for ( auto i : fragments ) {
-        auto point = i.tPoint1;
-        glColor3d( point.r, point.g, point.b );
-        // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-        glVertex3d( point.x / ratio, point.y / ratio, point.z / ratio );
-
-        point = i.tPoint2;
-        glColor3d( point.r, point.g, point.b );
-        // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-        glVertex3d( point.x / ratio, point.y / ratio, point.z / ratio );
-
-        point = i.tPoint3;
-        glColor3d( point.r, point.g, point.b );
-        // std::cout << "Red: " << point.r << "\nGreen: " << point.g << "\nBlue: " << point.b << std::endl;
-        glVertex3d( point.x / ratio, point.y / ratio, point.z / ratio );
-
-        // std::cout << "draw a triangle #" << counter << std::endl;
-        // counter += 1;
     }
 
     glEnd();
-
     glutSwapBuffers();
 }
 
@@ -236,13 +182,13 @@ int main( int argc, char** argv ) {
 
     glClearDepth( 1.0 );
 
-    glEnable( GL_DEPTH_TEST );
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glDepthFunc( GL_LEQUAL );
+    glClearColor( 0.0, 0.0, 0.0, 1.0f );
 
-    glShadeModel( GL_SMOOTH );
-
-    glClearColor( 1.0, 1.0, 1.0, 1.0f );
+    const size_t amount = 1000;
+    master              = new ParticleMaster( windowWidth, windowHeight, amount );
 
     GLenum error = glewInit();
     if ( error != GLEW_OK ) {
