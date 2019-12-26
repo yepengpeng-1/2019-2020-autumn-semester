@@ -5,7 +5,6 @@
 #include <string>
 
 static std::string vertexShader = R"glsl(
-
 	#version 330 core
 
 	layout(location = 0) in vec3 position;
@@ -31,7 +30,6 @@ static std::string vertexShader = R"glsl(
 )glsl";
 
 static std::string pixelShader = R"glsl(
-
 	#version 330 core
 
 	struct Material {
@@ -47,6 +45,9 @@ static std::string pixelShader = R"glsl(
 	uniform vec3 lightPosition;
 	uniform vec3 eyePosition;
 	uniform Material material;
+
+	uniform float U_FogStart;
+	uniform float U_FogEnd;
     
 	in vec3 fragPosition;
 	in vec3 outNormal;
@@ -75,7 +76,6 @@ static std::string pixelShader = R"glsl(
 		else {
 			gl_FragColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);	
 		}
-		
 	}
 )glsl";
 
@@ -109,6 +109,27 @@ static std::string lightPixelShader = R"glsl(
 			gl_FragColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);	
 		}
 		
+	}
+)glsl";
+
+static std::string smokeVertexShader = R"glsl(
+	#version 330 core
+	layout (location = 0) in vec3 aPos;
+
+	void main()
+	{
+		gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+	}
+)glsl";
+
+static std::string smokePixelShader = R"glsl(
+	#version 330 core
+
+	out vec4 FragColor;
+	uniform float alphaValue;
+	void main()
+	{
+		FragColor = vec4(1.0f, 1.0f, 1.0f, alphaValue);
 	}
 )glsl";
 
@@ -175,6 +196,22 @@ static unsigned int CreateLightShaderProgram() {
     unsigned int programId        = glCreateProgram();
     unsigned int vertexShaderId   = CompileShader( GL_VERTEX_SHADER, lightVertexShader );
     unsigned int fragmentShaderId = CompileShader( GL_FRAGMENT_SHADER, lightPixelShader );
+
+    glAttachShader( programId, vertexShaderId );
+    glAttachShader( programId, fragmentShaderId );
+    glLinkProgram( programId );
+    glValidateProgram( programId );
+
+    glDeleteShader( vertexShaderId );
+    glDeleteShader( fragmentShaderId );
+
+    return programId;
+}
+
+static unsigned int CreateSmokeShaderProgram() {
+    unsigned int programId        = glCreateProgram();
+    unsigned int vertexShaderId   = CompileShader( GL_VERTEX_SHADER, smokeVertexShader );
+    unsigned int fragmentShaderId = CompileShader( GL_FRAGMENT_SHADER, smokePixelShader );
 
     glAttachShader( programId, vertexShaderId );
     glAttachShader( programId, fragmentShaderId );

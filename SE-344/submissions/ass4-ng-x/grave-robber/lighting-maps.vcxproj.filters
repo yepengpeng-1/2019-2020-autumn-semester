@@ -77,5 +77,8 @@
     <ClInclude Include="source\ModelKits.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\particles\particle_generator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

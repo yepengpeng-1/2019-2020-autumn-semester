@@ -6,7 +6,8 @@ enum SceneIndex {
     DARKROOM_SCENE,  /* used for the dark room scene before the handy light appears */
     STONEHEAP_SCENE, /* used for the stone heap scene after the light and before the bomb */
     BOMB_SCENE,      /* used for the bombing stone scene*/
-    BUDDHA_SCENE     /* used for the ridiculous foolish buddha statue scene*/
+    BUDDHA_SCENE,    /* used for the ridiculous foolish buddha statue scene*/
+    OVER_SCENE       /* used for quitting the app */
 };
 
 struct float2 {

@@ -33,8 +33,6 @@ Camera camera( glm::vec3( 0.0f, 0.0f, 3.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
 
 unsigned int VBO, cubeVAO;
 
-
-
 Shader lightingShader, lampShader;
 
 // initialize with the test scene
@@ -317,7 +315,7 @@ static void onRender() {
         glActiveTexture( GL_TEXTURE0 );
         glBindTexture( GL_TEXTURE_2D, material );
 
-        glBindVertexArray(cubeVAO);
+        glBindVertexArray( cubeVAO );
         glBegin( GL_TRIANGLES );
         // giveRandomBrush();
         int counter = 1;
@@ -455,7 +453,7 @@ int main( int argc, char** argv ) {
     lightingShader.setInt( "material.specular", specularMap );
 
     // first, configure the cube's VAO (and VBO)
-    
+
     glGenVertexArrays( 1, &cubeVAO );
     glGenBuffers( 1, &VBO );
 
