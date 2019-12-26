@@ -21,17 +21,11 @@ static std::string vertexShader = R"glsl(
 	uniform mat4 model;
 	uniform mat3 normalMatrix;
 
-	varying vec3 fragTangent;
-	varying vec3 fragBitangent;
-
 	void main() {
 		gl_Position = projection * view * model * vec4(position, 2.0f);
 		fragPosition = vec3(model * vec4(position, 2.0f));
 		outNormal = normalMatrix * normal;
 		textureCoordinates = inTextureCoordinates;
-
-		fragTangent = tangent;
-    	fragBitangent = bitangent;
 	}
 	
 )glsl";
@@ -60,12 +54,12 @@ static std::string pixelShader = R"glsl(
 
 	void main() {
 		if (true) {
-			vec3 normalized = texture(material.emission, textureCoordinates).rgb * 2.0 - 1.0;
-
+			vec3 normalMap = texture(material.emission, textureCoordinates).rgb * 2.0 - 1.0;
+			vec3 normalNormal = normalize(normalMap.rgb);
 			float ambientStrength = 0.1;
 			vec3 ambientLight = ambientStrength * lightColor * vec3(texture(material.diffuse, textureCoordinates));
 
-			vec3 N = normalize(outNormal);
+			vec3 N = normalize(normalNormal);
 			vec3 L = normalize(lightPosition - fragPosition);
 			float diffuseStrength = max(dot(N, L), 0.0f);
 			vec3 diffuseColor = diffuseStrength * lightColor * vec3(texture(material.diffuse, textureCoordinates));
