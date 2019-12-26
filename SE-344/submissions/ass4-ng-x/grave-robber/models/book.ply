@@ -8,10 +8,10 @@ property float z
 property float nx
 property float ny
 property float nz
-property float u
-property float v
 property float s
 property float t
+property float u
+property float v
 element face 22
 property list uchar uint vertex_indices
 end_header

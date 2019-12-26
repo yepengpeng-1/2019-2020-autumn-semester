@@ -1,9 +1,8 @@
 
-#include <glad/glad.h> 
+#include <glad/glad.h>
 
 #include <iostream>
 #include <string>
-
 
 static std::string vertexShader = R"glsl(
 
@@ -114,73 +113,77 @@ static std::string lightPixelShader = R"glsl(
 	}
 )glsl";
 
-#define ASSERT(x) if(!(x)) __debugbreak();
-#define GLCall(x) GLClearError();\
-		x;\
-		ASSERT(GLCheckError(#x, __FILE__, __LINE__))
+#define ASSERT( x ) \
+    if ( !( x ) )   \
+        __debugbreak();
+#define GLCall( x ) \
+    GLClearError(); \
+    x;              \
+    ASSERT( GLCheckError( #x, __FILE__, __LINE__ ) )
 
 static void GLClearError() {
-	while (glGetError() != GL_NO_ERROR);
+    while ( glGetError() != GL_NO_ERROR )
+        ;
 }
 
-static bool GLCheckError(const char* function, const char* file, int line) {
-	while (GLenum error = glGetError()) {
-		std::cout << "[OpenGL Error] (" << error << ") : " << function << " " << file << " " << line << " " << std::endl;
-		return false;
-	}
-	return true;
+static bool GLCheckError( const char* function, const char* file, int line ) {
+    while ( GLenum error = glGetError() ) {
+        std::cout << "[OpenGL Error] (" << error << ") : " << function << " " << file << " " << line << " " << std::endl;
+        return false;
+    }
+    return true;
 }
 
-static unsigned int CompileShader(unsigned int shaderType, const std::string& shader) {
-	unsigned int shaderId = glCreateShader(shaderType);
-	const char* source = shader.c_str();
-	glShaderSource(shaderId, 1, &source, nullptr);
-	glCompileShader(shaderId);
+static unsigned int CompileShader( unsigned int shaderType, const std::string& shader ) {
+    unsigned int shaderId = glCreateShader( shaderType );
+    const char*  source   = shader.c_str();
+    glShaderSource( shaderId, 1, &source, nullptr );
+    glCompileShader( shaderId );
 
-	int compilationStatus;
-	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &compilationStatus);
-	if (!compilationStatus) {
-		int length;
-		glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &length);
-		char* message = (char*) _malloca(length * sizeof(char));
-		glGetShaderInfoLog(shaderId, length, &length, message);
-		std::cout << "Failed to compile " << ((shaderType == GL_VERTEX_SHADER)? "Vertex Shader": "Fragement Shader") << " shader\n" << std::endl;
-		std::cout << message << std::endl;
-		glDeleteShader(shaderId);
-		return 0;
-	}
+    int compilationStatus;
+    glGetShaderiv( shaderId, GL_COMPILE_STATUS, &compilationStatus );
+    if ( !compilationStatus ) {
+        int length;
+        glGetShaderiv( shaderId, GL_INFO_LOG_LENGTH, &length );
+        char* message = ( char* )_malloca( length * sizeof( char ) );
+        glGetShaderInfoLog( shaderId, length, &length, message );
+        std::cout << "Failed to compile " << ( ( shaderType == GL_VERTEX_SHADER ) ? "Vertex Shader" : "Fragement Shader" ) << " shader\n" << std::endl;
+        std::cout << message << std::endl;
+        glDeleteShader( shaderId );
+        return 0;
+    }
 
-	return shaderId;
+    return shaderId;
 }
 
 static unsigned int CreateShaderProgram() {
-	unsigned int programId = glCreateProgram();
-	unsigned int vertexShaderId = CompileShader(GL_VERTEX_SHADER, vertexShader);
-	unsigned int fragmentShaderId = CompileShader(GL_FRAGMENT_SHADER, pixelShader);
-	
-	glAttachShader(programId, vertexShaderId);
-	glAttachShader(programId, fragmentShaderId);
-	glLinkProgram(programId);
-	glValidateProgram(programId);
+    unsigned int programId        = glCreateProgram();
+    unsigned int vertexShaderId   = CompileShader( GL_VERTEX_SHADER, vertexShader );
+    unsigned int fragmentShaderId = CompileShader( GL_FRAGMENT_SHADER, pixelShader );
 
-	glDeleteShader(vertexShaderId);
-	glDeleteShader(fragmentShaderId);
+    glAttachShader( programId, vertexShaderId );
+    glAttachShader( programId, fragmentShaderId );
+    glLinkProgram( programId );
+    glValidateProgram( programId );
 
-	return programId;
+    glDeleteShader( vertexShaderId );
+    glDeleteShader( fragmentShaderId );
+
+    return programId;
 }
 
 static unsigned int CreateLightShaderProgram() {
-	unsigned int programId = glCreateProgram();
-	unsigned int vertexShaderId = CompileShader(GL_VERTEX_SHADER, lightVertexShader);
-	unsigned int fragmentShaderId = CompileShader(GL_FRAGMENT_SHADER, lightPixelShader);
+    unsigned int programId        = glCreateProgram();
+    unsigned int vertexShaderId   = CompileShader( GL_VERTEX_SHADER, lightVertexShader );
+    unsigned int fragmentShaderId = CompileShader( GL_FRAGMENT_SHADER, lightPixelShader );
 
-	glAttachShader(programId, vertexShaderId);
-	glAttachShader(programId, fragmentShaderId);
-	glLinkProgram(programId);
-	glValidateProgram(programId);
+    glAttachShader( programId, vertexShaderId );
+    glAttachShader( programId, fragmentShaderId );
+    glLinkProgram( programId );
+    glValidateProgram( programId );
 
-	glDeleteShader(vertexShaderId);
-	glDeleteShader(fragmentShaderId);
+    glDeleteShader( vertexShaderId );
+    glDeleteShader( fragmentShaderId );
 
-	return programId;
+    return programId;
 }

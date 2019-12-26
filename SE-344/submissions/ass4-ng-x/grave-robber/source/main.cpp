@@ -11,49 +11,22 @@
 #include <iostream>
 
 #include "IndexBuffer.h"
+#include "PlyReaderWrapped.hpp"
 #include "Renderer.h"
 #include "Shader.cpp"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
-
 #include "utilities.h"
 
 // initialize test scene
 SceneIndex scene = TEST_SCENE;
 
-typedef struct modelRecord {
-    float* buffer;
-    size_t size;
-} * modelRecordT;
-
-static float __book_model_buffer[] = {
-
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,  0.0f,  -1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  0.0f,  -1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.0f,  0.0f,  -1.0f,
-    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.0f,  0.0f,  -1.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.0f,  0.0f,  -1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,  0.0f,  -1.0f,
-
-    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.0f,  0.0f,  1.0f,  0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f,  0.0f,  1.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f,  0.0f,  1.0f,  -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.0f,  0.0f,  1.0f,
-
-    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f, -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -1.0f, 0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.0f,  0.0f,
-
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,
-    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  0.0f,  0.0f,
-
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.0f,  -1.0f, 0.0f,
-    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.0f,  -1.0f, 0.0f,  -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.0f,  -1.0f, 0.0f,  -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  -1.0f, 0.0f,
-
-    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, 0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.0f,  1.0f,  0.0f
-};
-
-modelRecord book_model = {
-    __book_model_buffer,
-    sizeof( __book_model_buffer ),
-};
+#include "ModelKits.hpp"
 
 modelRecordT model = nullptr;
+
+size_t windowWidth = 1600, windowHeight = 900;
 
 int main() {
 
@@ -62,12 +35,12 @@ int main() {
         exit( -1 );
     }
 
-    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3.0 );
-    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3.0 );
+    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
     glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
     glfwWindowHint( GLFW_RESIZABLE, GLFW_FALSE );
 
-    GLFWwindow* window = glfwCreateWindow( 1280, 720, "Grave Robber", nullptr, nullptr );
+    GLFWwindow* window = glfwCreateWindow( windowWidth, windowHeight, "Grave Robber", nullptr, nullptr );
     if ( !window ) {
         std::cout << "Failed to create a window... Aborting!!";
         glfwTerminate();
@@ -81,123 +54,125 @@ int main() {
         exit( -1 );
     }
 
-    glViewport( 0, 0, 1280, 720 );
+    glViewport( 0, 0, windowWidth, windowHeight );
 
     model = &book_model;
+    // model = read_ply_file( "./models/book.ply" );
 
-    {
-        // create shader programs
-        unsigned int programId      = CreateShaderProgram();
-        unsigned int lightProgramId = CreateLightShaderProgram();
+    while ( !glfwWindowShouldClose( window ) ) {
 
-        // float* buffer = book_model;
+        switch ( scene ) {
+        case TEST_SCENE: {
+            // create shader programs
+            unsigned int programId      = CreateShaderProgram();
+            unsigned int lightProgramId = CreateLightShaderProgram();
 
-        unsigned int vaoId, lightVaoId, bufferId, indexBufferId;
-        unsigned int diffuseMap, specularMap, emissionMap;
+            // float* buffer = book_model;
 
-        //////////////////////////////////// object settings //////////////////////////////////////
+            unsigned int vaoId, lightVaoId, bufferId, indexBufferId;
+            unsigned int diffuseMap, specularMap, emissionMap;
 
-        glUseProgram( programId );
+            //////////////////////////////////// object settings //////////////////////////////////////
 
-        VertexArray        cubeVertexArray;
-        VertexBuffer       cubeVertexBuffer( model->buffer, model->size );
-        VertexBufferLayout cubeVertexLayout( 8 * sizeof( float ) );
-        cubeVertexLayout.Push< float >( 0, 3, GL_FLOAT, 0 );                    // position vertex attribute
-        cubeVertexLayout.Push< float >( 1, 3, GL_FLOAT, sizeof( float ) * 5 );  // normal vertex attribute
-        cubeVertexLayout.Push< float >( 2, 2, GL_FLOAT, sizeof( float ) * 3 );  // texture coordinates
-        cubeVertexArray.AddAttributes( cubeVertexBuffer, cubeVertexLayout );
+            glUseProgram( programId );
 
-        glGenTextures( 1, &diffuseMap );
-        glActiveTexture( GL_TEXTURE0 );
-        glBindTexture( GL_TEXTURE_2D, diffuseMap );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-        int            width, height, nrChannels;
-        unsigned char* data = stbi_load( "./maps/title.png", &width, &height, &nrChannels, 0 );
-        if ( data ) {
-            glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
-            glGenerateMipmap( GL_TEXTURE_2D );
-        }
-        else {
-            std::cout << "\nFailed to load texture..." << std::endl;
-        }
-        stbi_image_free( data );
+            VertexArray        cubeVertexArray;
+            VertexBuffer       cubeVertexBuffer( model->buffer, model->size );
+            VertexBufferLayout cubeVertexLayout( 8 * sizeof( float ) );
+            cubeVertexLayout.Push< float >( 0, 3, GL_FLOAT, 0 );                    // position vertex attribute
+            cubeVertexLayout.Push< float >( 1, 3, GL_FLOAT, sizeof( float ) * 5 );  // normal vertex attribute
+            cubeVertexLayout.Push< float >( 2, 2, GL_FLOAT, sizeof( float ) * 3 );  // texture coordinates
+            cubeVertexArray.AddAttributes( cubeVertexBuffer, cubeVertexLayout );
 
-        glGenTextures( 1, &specularMap );
-        glActiveTexture( GL_TEXTURE1 );
-        glBindTexture( GL_TEXTURE_2D, specularMap );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-        data = stbi_load( "./maps/title_spec.png", &width, &height, &nrChannels, 0 );
-        if ( data ) {
-            glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
-            glGenerateMipmap( GL_TEXTURE_2D );
-        }
-        else {
-            std::cout << "\nFailed to load specular texture..." << std::endl;
-        }
-        stbi_image_free( data );
+            glGenTextures( 1, &diffuseMap );
+            glActiveTexture( GL_TEXTURE0 );
+            glBindTexture( GL_TEXTURE_2D, diffuseMap );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+            int            width, height, nrChannels;
+            unsigned char* data = stbi_load( "./maps/title.png", &width, &height, &nrChannels, 0 );
+            if ( data ) {
+                glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
+                glGenerateMipmap( GL_TEXTURE_2D );
+            }
+            else {
+                std::cout << "\nFailed to load texture..." << std::endl;
+            }
+            stbi_image_free( data );
 
-        glGenTextures( 1, &emissionMap );
-        glActiveTexture( GL_TEXTURE2 );
-        glBindTexture( GL_TEXTURE_2D, emissionMap );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-        data = stbi_load( "./maps/title_spec_empty.png", &width, &height, &nrChannels, 0 );
-        if ( data ) {
-            glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
-            glGenerateMipmap( GL_TEXTURE_2D );
-        }
-        else {
-            std::cout << "\nFailed to load specular texture..." << std::endl;
-        }
-        stbi_image_free( data );
+            glGenTextures( 1, &specularMap );
+            glActiveTexture( GL_TEXTURE1 );
+            glBindTexture( GL_TEXTURE_2D, specularMap );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+            data = stbi_load( "./maps/title_spec.png", &width, &height, &nrChannels, 0 );
+            if ( data ) {
+                glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
+                glGenerateMipmap( GL_TEXTURE_2D );
+            }
+            else {
+                std::cout << "\nFailed to load specular texture..." << std::endl;
+            }
+            stbi_image_free( data );
 
-        cubeVertexBuffer.Unbind();
-        cubeVertexArray.Unbind();
-        glUseProgram( 0 );
+            glGenTextures( 1, &emissionMap );
+            glActiveTexture( GL_TEXTURE2 );
+            glBindTexture( GL_TEXTURE_2D, emissionMap );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+            data = stbi_load( "./maps/title_spec_empty.png", &width, &height, &nrChannels, 0 );
+            if ( data ) {
+                glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
+                glGenerateMipmap( GL_TEXTURE_2D );
+            }
+            else {
+                std::cout << "\nFailed to load specular texture..." << std::endl;
+            }
+            stbi_image_free( data );
 
-        ////////////////////////////////////////////////////////////////////////////////////////////
+            cubeVertexBuffer.Unbind();
+            cubeVertexArray.Unbind();
+            glUseProgram( 0 );
 
-        /////////////////////////////////// light settings /////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////////////////////////////
 
-        glUseProgram( lightProgramId );
-        VertexArray        lightVertexArray;
-        VertexBufferLayout lightVertexLayout( 8 * sizeof( float ) );
-        lightVertexLayout.Push< float >( 0, 3, GL_FLOAT, 0 );  // position vertex attribute
-        cubeVertexArray.AddAttributes( cubeVertexBuffer, lightVertexLayout );
-        lightVertexArray.Unbind();
-        glUseProgram( 0 );
+            /////////////////////////////////// light settings /////////////////////////////////////////
 
-        /////////////////////////////////////////////////////////////////////////////////////////////
+            glUseProgram( lightProgramId );
+            VertexArray        lightVertexArray;
+            VertexBufferLayout lightVertexLayout( 8 * sizeof( float ) );
+            lightVertexLayout.Push< float >( 0, 3, GL_FLOAT, 0 );  // position vertex attribute
+            cubeVertexArray.AddAttributes( cubeVertexBuffer, lightVertexLayout );
+            lightVertexArray.Unbind();
+            glUseProgram( 0 );
 
-        glm::mat4 projection = glm::perspective( glm::radians( 45.0f ), 1000.0f / 600.0f, 0.1f, 100.0f );
+            /////////////////////////////////////////////////////////////////////////////////////////////
 
-        glm::mat4 view = glm::mat4( 1.0f );
-        view           = glm::translate( view, glm::vec3( 0.0f, 0.0f, -3.0f ) );
+            glm::mat4 projection = glm::perspective( glm::radians( 45.0f ), 1000.0f / 600.0f, 0.1f, 100.0f );
 
-        glm::mat4 model;
-        glm::mat3 normalMatrix;
+            glm::mat4 view = glm::mat4( 1.0f );
+            view           = glm::translate( view, glm::vec3( 0.0f, 0.0f, -3.0f ) );
 
-        float lightPosition[] = { 0.0f, 0.5f, 1.0f };
-        float objectColor[]   = { 1.0f, 1.0f, 1.0f };
-        float lightColor[]    = { 1.0f, 1.0f, 1.0f };
-        float eyePosition[]   = { 1.0f, 0.0f, 1.0f };
+            glm::mat4 model;
+            glm::mat3 normalMatrix;
 
-        glEnable( GL_DEPTH_TEST );
+            float lightPosition[] = { 0.0f, 0.5f, 1.0f };
+            float objectColor[]   = { 1.0f, 1.0f, 1.0f };
+            float lightColor[]    = { 1.0f, 1.0f, 1.0f };
+            float eyePosition[]   = { 1.0f, 0.0f, 1.0f };
 
-        while ( !glfwWindowShouldClose( window ) ) {
-            glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
-            glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+            glEnable( GL_DEPTH_TEST );
 
-            switch ( scene ) {
-            case TEST_SCENE: {
+            while ( !glfwWindowShouldClose( window ) ) {
+                glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+                glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
                 //////////////////////////////////////////////////////////////////////// OBJECT /////////////////////////////////////////////////////////////////////
                 glUseProgram( programId );
                 cubeVertexArray.Bind();
@@ -270,23 +245,20 @@ int main() {
 
                 glfwPollEvents();
                 glfwSwapBuffers( window );
-
-            } break;
-            case BOOKTITLE_SCENE:
-                break;
-            case DARKROOM_SCENE:
-                break;
-            case STONEHEAP_SCENE:
-                break;
-            case BOMB_SCENE:
-                break;
-            case BUDDHA_SCENE:
-                break;
             }
+        } break;
+        case BOOKTITLE_SCENE:
+            break;
+        case DARKROOM_SCENE:
+            break;
+        case STONEHEAP_SCENE:
+            break;
+        case BOMB_SCENE:
+            break;
+        case BUDDHA_SCENE:
+            break;
         }
-
-        glfwTerminate();
-
-        return 0;
     }
+    glfwTerminate();
+    return 0;
 }

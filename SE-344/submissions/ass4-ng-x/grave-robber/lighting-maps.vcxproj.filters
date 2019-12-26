@@ -74,5 +74,8 @@
     <ClInclude Include="source\PlyReaderWrapped.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\ModelKits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="libraries\stbi\stb_image.h" />
     <ClInclude Include="source\Core.h" />
+    <ClInclude Include="source\ModelKits.hpp" />
     <ClInclude Include="source\PlyLoader\tinyply.h" />
     <ClInclude Include="source\PlyReaderWrapped.hpp" />
     <ClInclude Include="source\rendering\IndexBuffer.h" />
