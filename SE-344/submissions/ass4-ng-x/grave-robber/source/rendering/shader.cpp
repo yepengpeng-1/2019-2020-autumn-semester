@@ -21,11 +21,17 @@ static std::string vertexShader = R"glsl(
 	uniform mat4 model;
 	uniform mat3 normalMatrix;
 
+	varying vec3 fragTangent;
+	varying vec3 fragBitangent;
+
 	void main() {
 		gl_Position = projection * view * model * vec4(position, 2.0f);
 		fragPosition = vec3(model * vec4(position, 2.0f));
 		outNormal = normalMatrix * normal;
 		textureCoordinates = inTextureCoordinates;
+
+		fragTangent = tangent;
+    	fragBitangent = bitangent;
 	}
 	
 )glsl";
@@ -47,13 +53,15 @@ static std::string pixelShader = R"glsl(
 	uniform vec3 lightPosition;
 	uniform vec3 eyePosition;
 	uniform Material material;
-
+    
 	in vec3 fragPosition;
 	in vec3 outNormal;
 	in vec2 textureCoordinates;
 
 	void main() {
-		if(!debug) {
+		if (true) {
+			vec3 normalized = texture(material.emission, textureCoordinates).rgb * 2.0 - 1.0;
+
 			float ambientStrength = 0.1;
 			vec3 ambientLight = ambientStrength * lightColor * vec3(texture(material.diffuse, textureCoordinates));
 
@@ -68,10 +76,7 @@ static std::string pixelShader = R"glsl(
 			//vec3 specular = specularStrength * lightColor * ( vec3(1.0) - vec3(texture(material.specular, textureCoordinates)));
 			vec3 specular = specularStrength * lightColor * vec3(texture(material.specular, textureCoordinates));
 
-			//vec3 emissionColor = texture(material.emission, textureCoordinates).rgb;
-			//gl_FragColor = vec4(ambientLight + diffuseColor + specular + emissionColor, 1.0);
-
-			gl_FragColor = vec4(ambientLight + diffuseColor + specular, 1.0);
+			gl_FragColor = vec4(ambientLight + diffuseColor + specular, 1.0f);
 		}
 		else {
 			gl_FragColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);	

@@ -126,7 +126,7 @@ int main() {
             glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
             glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
             glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-            data = stbi_load( "./maps/title_spec_empty.png", &width, &height, &nrChannels, 0 );
+            data = stbi_load( "./maps/title_NRM.png", &width, &height, &nrChannels, 0 );
             if ( data ) {
                 glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
                 glGenerateMipmap( GL_TEXTURE_2D );
@@ -162,10 +162,10 @@ int main() {
             glm::mat4 model;
             glm::mat3 normalMatrix;
 
-            float lightPosition[] = { 0.0f, 0.5f, 1.0f };
-            float objectColor[]   = { 1.0f, 1.0f, 1.0f };
+            float lightPosition[] = { 0.0f, 2.5f, 2.5f };
+            float objectColor[]   = { 0.9f, 0.9f, 1.0f };
             float lightColor[]    = { 1.0f, 1.0f, 1.0f };
-            float eyePosition[]   = { 1.0f, 0.0f, 1.0f };
+            float eyePosition[]   = { 3.0f, 0.0f, 3.0f };
 
             glEnable( GL_DEPTH_TEST );
 
