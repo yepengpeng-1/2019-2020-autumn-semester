@@ -87,11 +87,12 @@ void drawBackground( const std::vector< Pixel >& buffer ) {
 static int textureVisibleState = 0;
 
 void callTimer() {
-    if ( textureVisibleState == 2 ) {
-        return;
-    }
+
     auto time = glutGet( GLUT_ELAPSED_TIME );
-    if ( time > 30000 ) {
+    if (time > 40000) {
+        exit(0);
+    }
+    else if ( time > 30000 ) {
         textureVisibleState = 2;
     }
     else if ( time > 20000 ) {
