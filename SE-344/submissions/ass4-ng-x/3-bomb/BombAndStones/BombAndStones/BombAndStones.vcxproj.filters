@@ -32,5 +32,14 @@
     <ClInclude Include="utilities.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ObjLoader\ObjLoaderWrapped.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjLoader\tiny_obj_loader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Triangle\Triangle.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

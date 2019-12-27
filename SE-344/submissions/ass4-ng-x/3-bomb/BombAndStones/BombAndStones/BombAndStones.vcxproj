@@ -162,9 +162,12 @@
     <ClCompile Include="BombAndStones.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ObjLoader\ObjLoaderWrapped.hpp" />
+    <ClInclude Include="ObjLoader\tiny_obj_loader.h" />
     <ClInclude Include="PlyLoader\PlyReaderWrapped.hpp" />
     <ClInclude Include="PlyLoader\tinyply.h" />
     <ClInclude Include="TexLoader\texLoader.hpp" />
+    <ClInclude Include="Triangle\Triangle.hpp" />
     <ClInclude Include="utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
