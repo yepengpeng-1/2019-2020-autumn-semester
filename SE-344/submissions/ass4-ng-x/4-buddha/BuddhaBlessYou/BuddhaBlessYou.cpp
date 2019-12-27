@@ -84,7 +84,7 @@ static void onTimerTicked() {
     // CreateThread( nullptr, 0, load_best, nullptr, 0, nullptr );
 }
 
-inline void drawTriangleWithoutTexture( float3 vert /*, float3 normal, float2 tex */ ) {
+inline void drawTriangleWithoutTexture( const float3& vert /*, float3 normal, float2 tex */ ) {
     glVertex3f( vert.x, vert.y, vert.z );
 }
 
