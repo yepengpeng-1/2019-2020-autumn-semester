@@ -38,5 +38,8 @@
     <ClInclude Include="ObjLoader\tiny_obj_loader.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="TexLoader\texLoader.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

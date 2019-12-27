@@ -27,3 +27,7 @@ struct uint4 {
 struct triangle {
     float3 a, b, c;
 };
+struct Pixel {
+    float r, g, b;
+    float x, y;
+};

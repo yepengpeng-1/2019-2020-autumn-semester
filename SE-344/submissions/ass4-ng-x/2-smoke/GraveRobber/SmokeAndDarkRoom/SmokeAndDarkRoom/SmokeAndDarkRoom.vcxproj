@@ -166,6 +166,7 @@
     <ClInclude Include="particles\particle_generator.hpp" />
     <ClInclude Include="PlyLoader\PlyReaderWrapped.hpp" />
     <ClInclude Include="PlyLoader\tinyply.h" />
+    <ClInclude Include="TexLoader\texLoader.hpp" />
     <ClInclude Include="triangle\Triangle.hpp" />
     <ClInclude Include="utilities.h" />
   </ItemGroup>
