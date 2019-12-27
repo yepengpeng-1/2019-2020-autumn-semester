@@ -89,8 +89,8 @@ static int textureVisibleState = 0;
 void callTimer() {
 
     auto time = glutGet( GLUT_ELAPSED_TIME );
-    if (time > 40000) {
-        exit(0);
+    if ( time > 40000 ) {
+        exit( 0 );
     }
     else if ( time > 30000 ) {
         textureVisibleState = 2;
@@ -99,6 +99,7 @@ void callTimer() {
         textureVisibleState = 1;
     }
 }
+
 static void onRender() {
     callTimer();
     master->updateParticles();

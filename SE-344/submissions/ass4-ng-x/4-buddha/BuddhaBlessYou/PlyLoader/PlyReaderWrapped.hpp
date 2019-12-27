@@ -35,7 +35,7 @@ struct geometry {
     std::vector< uint3 >  triangles;
 };
 
-std::vector< triangle > read_ply_file( const std::string& filepath, float scale_ratio = 1.0 ) {
+std::vector< triangle > read_ply_file( const std::string& filepath, float scale_ratio = 14.0 ) {
 
     std::vector< triangle > returns;
     try {

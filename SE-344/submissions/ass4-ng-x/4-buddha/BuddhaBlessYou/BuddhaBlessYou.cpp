@@ -50,9 +50,54 @@ std::vector< UT::triangle > buddha_medium;
 std::vector< UT::triangle > buddha_high;
 std::vector< UT::triangle > buddha_best;
 
-static void onRender() {
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+static size_t currentState = 0;
+static bool   satisfied    = true;
+// 0 - low resolution
+// 1 - medium resolution
+// 2 - high resolution
+// 3 - best resolution
 
+static void onTimerTicked() {
+    if ( !satisfied ) {
+        return;
+    }
+    auto time = glutGet( GLUT_ELAPSED_TIME );
+    if ( currentState == 2 && time >= 60000 ) {
+        std::cout << "switched to best resolution" << std::endl;
+        currentState = 3;
+    }
+    else if ( currentState == 1 && time >= 40000 ) {
+        std::cout << "switched to high resolution" << std::endl;
+        currentState = 2;
+    }
+    else if ( currentState == 0 && time >= 20000 ) {
+        std::cout << "switched to medium resolution" << std::endl;
+        currentState = 1;
+    }
+    // might complete in 3 ~ 4 seconds
+    // CreateThread( nullptr, 0, load_medium, nullptr, 0, nullptr );
+
+    // might complete in 12 ~ 15 seconds
+    // CreateThread( nullptr, 0, load_high, nullptr, 0, nullptr );
+
+    // might complete in 40 seconds or so
+    // CreateThread( nullptr, 0, load_best, nullptr, 0, nullptr );
+}
+
+inline void drawTriangleWithoutTexture( float3 vert /*, float3 normal, float2 tex */ ) {
+    glVertex3f( vert.x, vert.y, vert.z );
+}
+
+static void onRender() {
+    onTimerTicked();
+
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
+    glLightfv( GL_LIGHT0, GL_DIFFUSE, ambientLight );
+    glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
+    glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );
+    glLightf( GL_LIGHT0, GL_SPOT_CUTOFF, 50.0f );
+    glEnable( GL_LIGHT0 );
     glEnable( GL_LIGHTING );
 
     glColorMaterial( GL_FRONT, GL_AMBIENT_AND_DIFFUSE );
@@ -65,28 +110,67 @@ static void onRender() {
     gluPerspective( 75, 1, 1, 21 );
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
-    gluLookAt( -4, 3, 3, 0, 0, 0, 0, 0, 1 );
+    gluLookAt( -3, 0.5, 0, 0, 2, 0, 0, 1, 0 );
 
-    glRotatef( angle, 0.0f, 0.0f, 1.0f );
+    glRotatef( angle, 0.0f, 1.0f, 0.0f );
+
+    std::vector< triangle >& fragments = buddha_low;
+    switch ( currentState ) {
+    case 1:
+        if ( buddha_medium.size() > 0 ) {
+            fragments = buddha_medium;
+        }
+        angle += 0.3f;
+        break;
+    case 2:
+        if ( buddha_high.size() > 0 ) {
+            fragments = buddha_high;
+        }
+        angle += 1.0f;
+        break;
+    case 3:
+        if ( buddha_best.size() > 0 ) {
+            fragments = buddha_best;
+        }
+        angle += 3.0f;
+        break;
+    default:
+        angle += 0.2f;
+        break;
+    }
+
+    glColor3f( 1.0, 1.0, 1.0 );
+    glBegin( GL_TRIANGLES );
+    for ( const auto& tri : fragments ) {
+        drawTriangleWithoutTexture( tri.a );
+        drawTriangleWithoutTexture( tri.b );
+        drawTriangleWithoutTexture( tri.c );
+    }
+    glEnd();
 
     glutSwapBuffers();
 }
 
-DWORD WINAPI load_medium( LPVOID lpParameter ) {
-    buddha_medium = read_ply_file( "./models/happy_recon/happy_vrip_res3.ply" );
-    cout << "Medium Resolution Loaded" << endl;
+DWORD WINAPI load_best( LPVOID lpParameter ) {
+    buddha_best = read_ply_file( "./models/happy_recon/happy_vrip.ply" );
+    cout << "Best Resolution Loaded" << endl;
     return 0;
 }
 
 DWORD WINAPI load_high( LPVOID lpParameter ) {
     buddha_high = read_ply_file( "./models/happy_recon/happy_vrip_res2.ply" );
     cout << "High Resolution Loaded" << endl;
+    // might complete in 40 seconds or so
+    CreateThread( nullptr, 0, load_best, nullptr, 0, nullptr );
     return 0;
 }
 
-DWORD WINAPI load_best( LPVOID lpParameter ) {
-    buddha_best = read_ply_file( "./models/happy_recon/happy_vrip.ply" );
-    cout << "Best Resolution Loaded" << endl;
+DWORD WINAPI load_medium( LPVOID lpParameter ) {
+    buddha_medium = read_ply_file( "./models/happy_recon/happy_vrip_res3.ply" );
+    cout << "Medium Resolution Loaded" << endl;
+    // might complete in 12 ~ 15 seconds
+    CreateThread( nullptr, 0, load_high, nullptr, 0, nullptr );
+
     return 0;
 }
 
@@ -115,12 +199,6 @@ int main( int argc, char** argv ) {
 
     // might complete in 3 ~ 4 seconds
     CreateThread( nullptr, 0, load_medium, nullptr, 0, nullptr );
-
-    // might complete in 12 ~ 15 seconds
-    CreateThread( nullptr, 0, load_high, nullptr, 0, nullptr );
-
-    // might complete in 40 seconds or so
-    CreateThread( nullptr, 0, load_best, nullptr, 0, nullptr );
 
     GLenum error = glewInit();
     if ( error != GLEW_OK ) {
