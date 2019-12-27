@@ -18,8 +18,14 @@
 
 static int windowWidth = 800, windowHeight = 800;
 
+static int imageWidth = 0, imageHeight = 0;
+
+std::vector< Pixel > roomBuffer;
+unsigned char*       imageBuffer;
+
 std::vector< triangle > rocks;
 GLuint                  rockTexture;
+GLuint                  wallTexture;
 
 static void onWindowResized( int w, int h ) {
     windowWidth = w, windowHeight = h;
@@ -38,9 +44,20 @@ inline void drawTriangleWithTexture( float3 vert, /* float3 normal, */ float2 te
     glVertex3f( vert.x, vert.y, vert.z );
 }
 
+void drawBackground( const std::vector< Pixel >& buffer ) {
+    glBegin( GL_POINTS );
+
+    for ( const auto& px : buffer ) {
+        glColor3f( px.r, px.g, px.b );
+        glVertex2f( px.x, px.y );
+    }
+    glEnd();
+}
+
 static void onRender() {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     // 设置视角
+
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     gluPerspective( 75, 1, 1, 21 );
@@ -49,8 +66,71 @@ static void onRender() {
     gluLookAt( -3, 2, 2, 0, 0, 0, 0, 0, 1 );
 
     glRotatef( angle, 0.0f, 0.0f, 1.0f );
-    angle += 0.1f;
+    angle += 0.5f;
 
+    glColor3f( 0.5f, 0.5f, 0.6f );
+    glEnable( GL_TEXTURE_2D );
+    glBindTexture( GL_TEXTURE_2D, wallTexture );
+    glBegin( GL_POLYGON );
+
+    glTexCoord2f( 1.0f, 0.0f );
+    glVertex3f( 10.0f, 0.0f, -5.0f );
+    glTexCoord2f( 1.0f, 1.0f );
+    glVertex3f( 10.0f, 0.0f, 5.0f );
+    glTexCoord2f( 0.0f, 1.0f );
+    glVertex3f( 0.0f, 10.0f, 5.0f );
+    glTexCoord2f( 0.0f, 0.0f );
+    glVertex3f( 0.0f, 10.0f, -5.0f );
+
+    glEnd();
+
+    glBegin( GL_POLYGON );
+    // glColor3f( 0.0f, 0.0f, 1.0f );
+
+    glTexCoord2f( 1.0f, 0.0f );
+    glVertex3f( 0.0f, 10.0f, -5.0f );
+    glTexCoord2f( 1.0f, 1.0f );
+    glVertex3f( 0.0f, 10.0f, 5.0f );
+    glTexCoord2f( 0.0f, 1.0f );
+    glVertex3f( -10.0f, 0.0f, 5.0f );
+    glTexCoord2f( 0.0f, 0.0f );
+    glVertex3f( -10.0f, 0.0f, -5.0f );
+
+    glEnd();
+
+    glBegin( GL_POLYGON );
+    // glColor3f( 1.0f, 0.0f, 1.0f );
+
+    glTexCoord2f( 1.0f, 0.0f );
+    glVertex3f( -10.0f, 0.0f, -5.0f );
+    glTexCoord2f( 1.0f, 1.0f );
+    glVertex3f( -10.0f, 0.0f, 5.0f );
+    glTexCoord2f( 0.0f, 1.0f );
+    glVertex3f( 0.0f, -10.0f, 5.0f );
+    glTexCoord2f( 0.0f, 0.0f );
+    glVertex3f( 0.0f, -10.0f, -5.0f );
+
+    glEnd();
+
+    glBegin( GL_POLYGON );
+    // glColor3f( 0.0f, 1.0f, 1.0f );
+
+    glTexCoord2f( 1.0f, 0.0f );
+    glVertex3f( 0.0f, -10.0f, -5.0f );
+    glTexCoord2f( 1.0f, 1.0f );
+    glVertex3f( 0.0f, -10.0f, 5.0f );
+    glTexCoord2f( 0.0f, 1.0f );
+    glVertex3f( 10.0f, 0.0f, 5.0f );
+    glTexCoord2f( 0.0f, 0.0f );
+    glVertex3f( 10.0f, 0.0f, -5.0f );
+
+    glEnd();
+
+    glDisable( GL_TEXTURE_2D );
+
+    glEnable( GL_TEXTURE_2D );
+
+    glColor3f( 0.25f, 0.3f, 0.3f );
     glBindTexture( GL_TEXTURE_2D, rockTexture );
     glBegin( GL_TRIANGLES );
     for ( const auto& tri : rocks ) {
@@ -59,6 +139,8 @@ static void onRender() {
         drawTriangleWithTexture( tri.c, tri.tc );
     }
     glEnd();
+    glDisable( GL_TEXTURE_2D );
+
     glutSwapBuffers();
 }
 
@@ -85,12 +167,16 @@ int main( int argc, char** argv ) {
     glutDisplayFunc( onRender );
     glutIdleFunc( onRender );
 
-    glEnable( GL_TEXTURE_2D );
+    glEnable( GL_DEPTH_TEST );
 
     rocks       = read_ply_file( "./models/rock_cluster.ply" );
     rockTexture = TM::loadTexture( "./maps/rock.png" );
+    wallTexture = TM::loadTexture( "./maps/wall.png" );
 
-    glEnable( GL_DEPTH_TEST );
+    // char filename[] = "./maps/gate.png";
+    // imageBuffer     = SOIL_load_image( filename, &imageWidth, &imageHeight, 0, SOIL_LOAD_RGB );
+
+    // TM::loadImage( roomBuffer, "./imgs/gate.png", imageWidth, imageHeight );
 
     glClearColor( 0.0, 0.0, 0.0, 1.0f );
 
