@@ -1,5 +1,24 @@
 #pragma once
 #include <cstdint>
+#include <ctime>
+namespace UT {
+
+    static bool init = true;
+static int random_int() {
+    if ( init ) {
+        srand( unsigned( time( 0 ) ) );
+        init = false;
+    }
+    return rand();
+}
+
+static double random_double() {
+    if ( init ) {
+        srand( time( 0 ) );
+        init = false;
+    }
+    return double( rand() ) / RAND_MAX;
+}
 
 enum SceneIndex {
     TEST_SCENE = 0,  /* used for testing faces and vertices */
@@ -39,3 +58,4 @@ struct Pixel {
     float r, g, b;
     float x, y;
 };
+}  // namespace UT

@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 
+using namespace UT;
 using namespace tinyply;
 
 class manual_timer {

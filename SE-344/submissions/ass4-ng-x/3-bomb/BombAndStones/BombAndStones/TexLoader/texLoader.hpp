@@ -6,7 +6,10 @@
 #include <SOIL/SOIL.h>
 #include <string>
 
+
+
 namespace TM {
+    using namespace UT;
 static GLuint loadTexture( std::string filename ) {
 
     GLuint tex;

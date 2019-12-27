@@ -8,6 +8,7 @@
 #include "PlyLoader/PlyReaderWrapped.hpp"
 #include "TexLoader/texLoader.hpp"
 
+#include "utilities.h"
 #include <algorithm>
 #include <assert.h>
 #include <cmath>
@@ -15,6 +16,10 @@
 #include <iostream>
 #include <random>
 #include <vector>
+
+#define M_PI 3.14159265358979323846264338327950288
+
+using namespace UT;
 
 static int windowWidth = 800, windowHeight = 800;
 
@@ -54,19 +59,59 @@ void drawBackground( const std::vector< Pixel >& buffer ) {
     glEnd();
 }
 
+static int visionSteps = 0;
+// 0 = normal.
+// 1 = flashlight on
+// 2 = bomb exploded
+
+// light parameters
+
+GLfloat lightPos[]     = { -1.2, 1.0, 0.3, 1.0 };
+GLfloat ambientLight[] = { 0.7f, 0.7f, 0.74f, 0.1f };
+GLfloat specular[]     = { 1.0f, 1.0f, 1.0f, 1.0f };
+GLfloat specref[]      = { 1.0f, 1.0f, 1.0f, 1.0f };
+GLfloat spotDir[]      = { 0.0f, 0.0f, 0.2f };
+
 static void onRender() {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    // 设置视角
+
+    glEnable( GL_LIGHTING );
+
+    glColorMaterial( GL_FRONT, GL_AMBIENT_AND_DIFFUSE );
+
+    glMaterialfv( GL_FRONT, GL_SPECULAR, specref );
+    glMateriali( GL_FRONT, GL_SHININESS, 17 );
 
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     gluPerspective( 75, 1, 1, 21 );
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
-    gluLookAt( -3, 2, 2, 0, 0, 0, 0, 0, 1 );
+    gluLookAt( -4, 3, 3, 0, 0, 0, 0, 0, 1 );
 
     glRotatef( angle, 0.0f, 0.0f, 1.0f );
-    angle += 0.5f;
+    angle += 0.2f;
+    lightPos[ 0 ] = cos( angle * M_PI / 180.0 ) * -1.8f;
+    lightPos[ 1 ] = sin( angle * M_PI / 180.0 ) * 1.5f;
+
+    if ( visionSteps == 2 ) {
+        glLightModelfv( GL_LIGHT_MODEL_AMBIENT, specular );
+    }
+    else if ( visionSteps == 1 ) {
+        spotDir[ 0 ] = random_double();
+        spotDir[ 1 ] = random_double();
+        glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
+        glLightfv( GL_LIGHT0, GL_DIFFUSE, ambientLight );
+        glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
+        glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
+        glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );
+        glLightf( GL_LIGHT0, GL_SPOT_CUTOFF, 50.0f );
+        glEnable( GL_LIGHT0 );
+    }
+    else if ( visionSteps == 0 ) {
+        glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );
+    }
+    glEnable( GL_COLOR_MATERIAL );
 
     glColor3f( 0.5f, 0.5f, 0.6f );
     glEnable( GL_TEXTURE_2D );
@@ -152,6 +197,26 @@ inline void _glVertex3f( GLfloat x, GLfloat y, GLfloat z ) {
     glVertex3f( x / ( windowWidth / 2 ) - 1.0f, y / ( windowHeight / 2 ) - 1.0f, z );
 }
 
+void keyboardAction( unsigned char key, int x, int y ) {
+    switch ( key ) {
+    case 32:
+        if ( visionSteps == 0 ) {
+            visionSteps = 1;
+            glutPostRedisplay();
+        }
+        break;
+    case 'b':
+        if ( visionSteps == 1 ) {
+            visionSteps = 2;
+            glutPostRedisplay();
+        }
+        break;
+    default:
+        break;
+    }
+    std::cout << "switched to step #" << visionSteps << std::endl;
+}
+
 int main( int argc, char** argv ) {
 
     /* Draw triangles! */
@@ -166,8 +231,11 @@ int main( int argc, char** argv ) {
     glutReshapeFunc( onWindowResized );
     glutDisplayFunc( onRender );
     glutIdleFunc( onRender );
+    glutKeyboardFunc( keyboardAction );
 
     glEnable( GL_DEPTH_TEST );
+
+    glShadeModel( GL_SMOOTH );
 
     rocks       = read_ply_file( "./models/rock_cluster.ply" );
     rockTexture = TM::loadTexture( "./maps/rock.png" );
