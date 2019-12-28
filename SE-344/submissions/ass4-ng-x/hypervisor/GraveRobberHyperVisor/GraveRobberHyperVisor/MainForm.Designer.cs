@@ -64,9 +64,9 @@
             this.leaveButton.BackColor = System.Drawing.Color.Black;
             this.leaveButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.leaveButton.ForeColor = System.Drawing.Color.White;
-            this.leaveButton.Location = new System.Drawing.Point(35, 786);
+            this.leaveButton.Location = new System.Drawing.Point(38, 786);
             this.leaveButton.Name = "leaveButton";
-            this.leaveButton.Size = new System.Drawing.Size(97, 41);
+            this.leaveButton.Size = new System.Drawing.Size(105, 41);
             this.leaveButton.TabIndex = 0;
             this.leaveButton.Text = "离开";
             this.leaveButton.UseVisualStyleBackColor = false;
@@ -83,11 +83,11 @@
             this.visionControl.Controls.Add(this.mysteriousRoom);
             this.visionControl.Controls.Add(this.buddhaBless);
             this.visionControl.Controls.Add(this.endPage);
-            this.visionControl.Location = new System.Drawing.Point(167, -2);
+            this.visionControl.Location = new System.Drawing.Point(181, -2);
             this.visionControl.Name = "visionControl";
             this.visionControl.SelectedIndex = 0;
             this.visionControl.ShowToolTips = true;
-            this.visionControl.Size = new System.Drawing.Size(1225, 856);
+            this.visionControl.Size = new System.Drawing.Size(1327, 856);
             this.visionControl.TabIndex = 1;
             this.visionControl.SelectedIndexChanged += new System.EventHandler(this.visionControl_SelectedIndexChanged);
             // 
@@ -97,7 +97,7 @@
             this.initPage.Location = new System.Drawing.Point(8, 39);
             this.initPage.Name = "initPage";
             this.initPage.Padding = new System.Windows.Forms.Padding(3);
-            this.initPage.Size = new System.Drawing.Size(1209, 809);
+            this.initPage.Size = new System.Drawing.Size(1311, 809);
             this.initPage.TabIndex = 0;
             this.initPage.Text = "开始之前";
             this.initPage.UseVisualStyleBackColor = true;
@@ -111,7 +111,7 @@
             this.mainViewBox.Image = ((System.Drawing.Image)(resources.GetObject("mainViewBox.Image")));
             this.mainViewBox.Location = new System.Drawing.Point(0, 0);
             this.mainViewBox.Name = "mainViewBox";
-            this.mainViewBox.Size = new System.Drawing.Size(1209, 809);
+            this.mainViewBox.Size = new System.Drawing.Size(1310, 809);
             this.mainViewBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.mainViewBox.TabIndex = 0;
             this.mainViewBox.TabStop = false;
@@ -122,7 +122,7 @@
             this.introPage.Location = new System.Drawing.Point(8, 39);
             this.introPage.Name = "introPage";
             this.introPage.Padding = new System.Windows.Forms.Padding(3);
-            this.introPage.Size = new System.Drawing.Size(1209, 809);
+            this.introPage.Size = new System.Drawing.Size(1311, 809);
             this.introPage.TabIndex = 1;
             this.introPage.Text = "笔记出现";
             this.introPage.Enter += new System.EventHandler(this.introPage_Enter);
@@ -134,7 +134,7 @@
             this.foggyPage.Location = new System.Drawing.Point(8, 39);
             this.foggyPage.Name = "foggyPage";
             this.foggyPage.Padding = new System.Windows.Forms.Padding(3);
-            this.foggyPage.Size = new System.Drawing.Size(1209, 809);
+            this.foggyPage.Size = new System.Drawing.Size(1311, 809);
             this.foggyPage.TabIndex = 2;
             this.foggyPage.Text = "雾气弥漫";
             this.foggyPage.Enter += new System.EventHandler(this.foggyPage_Enter);
@@ -147,7 +147,7 @@
             this.foggyImageBox.Image = ((System.Drawing.Image)(resources.GetObject("foggyImageBox.Image")));
             this.foggyImageBox.Location = new System.Drawing.Point(0, 0);
             this.foggyImageBox.Name = "foggyImageBox";
-            this.foggyImageBox.Size = new System.Drawing.Size(1209, 809);
+            this.foggyImageBox.Size = new System.Drawing.Size(1310, 809);
             this.foggyImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.foggyImageBox.TabIndex = 0;
             this.foggyImageBox.TabStop = false;
@@ -158,7 +158,7 @@
             this.mysteriousRoom.Location = new System.Drawing.Point(8, 39);
             this.mysteriousRoom.Name = "mysteriousRoom";
             this.mysteriousRoom.Padding = new System.Windows.Forms.Padding(3);
-            this.mysteriousRoom.Size = new System.Drawing.Size(1209, 809);
+            this.mysteriousRoom.Size = new System.Drawing.Size(1311, 809);
             this.mysteriousRoom.TabIndex = 3;
             this.mysteriousRoom.Text = "怪异房间";
             this.mysteriousRoom.UseVisualStyleBackColor = true;
@@ -170,9 +170,9 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.roomPictureBox.Image = ((System.Drawing.Image)(resources.GetObject("roomPictureBox.Image")));
-            this.roomPictureBox.Location = new System.Drawing.Point(-8, 0);
+            this.roomPictureBox.Location = new System.Drawing.Point(-9, 0);
             this.roomPictureBox.Name = "roomPictureBox";
-            this.roomPictureBox.Size = new System.Drawing.Size(1225, 817);
+            this.roomPictureBox.Size = new System.Drawing.Size(1327, 817);
             this.roomPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.roomPictureBox.TabIndex = 0;
             this.roomPictureBox.TabStop = false;
@@ -183,7 +183,7 @@
             this.buddhaBless.Location = new System.Drawing.Point(8, 39);
             this.buddhaBless.Name = "buddhaBless";
             this.buddhaBless.Padding = new System.Windows.Forms.Padding(3);
-            this.buddhaBless.Size = new System.Drawing.Size(1209, 809);
+            this.buddhaBless.Size = new System.Drawing.Size(1311, 809);
             this.buddhaBless.TabIndex = 4;
             this.buddhaBless.Text = "佛祖保佑";
             this.buddhaBless.UseVisualStyleBackColor = true;
@@ -198,7 +198,7 @@
             this.buddhaImageBox.Image = ((System.Drawing.Image)(resources.GetObject("buddhaImageBox.Image")));
             this.buddhaImageBox.Location = new System.Drawing.Point(0, 0);
             this.buddhaImageBox.Name = "buddhaImageBox";
-            this.buddhaImageBox.Size = new System.Drawing.Size(1209, 817);
+            this.buddhaImageBox.Size = new System.Drawing.Size(1310, 817);
             this.buddhaImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.buddhaImageBox.TabIndex = 0;
             this.buddhaImageBox.TabStop = false;
@@ -209,7 +209,7 @@
             this.endPage.Location = new System.Drawing.Point(8, 39);
             this.endPage.Name = "endPage";
             this.endPage.Padding = new System.Windows.Forms.Padding(3);
-            this.endPage.Size = new System.Drawing.Size(1209, 809);
+            this.endPage.Size = new System.Drawing.Size(1311, 809);
             this.endPage.TabIndex = 5;
             this.endPage.Text = "终末之诗";
             this.endPage.UseVisualStyleBackColor = true;
@@ -223,7 +223,7 @@
             this.finaleImageBox.Image = ((System.Drawing.Image)(resources.GetObject("finaleImageBox.Image")));
             this.finaleImageBox.Location = new System.Drawing.Point(0, 0);
             this.finaleImageBox.Name = "finaleImageBox";
-            this.finaleImageBox.Size = new System.Drawing.Size(1217, 817);
+            this.finaleImageBox.Size = new System.Drawing.Size(1318, 817);
             this.finaleImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.finaleImageBox.TabIndex = 0;
             this.finaleImageBox.TabStop = false;
@@ -234,9 +234,9 @@
             this.aboutButton.BackColor = System.Drawing.Color.Black;
             this.aboutButton.Cursor = System.Windows.Forms.Cursors.Hand;
             this.aboutButton.ForeColor = System.Drawing.Color.White;
-            this.aboutButton.Location = new System.Drawing.Point(35, 734);
+            this.aboutButton.Location = new System.Drawing.Point(38, 734);
             this.aboutButton.Name = "aboutButton";
-            this.aboutButton.Size = new System.Drawing.Size(97, 41);
+            this.aboutButton.Size = new System.Drawing.Size(105, 41);
             this.aboutButton.TabIndex = 2;
             this.aboutButton.Text = "关于";
             this.aboutButton.UseVisualStyleBackColor = false;
@@ -246,9 +246,9 @@
             // 
             this.previousButton.BackColor = System.Drawing.Color.Black;
             this.previousButton.ForeColor = System.Drawing.Color.White;
-            this.previousButton.Location = new System.Drawing.Point(13, 12);
+            this.previousButton.Location = new System.Drawing.Point(14, 12);
             this.previousButton.Name = "previousButton";
-            this.previousButton.Size = new System.Drawing.Size(61, 91);
+            this.previousButton.Size = new System.Drawing.Size(66, 91);
             this.previousButton.TabIndex = 3;
             this.previousButton.Text = "<";
             this.previousButton.UseVisualStyleBackColor = false;
@@ -258,9 +258,9 @@
             // 
             this.nextButton.BackColor = System.Drawing.Color.Black;
             this.nextButton.ForeColor = System.Drawing.Color.White;
-            this.nextButton.Location = new System.Drawing.Point(91, 12);
+            this.nextButton.Location = new System.Drawing.Point(99, 12);
             this.nextButton.Name = "nextButton";
-            this.nextButton.Size = new System.Drawing.Size(60, 91);
+            this.nextButton.Size = new System.Drawing.Size(65, 91);
             this.nextButton.TabIndex = 4;
             this.nextButton.Text = ">";
             this.nextButton.UseVisualStyleBackColor = false;
@@ -268,10 +268,10 @@
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 24F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.ClientSize = new System.Drawing.Size(1404, 852);
+            this.ClientSize = new System.Drawing.Size(1521, 852);
             this.Controls.Add(this.nextButton);
             this.Controls.Add(this.previousButton);
             this.Controls.Add(this.aboutButton);
@@ -279,6 +279,7 @@
             this.Controls.Add(this.visionControl);
             this.Name = "MainForm";
             this.Text = "[SE-344 Assignment Final] GRAVE ROBBER";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.visionControl.ResumeLayout(false);
             this.initPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.mainViewBox)).EndInit();

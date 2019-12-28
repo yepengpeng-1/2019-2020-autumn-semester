@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Threading;
 using System.Media;
+using System.Windows.Media;
 
 namespace GraveRobberHyperVisor
 {
@@ -32,31 +33,37 @@ namespace GraveRobberHyperVisor
             previousButton.Enabled = false;
 
             this.WindowState = FormWindowState.Maximized;
-
-            globalBgm.Load();
+            initPage_Enter(this, EventArgs.Empty);
         }
 
-        SoundPlayer introSound, globalBgm, stormSound, outroSound;
+        MediaPlayer introSound, globalBgm, stormSound, outroSound;
 
-        
+        void loopMedia(object sender, EventArgs e)
+        {
+            MediaPlayer player = sender as MediaPlayer;
+            if (player == null)
+                return;
+
+            player.Position = new TimeSpan(0);
+            player.Play();
+        }
+
         private void initMedia()
         {
-            introSound = new SoundPlayer();
-            outroSound = new SoundPlayer();
-            globalBgm = new SoundPlayer();
-            stormSound = new SoundPlayer();
+            introSound = new MediaPlayer();
+            outroSound = new MediaPlayer();
+            globalBgm = new MediaPlayer();
+            stormSound = new MediaPlayer();
 
-            introSound.SoundLocation = "media\\intro.wav";
-            introSound.Load();
+            introSound.MediaEnded += loopMedia;
+            outroSound.MediaEnded += loopMedia;
+            globalBgm.MediaEnded += loopMedia;
+            stormSound.MediaEnded += loopMedia;
 
-            globalBgm.SoundLocation = "media\\global.wav";
-            globalBgm.Load();
-
-            stormSound.SoundLocation = "media\\storm.wav";
-            stormSound.Load();
-
-            outroSound.SoundLocation = "media\\outro.wav";
-            outroSound.Load();
+            introSound.Open(new System.Uri("media\\intro.wav", UriKind.Relative));
+            outroSound.Open(new System.Uri("media\\outro.wav", UriKind.Relative));
+            globalBgm.Open(new System.Uri("media\\global.wav", UriKind.Relative));
+            stormSound.Open(new System.Uri("media\\storm.wav", UriKind.Relative));
         }
 
         private void leaveButton_Click(object sender, EventArgs e)
@@ -171,28 +178,33 @@ namespace GraveRobberHyperVisor
         {
             introSound.Stop();
             outroSound.Stop();
-            globalBgm.PlayLooping();
-            stormSound.PlayLooping();
+            globalBgm.Play();
+            stormSound.Play();
 
             Thread blackName = new Thread(new ParameterizedThreadStart(switchFromTitle));
             blackName.Start();
-
         }
 
         private void initPage_Enter(object sender, EventArgs e)
         {
-            introSound.PlayLooping();
+            
+            introSound.Play();
             outroSound.Stop();
-            globalBgm.PlayLooping();
+            globalBgm.Play();
             stormSound.Stop();
         }
 
         private void endPage_Enter(object sender, EventArgs e)
         {
             introSound.Stop();
-            outroSound.PlayLooping();
+            outroSound.Play();
             globalBgm.Stop();
             stormSound.Stop();
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            // do some initializing stuff here
         }
 
         private void foggyPage_Enter(object sender, EventArgs e)
@@ -202,7 +214,7 @@ namespace GraveRobberHyperVisor
 
             introSound.Stop();
             outroSound.Stop();
-            globalBgm.PlayLooping();
+            globalBgm.Play();
             stormSound.Stop();
         }
 
@@ -213,8 +225,8 @@ namespace GraveRobberHyperVisor
 
             introSound.Stop();
             outroSound.Stop();
-            globalBgm.PlayLooping();
-            stormSound.PlayLooping();
+            globalBgm.Play();
+            stormSound.Play();
         }
 
         private void buddhaBless_Enter(object sender, EventArgs e)
@@ -224,7 +236,7 @@ namespace GraveRobberHyperVisor
 
             introSound.Stop();
             outroSound.Stop();
-            globalBgm.PlayLooping();
+            globalBgm.Play();
             stormSound.Stop();
         }
     }
