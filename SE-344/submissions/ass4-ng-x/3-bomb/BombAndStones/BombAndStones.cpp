@@ -55,10 +55,11 @@ static void onWindowResized( int w, int h ) {
 
 static GLfloat angle = 0.0f;
 
-inline void drawTriangleWithTexture( float3 vert, /* float3 normal, */ float2 tex ) {
+inline void drawTriangleWithTexture( float3 vert, float3 normal, float2 tex ) {
     // u = s
     // v = 1 - t
     glTexCoord2f( tex.x, 1 - tex.y );
+    glNormal3f( normal.x, normal.y, normal.z );
     glVertex3f( vert.x, vert.y, vert.z );
 }
 
@@ -367,9 +368,9 @@ static void onRender() {
     glBindTexture( GL_TEXTURE_2D, rockTexture );
     glBegin( GL_TRIANGLES );
     for ( const auto& tri : rocks ) {
-        drawTriangleWithTexture( tri.a, tri.ta );
-        drawTriangleWithTexture( tri.b, tri.tb );
-        drawTriangleWithTexture( tri.c, tri.tc );
+        drawTriangleWithTexture( tri.a, tri.na, tri.ta );
+        drawTriangleWithTexture( tri.b, tri.nb, tri.tb );
+        drawTriangleWithTexture( tri.c, tri.nc, tri.tc );
     }
     glEnd();
     glDisable( GL_TEXTURE_2D );

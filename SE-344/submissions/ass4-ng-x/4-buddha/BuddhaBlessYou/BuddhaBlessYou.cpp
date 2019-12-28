@@ -33,18 +33,6 @@ static void onWindowResized( int w, int h ) {
 
 static GLfloat angle = 0.0f;
 
-GLfloat lightPos[]     = { -1.2, 1.0, 0.3, 1.0 };
-GLfloat ambientLight[] = { 0.7f, 0.7f, 0.74f, 0.1f };
-GLfloat specular[]     = { 1.0f, 1.0f, 1.0f, 1.0f };
-GLfloat specref[]      = { 1.0f, 1.0f, 1.0f, 1.0f };
-GLfloat spotDir[]      = { 0.0f, 0.0f, 0.2f };
-
-GLfloat mat_ambient[]  = { 0.4f, 0.4f, 0.4f, 1.0f };
-GLfloat mat_diffuse[]  = { 0.4f, 0.4f, 0.4f, 1.0f };
-GLfloat mat_specular[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-GLfloat mat_emission[] = { 0.0f, 0.0f, 0.0f, 1.f };
-GLfloat mat_shininess  = 120.0f;
-
 std::vector< UT::triangle > buddha_low;
 std::vector< UT::triangle > buddha_medium;
 std::vector< UT::triangle > buddha_high;
@@ -88,22 +76,75 @@ inline void drawTriangleWithoutTexture( const float3& vert /*, float3 normal, fl
     glVertex3f( vert.x, vert.y, vert.z );
 }
 
+// environment light
+GLfloat ambientLight[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+
+GLfloat lightPos1[] = { 0, 1.5, 2.0, 1.0 };
+GLfloat specular1[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+
+GLfloat lightPos2[] = { -1.732, 1.5, -1.0, 1.0 };
+GLfloat specular2[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+
+GLfloat lightPos3[] = { 1.732, 1.5, -1.0, 1.0 };
+GLfloat specular3[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+
+GLfloat specref[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+GLfloat spotDir[] = { 0.0f, 0.5f, 0.0f };
+
+GLfloat mat_ambient[]       = { 0.4f, 0.4f, 0.4f, 1.0f };
+GLfloat mat_ambient_color[] = { 0.8f, 0.8f, 0.2f, 1.0f };
+GLfloat mat_diffuse[]       = { 0.4f, 0.4f, 0.4f, 1.0f };
+GLfloat mat_specular[]      = { 0.7f, 0.7f, 0.7f, 1.0f };
+GLfloat mat_emission[]      = { 0.0f, 0.0f, 0.0f, 1.f };
+GLfloat mat_no_emission[]   = { 0.3f, 0.2f, 0.2f, 0.0f };
+GLfloat mat_shininess[]     = { 5.0f };
+
 static void onRender() {
     onTimerTicked();
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glLightfv( GL_LIGHT0, GL_POSITION, lightPos );
+
+    // put an environment light
+    // glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );
+
+    // put light no.1
+    glLightfv( GL_LIGHT0, GL_POSITION, lightPos1 );
     glLightfv( GL_LIGHT0, GL_DIFFUSE, ambientLight );
-    glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
-    glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );
-    glLightf( GL_LIGHT0, GL_SPOT_CUTOFF, 50.0f );
+    glLightfv( GL_LIGHT0, GL_SPECULAR, specular1 );
+
+    // glLightf( GL_LIGHT0, GL_SPOT_CUTOFF, 50.0f );
     glEnable( GL_LIGHT0 );
+
+    // put light no.2
+    glLightfv( GL_LIGHT1, GL_POSITION, lightPos2 );
+    glLightfv( GL_LIGHT1, GL_DIFFUSE, ambientLight );
+    glLightfv( GL_LIGHT1, GL_SPECULAR, specular2 );
+
+    // glLightf( GL_LIGHT1, GL_SPOT_CUTOFF, 50.0f );
+    glEnable( GL_LIGHT1 );
+
+    // put light no.3
+    glLightfv( GL_LIGHT2, GL_POSITION, lightPos3 );
+    glLightfv( GL_LIGHT2, GL_DIFFUSE, ambientLight );
+    glLightfv( GL_LIGHT2, GL_SPECULAR, specular3 );
+
+    // glLightf( GL_LIGHT2, GL_SPOT_CUTOFF, 50.0f );
+    glEnable( GL_LIGHT2 );
+
+    // glBegin( GL_POINTS );
+    // glColor3f( 1.0, 0.0, 0.0 );
+    // glVertex3f( lightPos[ 0 ], lightPos[ 1 ], lightPos[ 2 ] );
+    // glEnd();
+
     glEnable( GL_LIGHTING );
 
     glColorMaterial( GL_FRONT, GL_AMBIENT_AND_DIFFUSE );
 
-    glMaterialfv( GL_FRONT, GL_SPECULAR, specref );
-    glMateriali( GL_FRONT, GL_SHININESS, 17 );
+    glMaterialfv( GL_FRONT, GL_AMBIENT, mat_ambient_color );
+    glMaterialfv( GL_FRONT, GL_DIFFUSE, mat_diffuse );
+    glMaterialfv( GL_FRONT, GL_SPECULAR, mat_specular );
+    glMaterialfv( GL_FRONT, GL_SHININESS, mat_shininess );
+    glMaterialfv( GL_FRONT, GL_EMISSION, mat_no_emission );
 
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
