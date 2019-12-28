@@ -23,6 +23,9 @@ using namespace UT;
 
 static int windowWidth = 800, windowHeight = 800;
 
+// implement it later
+void switchLightColor();
+
 static void onWindowResized( int w, int h ) {
     windowWidth = w, windowHeight = h;
     glViewport( 0, 0, w, h );
@@ -53,14 +56,17 @@ static void onTimerTicked() {
     auto time = glutGet( GLUT_ELAPSED_TIME );
     if ( currentState == 2 && time >= 60000 ) {
         std::cout << "switched to best resolution" << std::endl;
+        switchLightColor();
         currentState = 3;
     }
     else if ( currentState == 1 && time >= 40000 ) {
         std::cout << "switched to high resolution" << std::endl;
+        switchLightColor();
         currentState = 2;
     }
     else if ( currentState == 0 && time >= 20000 ) {
         std::cout << "switched to medium resolution" << std::endl;
+        switchLightColor();
         currentState = 1;
     }
     // might complete in 3 ~ 4 seconds
@@ -90,6 +96,8 @@ GLfloat specular2[] = { 0.0f, 1.0f, 0.0f, 1.0f };
 GLfloat lightPos3[] = { 1.732, 1.5, -1.0, 1.0 };
 GLfloat specular3[] = { 0.0f, 0.0f, 1.0f, 1.0f };
 
+GLfloat speculartemp[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+
 GLfloat specref[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 GLfloat spotDir[] = { 0.0f, 0.5f, 0.0f };
 
@@ -100,6 +108,13 @@ GLfloat mat_specular[]      = { 0.7f, 0.7f, 0.7f, 1.0f };
 GLfloat mat_emission[]      = { 0.0f, 0.0f, 0.0f, 1.f };
 GLfloat mat_no_emission[]   = { 0.2f, 0.2f, 0.2f, 0.0f };
 GLfloat mat_shininess[]     = { 50.0f };
+
+void switchLightColor() {
+    std::memcpy( speculartemp, specular1, sizeof( speculartemp ) );
+    std::memcpy( specular1, specular2, sizeof( speculartemp ) );
+    std::memcpy( specular2, specular3, sizeof( speculartemp ) );
+    std::memcpy( specular3, speculartemp, sizeof( speculartemp ) );
+}
 
 inline void __glVertex3f( GLfloat x, GLfloat y, GLfloat z ) {
     glVertex3f( x, z + 5.0, y );
