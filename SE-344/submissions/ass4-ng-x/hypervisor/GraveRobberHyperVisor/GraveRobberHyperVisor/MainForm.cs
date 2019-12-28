@@ -7,12 +7,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Threading;
 
 namespace GraveRobberHyperVisor
 {
     public partial class MainForm : Form
     {
+        public delegate void ProcessDelegate();
+
         const int maxPageCount = 6;
+
+        // private static System.Diagnostics.Process titleProcess;
+        // private static System.Diagnostics.Process smokeProcess;
+        // private static System.Diagnostics.Process bombProcess;
+        // private static System.Diagnostics.Process buddhaProcess;
+
         public MainForm()
         {
             InitializeComponent();
@@ -71,6 +81,88 @@ namespace GraveRobberHyperVisor
             {
                 visionControl.SelectedIndex += 1;
             }
+        }
+
+        private void switchFromTitle(object name)
+        {
+            // Console.WriteLine(Application.StartupPath + "\\1-title.exe");
+            System.Diagnostics.Process.Start(Application.StartupPath + "\\1-title.exe").WaitForExit();
+
+
+            ProcessDelegate showProcess = delegate()
+            {
+                nextButton_Click(nextButton, EventArgs.Empty);
+            };
+
+            nextButton.Invoke(showProcess);
+        }
+
+        private void switchFromFoggy(object name)
+        {
+            Thread.Sleep(1500);
+            System.Diagnostics.Process.Start(Application.StartupPath + "\\2-smoke.exe").WaitForExit();
+
+
+            ProcessDelegate showProcess = delegate ()
+            {
+                nextButton_Click(nextButton, EventArgs.Empty);
+            };
+
+            nextButton.Invoke(showProcess);
+        }
+
+        private void switchFromRoom(object name)
+        {
+            Thread.Sleep(1500);
+            System.Diagnostics.Process.Start(Application.StartupPath + "\\3-bomb.exe").WaitForExit();
+
+
+            ProcessDelegate showProcess = delegate ()
+            {
+                nextButton_Click(nextButton, EventArgs.Empty);
+            };
+
+            nextButton.Invoke(showProcess);
+        }
+
+        private void switchFromBuddha(object name)
+        {
+            Thread.Sleep(1500);
+            System.Diagnostics.Process.Start(Application.StartupPath + "\\4-buddha.exe").WaitForExit();
+
+
+            ProcessDelegate showProcess = delegate ()
+            {
+                nextButton_Click(nextButton, EventArgs.Empty);
+            };
+
+            nextButton.Invoke(showProcess);
+        }
+
+
+        private void introPage_Enter(object sender, EventArgs e)
+        {
+            Thread blackName = new Thread(new ParameterizedThreadStart(switchFromTitle));
+            blackName.Start();
+
+        }
+
+        private void foggyPage_Enter(object sender, EventArgs e)
+        {
+            Thread blackName = new Thread(new ParameterizedThreadStart(switchFromFoggy));
+            blackName.Start();
+        }
+
+        private void mysteriousRoom_Enter(object sender, EventArgs e)
+        {
+            Thread blackName = new Thread(new ParameterizedThreadStart(switchFromRoom));
+            blackName.Start();
+        }
+
+        private void buddhaBless_Enter(object sender, EventArgs e)
+        {
+            Thread blackName = new Thread(new ParameterizedThreadStart(switchFromBuddha));
+            blackName.Start();
         }
     }
 }
