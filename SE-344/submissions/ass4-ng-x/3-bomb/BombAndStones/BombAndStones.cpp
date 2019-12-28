@@ -404,7 +404,10 @@ void keyboardAction( unsigned char key, int x, int y ) {
         break;
     case 'b':
         if ( visionSteps == 1 ) {
-            visionSteps = 2;
+            visionSteps   = 2;
+            specular[ 0 ] = 0.7f;
+            specular[ 1 ] = 0.4f;
+            specular[ 2 ] = 0.4f;
             glutPostRedisplay();
         }
         break;

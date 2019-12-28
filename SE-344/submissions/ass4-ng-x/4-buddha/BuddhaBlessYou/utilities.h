@@ -48,10 +48,11 @@ struct triangle {
     // vertex location (x, y, z)
     float3 a, b, c;
 
-    // // normal direction (nx, ny, nz)
-    // float3 na, nb, nc;
+    // normal direction (nx, ny, nz)
+    float3 na, nb, nc;
 
     // // texture mapping coordinates (u, v)
+    // will not be used in the buddha phase
     // float2 ta, tb, tc;
 };
 struct Pixel {

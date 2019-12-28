@@ -6,7 +6,7 @@
 #include <GL/freeglut.h>
 // stupid!
 #include "PlyLoader/PlyReaderWrapped.hpp"
-
+#include "TexLoader/texLoader.hpp"
 #include "utilities.h"
 #include <Windows.h>
 #include <algorithm>
@@ -40,6 +40,7 @@ std::vector< UT::triangle > buddha_best;
 
 static size_t currentState = 0;
 static bool   satisfied    = true;
+GLuint        wallTexture;
 // 0 - low resolution
 // 1 - medium resolution
 // 2 - high resolution
@@ -72,12 +73,13 @@ static void onTimerTicked() {
     // CreateThread( nullptr, 0, load_best, nullptr, 0, nullptr );
 }
 
-inline void drawTriangleWithoutTexture( const float3& vert /*, float3 normal, float2 tex */ ) {
+inline void drawTriangleWithoutTexture( const float3& vert, float3 normal /*, float2 tex */ ) {
+    glNormal3f( normal.x, normal.y, normal.z );
     glVertex3f( vert.x, vert.y, vert.z );
 }
 
 // environment light
-GLfloat ambientLight[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+GLfloat ambientLight[] = { 0.1f, 0.1f, 0.1f, 0.1f };
 
 GLfloat lightPos1[] = { 0, 1.5, 2.0, 1.0 };
 GLfloat specular1[] = { 1.0f, 0.0f, 0.0f, 1.0f };
@@ -92,20 +94,89 @@ GLfloat specref[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 GLfloat spotDir[] = { 0.0f, 0.5f, 0.0f };
 
 GLfloat mat_ambient[]       = { 0.4f, 0.4f, 0.4f, 1.0f };
-GLfloat mat_ambient_color[] = { 0.8f, 0.8f, 0.2f, 1.0f };
+GLfloat mat_ambient_color[] = { 0.3f, 0.3f, 0.3f, 1.0f };
 GLfloat mat_diffuse[]       = { 0.4f, 0.4f, 0.4f, 1.0f };
 GLfloat mat_specular[]      = { 0.7f, 0.7f, 0.7f, 1.0f };
 GLfloat mat_emission[]      = { 0.0f, 0.0f, 0.0f, 1.f };
-GLfloat mat_no_emission[]   = { 0.3f, 0.2f, 0.2f, 0.0f };
-GLfloat mat_shininess[]     = { 5.0f };
+GLfloat mat_no_emission[]   = { 0.2f, 0.2f, 0.2f, 0.0f };
+GLfloat mat_shininess[]     = { 50.0f };
+
+inline void __glVertex3f( GLfloat x, GLfloat y, GLfloat z ) {
+    glVertex3f( x, z + 5.0, y );
+}
+
+static void drawWall() {
+
+    glColor3f( 0.5f, 0.5f, 0.6f );
+    glEnable( GL_TEXTURE_2D );
+    glBindTexture( GL_TEXTURE_2D, wallTexture );
+    glBegin( GL_POLYGON );
+
+    glTexCoord2f( 1.0f, 0.0f );
+    __glVertex3f( 10.0f, 0.0f, -5.0f );
+    glTexCoord2f( 1.0f, 1.0f );
+    __glVertex3f( 10.0f, 0.0f, 5.0f );
+    glTexCoord2f( 0.0f, 1.0f );
+    __glVertex3f( 0.0f, 10.0f, 5.0f );
+    glTexCoord2f( 0.0f, 0.0f );
+    __glVertex3f( 0.0f, 10.0f, -5.0f );
+
+    glEnd();
+
+    glBegin( GL_POLYGON );
+    // glColor3f( 0.0f, 0.0f, 1.0f );
+
+    glTexCoord2f( 1.0f, 0.0f );
+    __glVertex3f( 0.0f, 10.0f, -5.0f );
+    glTexCoord2f( 1.0f, 1.0f );
+    __glVertex3f( 0.0f, 10.0f, 5.0f );
+    glTexCoord2f( 0.0f, 1.0f );
+    __glVertex3f( -10.0f, 0.0f, 5.0f );
+    glTexCoord2f( 0.0f, 0.0f );
+    __glVertex3f( -10.0f, 0.0f, -5.0f );
+
+    glEnd();
+
+    glBegin( GL_POLYGON );
+    // glColor3f( 1.0f, 0.0f, 1.0f );
+
+    glTexCoord2f( 1.0f, 0.0f );
+    __glVertex3f( -10.0f, 0.0f, -5.0f );
+    glTexCoord2f( 1.0f, 1.0f );
+    __glVertex3f( -10.0f, 0.0f, 5.0f );
+    glTexCoord2f( 0.0f, 1.0f );
+    __glVertex3f( 0.0f, -10.0f, 5.0f );
+    glTexCoord2f( 0.0f, 0.0f );
+    __glVertex3f( 0.0f, -10.0f, -5.0f );
+
+    glEnd();
+
+    glBegin( GL_POLYGON );
+    // glColor3f( 0.0f, 1.0f, 1.0f );
+
+    glTexCoord2f( 1.0f, 0.0f );
+    __glVertex3f( 0.0f, -10.0f, -5.0f );
+    glTexCoord2f( 1.0f, 1.0f );
+    __glVertex3f( 0.0f, -10.0f, 5.0f );
+    glTexCoord2f( 0.0f, 1.0f );
+    __glVertex3f( 10.0f, 0.0f, 5.0f );
+    glTexCoord2f( 0.0f, 0.0f );
+    __glVertex3f( 10.0f, 0.0f, -5.0f );
+
+    glEnd();
+
+    glDisable( GL_TEXTURE_2D );
+}
 
 static void onRender() {
     onTimerTicked();
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+    drawWall();
+
     // put an environment light
-    // glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );
+    glLightModelfv( GL_LIGHT_MODEL_AMBIENT, ambientLight );
 
     // put light no.1
     glLightfv( GL_LIGHT0, GL_POSITION, lightPos1 );
@@ -183,9 +254,9 @@ static void onRender() {
     glColor3f( 1.0, 1.0, 1.0 );
     glBegin( GL_TRIANGLES );
     for ( const auto& tri : fragments ) {
-        drawTriangleWithoutTexture( tri.a );
-        drawTriangleWithoutTexture( tri.b );
-        drawTriangleWithoutTexture( tri.c );
+        drawTriangleWithoutTexture( tri.a, tri.na );
+        drawTriangleWithoutTexture( tri.b, tri.nb );
+        drawTriangleWithoutTexture( tri.c, tri.nc );
     }
     glEnd();
 
@@ -236,7 +307,8 @@ int main( int argc, char** argv ) {
 
     glClearColor( 0.0, 0.0, 0.0, 1.0f );
 
-    buddha_low = read_ply_file( "./models/happy_recon/happy_vrip_res4.ply" );
+    buddha_low  = read_ply_file( "./models/happy_recon/happy_vrip_res4.ply" );
+    wallTexture = TM::loadTexture( "./maps/wall_light.png" );
 
     // might complete in 3 ~ 4 seconds
     CreateThread( nullptr, 0, load_medium, nullptr, 0, nullptr );

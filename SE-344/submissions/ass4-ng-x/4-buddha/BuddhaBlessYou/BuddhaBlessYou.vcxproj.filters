@@ -29,5 +29,8 @@
     <ClInclude Include="utilities.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="TexLoader\texLoader.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

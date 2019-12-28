@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <chrono>
 #include <fstream>
+#include <glm/glm/glm.hpp>
 #include <iostream>
 #include <vector>
 
@@ -143,9 +144,11 @@ std::vector< triangle > read_ply_file( const std::string& filepath, float scale_
             t.b      = verts[ raw.y ];
             t.c      = verts[ raw.z ];
 
-            // t.na = norms[ raw.x ];
-            // t.nb = norms[ raw.y ];
-            // t.nc = norms[ raw.z ];
+            auto norm = glm::normalize( glm::cross( glm::vec3( t.a.x - t.b.x, t.a.y - t.b.y, t.a.z - t.b.z ), glm::vec3( t.a.x - t.c.x, t.a.y - t.c.y, t.a.z - t.c.z ) ));
+
+            t.na = float3{ norm.x , norm.y, norm.z };
+            t.nb = t.na;
+            t.nc = t.nb;
 
             // t.ta = tcs[ raw.x ];
             // t.tb = tcs[ raw.y ];
