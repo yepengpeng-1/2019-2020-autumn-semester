@@ -28,35 +28,33 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.leaveButton = new System.Windows.Forms.Button();
             this.visionControl = new System.Windows.Forms.TabControl();
             this.initPage = new System.Windows.Forms.TabPage();
+            this.mainViewBox = new System.Windows.Forms.PictureBox();
             this.introPage = new System.Windows.Forms.TabPage();
-            this.aboutButton = new System.Windows.Forms.Button();
             this.foggyPage = new System.Windows.Forms.TabPage();
+            this.foggyImageBox = new System.Windows.Forms.PictureBox();
             this.mysteriousRoom = new System.Windows.Forms.TabPage();
+            this.roomPictureBox = new System.Windows.Forms.PictureBox();
             this.buddhaBless = new System.Windows.Forms.TabPage();
+            this.buddhaImageBox = new System.Windows.Forms.PictureBox();
             this.endPage = new System.Windows.Forms.TabPage();
-            this.globalTimer = new System.Windows.Forms.Timer(this.components);
+            this.finaleImageBox = new System.Windows.Forms.PictureBox();
+            this.aboutButton = new System.Windows.Forms.Button();
             this.previousButton = new System.Windows.Forms.Button();
             this.nextButton = new System.Windows.Forms.Button();
-            this.mainViewBox = new System.Windows.Forms.PictureBox();
-            this.foggyImageBox = new System.Windows.Forms.PictureBox();
-            this.roomPictureBox = new System.Windows.Forms.PictureBox();
-            this.buddhaImageBox = new System.Windows.Forms.PictureBox();
-            this.finaleImageBox = new System.Windows.Forms.PictureBox();
             this.visionControl.SuspendLayout();
             this.initPage.SuspendLayout();
-            this.foggyPage.SuspendLayout();
-            this.mysteriousRoom.SuspendLayout();
-            this.buddhaBless.SuspendLayout();
-            this.endPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainViewBox)).BeginInit();
+            this.foggyPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.foggyImageBox)).BeginInit();
+            this.mysteriousRoom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.roomPictureBox)).BeginInit();
+            this.buddhaBless.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.buddhaImageBox)).BeginInit();
+            this.endPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.finaleImageBox)).BeginInit();
             this.SuspendLayout();
             // 
@@ -103,6 +101,20 @@
             this.initPage.TabIndex = 0;
             this.initPage.Text = "开始之前";
             this.initPage.UseVisualStyleBackColor = true;
+            this.initPage.Enter += new System.EventHandler(this.initPage_Enter);
+            // 
+            // mainViewBox
+            // 
+            this.mainViewBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.mainViewBox.Image = ((System.Drawing.Image)(resources.GetObject("mainViewBox.Image")));
+            this.mainViewBox.Location = new System.Drawing.Point(0, 0);
+            this.mainViewBox.Name = "mainViewBox";
+            this.mainViewBox.Size = new System.Drawing.Size(1209, 809);
+            this.mainViewBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.mainViewBox.TabIndex = 0;
+            this.mainViewBox.TabStop = false;
             // 
             // introPage
             // 
@@ -114,6 +126,107 @@
             this.introPage.TabIndex = 1;
             this.introPage.Text = "笔记出现";
             this.introPage.Enter += new System.EventHandler(this.introPage_Enter);
+            // 
+            // foggyPage
+            // 
+            this.foggyPage.BackColor = System.Drawing.Color.Black;
+            this.foggyPage.Controls.Add(this.foggyImageBox);
+            this.foggyPage.Location = new System.Drawing.Point(8, 39);
+            this.foggyPage.Name = "foggyPage";
+            this.foggyPage.Padding = new System.Windows.Forms.Padding(3);
+            this.foggyPage.Size = new System.Drawing.Size(1209, 809);
+            this.foggyPage.TabIndex = 2;
+            this.foggyPage.Text = "雾气弥漫";
+            this.foggyPage.Enter += new System.EventHandler(this.foggyPage_Enter);
+            // 
+            // foggyImageBox
+            // 
+            this.foggyImageBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.foggyImageBox.Image = ((System.Drawing.Image)(resources.GetObject("foggyImageBox.Image")));
+            this.foggyImageBox.Location = new System.Drawing.Point(0, 0);
+            this.foggyImageBox.Name = "foggyImageBox";
+            this.foggyImageBox.Size = new System.Drawing.Size(1209, 809);
+            this.foggyImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.foggyImageBox.TabIndex = 0;
+            this.foggyImageBox.TabStop = false;
+            // 
+            // mysteriousRoom
+            // 
+            this.mysteriousRoom.Controls.Add(this.roomPictureBox);
+            this.mysteriousRoom.Location = new System.Drawing.Point(8, 39);
+            this.mysteriousRoom.Name = "mysteriousRoom";
+            this.mysteriousRoom.Padding = new System.Windows.Forms.Padding(3);
+            this.mysteriousRoom.Size = new System.Drawing.Size(1209, 809);
+            this.mysteriousRoom.TabIndex = 3;
+            this.mysteriousRoom.Text = "怪异房间";
+            this.mysteriousRoom.UseVisualStyleBackColor = true;
+            this.mysteriousRoom.Enter += new System.EventHandler(this.mysteriousRoom_Enter);
+            // 
+            // roomPictureBox
+            // 
+            this.roomPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.roomPictureBox.Image = ((System.Drawing.Image)(resources.GetObject("roomPictureBox.Image")));
+            this.roomPictureBox.Location = new System.Drawing.Point(-8, 0);
+            this.roomPictureBox.Name = "roomPictureBox";
+            this.roomPictureBox.Size = new System.Drawing.Size(1225, 817);
+            this.roomPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.roomPictureBox.TabIndex = 0;
+            this.roomPictureBox.TabStop = false;
+            // 
+            // buddhaBless
+            // 
+            this.buddhaBless.Controls.Add(this.buddhaImageBox);
+            this.buddhaBless.Location = new System.Drawing.Point(8, 39);
+            this.buddhaBless.Name = "buddhaBless";
+            this.buddhaBless.Padding = new System.Windows.Forms.Padding(3);
+            this.buddhaBless.Size = new System.Drawing.Size(1209, 809);
+            this.buddhaBless.TabIndex = 4;
+            this.buddhaBless.Text = "佛祖保佑";
+            this.buddhaBless.UseVisualStyleBackColor = true;
+            this.buddhaBless.Enter += new System.EventHandler(this.buddhaBless_Enter);
+            // 
+            // buddhaImageBox
+            // 
+            this.buddhaImageBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.buddhaImageBox.BackColor = System.Drawing.Color.Black;
+            this.buddhaImageBox.Image = ((System.Drawing.Image)(resources.GetObject("buddhaImageBox.Image")));
+            this.buddhaImageBox.Location = new System.Drawing.Point(0, 0);
+            this.buddhaImageBox.Name = "buddhaImageBox";
+            this.buddhaImageBox.Size = new System.Drawing.Size(1209, 817);
+            this.buddhaImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.buddhaImageBox.TabIndex = 0;
+            this.buddhaImageBox.TabStop = false;
+            // 
+            // endPage
+            // 
+            this.endPage.Controls.Add(this.finaleImageBox);
+            this.endPage.Location = new System.Drawing.Point(8, 39);
+            this.endPage.Name = "endPage";
+            this.endPage.Padding = new System.Windows.Forms.Padding(3);
+            this.endPage.Size = new System.Drawing.Size(1209, 809);
+            this.endPage.TabIndex = 5;
+            this.endPage.Text = "终末之诗";
+            this.endPage.UseVisualStyleBackColor = true;
+            this.endPage.Enter += new System.EventHandler(this.endPage_Enter);
+            // 
+            // finaleImageBox
+            // 
+            this.finaleImageBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.finaleImageBox.Image = ((System.Drawing.Image)(resources.GetObject("finaleImageBox.Image")));
+            this.finaleImageBox.Location = new System.Drawing.Point(0, 0);
+            this.finaleImageBox.Name = "finaleImageBox";
+            this.finaleImageBox.Size = new System.Drawing.Size(1217, 817);
+            this.finaleImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.finaleImageBox.TabIndex = 0;
+            this.finaleImageBox.TabStop = false;
             // 
             // aboutButton
             // 
@@ -128,57 +241,6 @@
             this.aboutButton.Text = "关于";
             this.aboutButton.UseVisualStyleBackColor = false;
             this.aboutButton.Click += new System.EventHandler(this.aboutButton_Click);
-            // 
-            // foggyPage
-            // 
-            this.foggyPage.BackColor = System.Drawing.Color.Black;
-            this.foggyPage.Controls.Add(this.foggyImageBox);
-            this.foggyPage.Location = new System.Drawing.Point(8, 39);
-            this.foggyPage.Name = "foggyPage";
-            this.foggyPage.Padding = new System.Windows.Forms.Padding(3);
-            this.foggyPage.Size = new System.Drawing.Size(1209, 809);
-            this.foggyPage.TabIndex = 2;
-            this.foggyPage.Text = "雾气弥漫";
-            this.foggyPage.Enter += new System.EventHandler(this.foggyPage_Enter);
-            // 
-            // mysteriousRoom
-            // 
-            this.mysteriousRoom.Controls.Add(this.roomPictureBox);
-            this.mysteriousRoom.Location = new System.Drawing.Point(8, 39);
-            this.mysteriousRoom.Name = "mysteriousRoom";
-            this.mysteriousRoom.Padding = new System.Windows.Forms.Padding(3);
-            this.mysteriousRoom.Size = new System.Drawing.Size(1209, 809);
-            this.mysteriousRoom.TabIndex = 3;
-            this.mysteriousRoom.Text = "怪异房间";
-            this.mysteriousRoom.UseVisualStyleBackColor = true;
-            this.mysteriousRoom.Enter += new System.EventHandler(this.mysteriousRoom_Enter);
-            // 
-            // buddhaBless
-            // 
-            this.buddhaBless.Controls.Add(this.buddhaImageBox);
-            this.buddhaBless.Location = new System.Drawing.Point(8, 39);
-            this.buddhaBless.Name = "buddhaBless";
-            this.buddhaBless.Padding = new System.Windows.Forms.Padding(3);
-            this.buddhaBless.Size = new System.Drawing.Size(1209, 809);
-            this.buddhaBless.TabIndex = 4;
-            this.buddhaBless.Text = "佛祖保佑";
-            this.buddhaBless.UseVisualStyleBackColor = true;
-            this.buddhaBless.Enter += new System.EventHandler(this.buddhaBless_Enter);
-            // 
-            // endPage
-            // 
-            this.endPage.Controls.Add(this.finaleImageBox);
-            this.endPage.Location = new System.Drawing.Point(8, 39);
-            this.endPage.Name = "endPage";
-            this.endPage.Padding = new System.Windows.Forms.Padding(3);
-            this.endPage.Size = new System.Drawing.Size(1209, 809);
-            this.endPage.TabIndex = 5;
-            this.endPage.Text = "终末之诗";
-            this.endPage.UseVisualStyleBackColor = true;
-            // 
-            // globalTimer
-            // 
-            this.globalTimer.Tick += new System.EventHandler(this.globalTimer_Tick);
             // 
             // previousButton
             // 
@@ -204,72 +266,6 @@
             this.nextButton.UseVisualStyleBackColor = false;
             this.nextButton.Click += new System.EventHandler(this.nextButton_Click);
             // 
-            // mainViewBox
-            // 
-            this.mainViewBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.mainViewBox.Image = ((System.Drawing.Image)(resources.GetObject("mainViewBox.Image")));
-            this.mainViewBox.Location = new System.Drawing.Point(0, 0);
-            this.mainViewBox.Name = "mainViewBox";
-            this.mainViewBox.Size = new System.Drawing.Size(1209, 809);
-            this.mainViewBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.mainViewBox.TabIndex = 0;
-            this.mainViewBox.TabStop = false;
-            // 
-            // foggyImageBox
-            // 
-            this.foggyImageBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.foggyImageBox.Image = ((System.Drawing.Image)(resources.GetObject("foggyImageBox.Image")));
-            this.foggyImageBox.Location = new System.Drawing.Point(0, 0);
-            this.foggyImageBox.Name = "foggyImageBox";
-            this.foggyImageBox.Size = new System.Drawing.Size(1209, 809);
-            this.foggyImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.foggyImageBox.TabIndex = 0;
-            this.foggyImageBox.TabStop = false;
-            // 
-            // roomPictureBox
-            // 
-            this.roomPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.roomPictureBox.Image = ((System.Drawing.Image)(resources.GetObject("roomPictureBox.Image")));
-            this.roomPictureBox.Location = new System.Drawing.Point(-8, 0);
-            this.roomPictureBox.Name = "roomPictureBox";
-            this.roomPictureBox.Size = new System.Drawing.Size(1225, 817);
-            this.roomPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.roomPictureBox.TabIndex = 0;
-            this.roomPictureBox.TabStop = false;
-            // 
-            // buddhaImageBox
-            // 
-            this.buddhaImageBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.buddhaImageBox.BackColor = System.Drawing.Color.Black;
-            this.buddhaImageBox.Image = ((System.Drawing.Image)(resources.GetObject("buddhaImageBox.Image")));
-            this.buddhaImageBox.Location = new System.Drawing.Point(0, 0);
-            this.buddhaImageBox.Name = "buddhaImageBox";
-            this.buddhaImageBox.Size = new System.Drawing.Size(1209, 817);
-            this.buddhaImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.buddhaImageBox.TabIndex = 0;
-            this.buddhaImageBox.TabStop = false;
-            // 
-            // finaleImageBox
-            // 
-            this.finaleImageBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.finaleImageBox.Image = ((System.Drawing.Image)(resources.GetObject("finaleImageBox.Image")));
-            this.finaleImageBox.Location = new System.Drawing.Point(0, 0);
-            this.finaleImageBox.Name = "finaleImageBox";
-            this.finaleImageBox.Size = new System.Drawing.Size(1217, 817);
-            this.finaleImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.finaleImageBox.TabIndex = 0;
-            this.finaleImageBox.TabStop = false;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 24F);
@@ -285,14 +281,14 @@
             this.Text = "[SE-344 Assignment Final] GRAVE ROBBER";
             this.visionControl.ResumeLayout(false);
             this.initPage.ResumeLayout(false);
-            this.foggyPage.ResumeLayout(false);
-            this.mysteriousRoom.ResumeLayout(false);
-            this.buddhaBless.ResumeLayout(false);
-            this.endPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.mainViewBox)).EndInit();
+            this.foggyPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.foggyImageBox)).EndInit();
+            this.mysteriousRoom.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.roomPictureBox)).EndInit();
+            this.buddhaBless.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.buddhaImageBox)).EndInit();
+            this.endPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.finaleImageBox)).EndInit();
             this.ResumeLayout(false);
 
@@ -309,7 +305,6 @@
         private System.Windows.Forms.TabPage mysteriousRoom;
         private System.Windows.Forms.TabPage buddhaBless;
         private System.Windows.Forms.TabPage endPage;
-        private System.Windows.Forms.Timer globalTimer;
         private System.Windows.Forms.Button previousButton;
         private System.Windows.Forms.Button nextButton;
         private System.Windows.Forms.PictureBox mainViewBox;

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Threading;
+using System.Media;
 
 namespace GraveRobberHyperVisor
 {
@@ -25,11 +26,37 @@ namespace GraveRobberHyperVisor
 
         public MainForm()
         {
+            initMedia();
             InitializeComponent();
             visionControl.SelectedIndex = 0;
             previousButton.Enabled = false;
 
             this.WindowState = FormWindowState.Maximized;
+
+            globalBgm.Load();
+        }
+
+        SoundPlayer introSound, globalBgm, stormSound, outroSound;
+
+        
+        private void initMedia()
+        {
+            introSound = new SoundPlayer();
+            outroSound = new SoundPlayer();
+            globalBgm = new SoundPlayer();
+            stormSound = new SoundPlayer();
+
+            introSound.SoundLocation = "media\\intro.wav";
+            introSound.Load();
+
+            globalBgm.SoundLocation = "media\\global.wav";
+            globalBgm.Load();
+
+            stormSound.SoundLocation = "media\\storm.wav";
+            stormSound.Load();
+
+            outroSound.SoundLocation = "media\\outro.wav";
+            outroSound.Load();
         }
 
         private void leaveButton_Click(object sender, EventArgs e)
@@ -142,27 +169,63 @@ namespace GraveRobberHyperVisor
 
         private void introPage_Enter(object sender, EventArgs e)
         {
+            introSound.Stop();
+            outroSound.Stop();
+            globalBgm.PlayLooping();
+            stormSound.PlayLooping();
+
             Thread blackName = new Thread(new ParameterizedThreadStart(switchFromTitle));
             blackName.Start();
 
+        }
+
+        private void initPage_Enter(object sender, EventArgs e)
+        {
+            introSound.PlayLooping();
+            outroSound.Stop();
+            globalBgm.PlayLooping();
+            stormSound.Stop();
+        }
+
+        private void endPage_Enter(object sender, EventArgs e)
+        {
+            introSound.Stop();
+            outroSound.PlayLooping();
+            globalBgm.Stop();
+            stormSound.Stop();
         }
 
         private void foggyPage_Enter(object sender, EventArgs e)
         {
             Thread blackName = new Thread(new ParameterizedThreadStart(switchFromFoggy));
             blackName.Start();
+
+            introSound.Stop();
+            outroSound.Stop();
+            globalBgm.PlayLooping();
+            stormSound.Stop();
         }
 
         private void mysteriousRoom_Enter(object sender, EventArgs e)
         {
             Thread blackName = new Thread(new ParameterizedThreadStart(switchFromRoom));
             blackName.Start();
+
+            introSound.Stop();
+            outroSound.Stop();
+            globalBgm.PlayLooping();
+            stormSound.PlayLooping();
         }
 
         private void buddhaBless_Enter(object sender, EventArgs e)
         {
             Thread blackName = new Thread(new ParameterizedThreadStart(switchFromBuddha));
             blackName.Start();
+
+            introSound.Stop();
+            outroSound.Stop();
+            globalBgm.PlayLooping();
+            stormSound.Stop();
         }
     }
 }
