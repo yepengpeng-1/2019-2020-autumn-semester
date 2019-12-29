@@ -449,3 +449,377 @@ CC 就是 Concurrency Control，也就是并行控制策略，负责调度那些
 ![image-20191223164052253](REVIEW.assets/image-20191223164052253.png)
 
 ![image-20191223164106534](REVIEW.assets/image-20191223164106534.png)
+
+## Lecture 16: Lock & Memory Model
+
+>    锁与内存模型
+
+锁，实在是太重要了。给出了极致简单的抽象和严格的正确性保证。
+
+而且，它为我们在不可靠的基础上抽象出一层可靠的系统提供了保证。
+
+### Implementation
+
+那么我们该怎么实现锁呢？
+
+#### Naïve (and Incorrect) Implementation
+
+![image-20191229191645171](REVIEW.assets/image-20191229191645171.png)
+
+或许所有希望制造锁的人最开始都是这么想的。如果拿锁被拒就循环着等待，退出循环就代表拿到了。
+
+真的吗？
+
+不。鉴于 acquire 锁所做的步骤包括了下面两步：
+
+1.  读取锁 L 的状态
+2.  将锁 L 的状态设为 LOCKED
+
+这套序列不是原子的。也就是说，在 1. 和 2. 之间可能插入别的事件。或许一个线程插入了 1. 2. 之间，错误地认为它可以拿到锁，结果导致锁被多人持有。这显然是不对的。
+
+#### Primitive Implementation
+
+早期智人尝试过两种不同的锁的实现方法：纯软件实现和掺杂硬件的实现。
+
+软件实现主要有：
+
+*   Using Load and Store instructions only
+*   Dekker's & Peterson's Algorithms
+
+硬件实现主要有：
+
+*   RSM instruction: Read and Set Memory
+*   T & S: Test and Set
+*   C & S: Compare and Swap
+*   Load-linked + Store-conditional
+*   F & A: Fetch and Add
+
+#### Peterson's Algorithms
+
+![image-20191229192621710](REVIEW.assets/image-20191229192621710.png)
+
+分析一下，可以看出来这段代码做的事情在于给每一个 Thread 都提供一个 Flag 位。同时，全局保留一个变量 turn 来记录当前拿锁的线程号。
+
+在请求拿锁的时候，先把自己试图拿锁这一信息设定为 true（`flag[self] = 1;`），并将 turn 设置为对方。
+
+如果 `turn = 1 - self` 成立，且对方仍然持有这把锁，即这仍然是对方的回合，那么就持续 Spin。
+
+这种办法依赖于一个假设，即所有的 LOAD 和 STORE 都满足原子性，即依赖内存系统的正确性。
+
+在上古时代这是对的，然而现在的内存模型已经发展到不满足这件事了（笑）。
+
+所以大家也不用这种锁了。
+
+等等……插一句，讲讲内存模型是怎么一回事。
+
+### Memory Model
+
+内存模型。
+
+#### Definition
+
+确定了 CPU 跟内存如何进行交互的模型。
+
+这很重要，不同的模型可能完全改变 CPU 执行的结果。
+
+#### Memory Consistency
+
+对于内存一致性最朴素的理解就是：对同一块内存空间来说，Read 总是读到最后一次 Write 的内容。
+
+#### Multi-Core
+
+现在的 CPU 几乎都有多核心了。不同的核心却是共享着同一片主存的。他们会在完全随机的时间进行许许多多的读和写。
+
+这件事可不简单。
+
+#### Consistency Strategy
+
+有哪些保持一致性的策略呢？
+
+##### Strict Consistency
+
+严格一致模式。
+
+![image-20191229194130683](REVIEW.assets/image-20191229194130683.png)
+
+举例来说，两个处理器核心 P1 和 P2 同时工作，但是 Strict Consistency 的要求完全没有减弱；它要求在任何情况下，任何的读都应该读出任意最近的写的数据，无论他们来自哪一核心。
+
+这个要求显然是很严格的（没法更严格了），基本上是把单核心的策略照搬到多核心来了。
+
+可想而知，要保证这种一致性的代价很高。
+
+##### Sequential Consistency
+
+顺序一致模式。
+
+孔子有云，
+
+>   …the result of any execution is the same as if the operations of all the processors were executed in some sequential order, and the operations of each individual processor appear in this sequence in the order specified by its program.
+
+翻译一下就是，只要访存的结果跟所有处理器严格按照顺序执行的结果一样（而不是瞎混在一起的），那就把它认定为一个顺序一致的访存。
+
+![image-20191229195330118](REVIEW.assets/image-20191229195330118.png)
+
+举例来说，图一中 P1 和 P4 写入了 1 和 2；而 P2 和 P3 则是连续进行了两次读取。
+
+这样，P2（或 P3，他们是等地位的）可能读取出 1、1，也就是执行顺序为 P4 -> P1 -> P2_1 -> P2_2；
+
+也可能读取出 2、2，执行顺序是 P1 -> P4 -> P2_1 -> P2_2；也可能读取出 1、2。
+
+但如果读出 2、1，那就是违背了 Sequential Consistency 了。
+
+因为不存在一个处理器的交替执行顺序能满足 2、1 的。
+
+>   Sequential Consistency 比 Strict Consistency 要弱一些。这个大家都看得出吧。
+
+##### Cache Coherence
+
+![image-20191229200455910](REVIEW.assets/image-20191229200455910.png)
+
+比较一下 Cache Coherence 和 Sequential Consistency。
+
+不同之处是
+
+*   Sequential consistency requires a globally consistent view of memory operations
+
+*   Cache coherence only requires a locally consistent view
+
+*   ==e.g., for local variable x or y, all CPUs see the same order; but for (x,y), different CPUs may see different orders==
+
+Seq Consistency 要求的是全局的一致性；然而 Cache Coherence 仅仅要求局部的一致性。
+
+##### Process Consistency
+
+>    处理器一致性（这啥？）
+
+也称为 PRAM Consistency (Pipelined RAM Consistency)
+
+定义是：
+
+*   Writes done by a single processor are received by all other processors in the issue order
+
+*   But writes from different processors may be seen in a different order by different processors
+
+单个处理器所有的写操作都保证会被所有的处理器以相同的顺序接收。
+
+但是，多个处理器的写操作可能会被不同的处理器以不同的顺序接收。
+
+![image-20191229201440432](REVIEW.assets/image-20191229201440432.png)
+
+每个处理器接收「写」的顺序不同就导致了他可能「读」出不同的序列来。
+
+##### Java Memory Model
+
+JVM 是一层虚拟机，所以他也有自己的 Memory Model（哭）
+
+它的宗旨是：
+
+*   让用户做决定。默认情况下，只保证关键部分的 Sequential Consistency。
+*   对非同步的多线程程序，只做最低程度的保证：保证你的读写操作一定发生在内存被初始化之後。
+
+（这已经是……不怎么算保证的保证了）
+
+### Atomic Instructions
+
+上面已经提到了，可以通过软件来实现锁。然后说着说着又提到了内存模型。
+
+现在我们说回来：利用多功能原子指令来实现锁。
+
+这种实现方法需要硬件提供特殊的指令集支持。
+
+#### Test and Set
+
+Test and Set 指令大概做什么呢？
+
+用 C 代码来表示，大概是这样的：
+
+```c++
+int TestAndSet(int *old_ptr, int new) {
+    int old = *old_ptr; // fetch old value at old_ptr
+    *old_ptr = new; // store 'new' into old_ptr
+    return old; // return the old value
+}
+```
+
+将 `old_ptr` 的值设定为 new，并且返回设定之前的值。
+
+注意，这整件事情是由指令集提供的原子指令。也就是说，你可以确保发生了一次从 old 改换成 new 的写入，而必不存在其他涉及到 `old_ptr` 的内存操作，无论写读。
+
+这样，我们很快可以改写我们的 Lock 实现：
+
+![image-20191229202539234](REVIEW.assets/image-20191229202539234.png)
+
+而且简洁，优雅，符合直觉（只有我做到了把 0 改成了 1，那才算是拿着锁了）。
+
+#### Compare and Swap
+
+这是 SPARC 的叫法。x86 叫做 Compare and Exchange。
+
+```c
+int CompareAndSwap(int *ptr, int expected, int new) {
+    int actual = *ptr;
+    if (actual == expected)
+        *ptr = new;
+    return actual;
+}
+```
+
+基本操作是：只有 `ptr` 对应的内存是我希望得到的 `expected` 的时候，才把 `new` 写入内存。
+
+本质上也是为了保证「我确实是把内存从 `expected` 改成了 `new`」。关键在于**从 `expected`**。
+
+这就能保证不存在两个人同时进行 0 -> 1 的改变，还都以为自己是那个起作用的人。
+
+![image-20191229203109012](REVIEW.assets/image-20191229203109012.png)
+
+同样简洁，优雅，符合直觉。
+
+#### Load-linked and Store-conditional
+
+>   这名字也太长
+
+同样，上原子操作的等价 C 代码：
+
+```c
+int LoadLinked(int *ptr) {
+  return *ptr;
+}
+
+int StoreConditional(int *ptr, int value) {
+  if (/*no one has updated *ptr since the LoadLinked to this address*/) {
+    *ptr = value;
+    return 1; // success!
+  } else {
+    return 0; // failed to update
+  }
+}
+```
+
+这就不是很优美了…拆分成了两条语句，它保证的是在上次 Load 和这次 Store 之间如果没有别人更新过 `ptr`，就写入内存；否则拒绝写入。
+
+这也就是上面的变种。关键在于实现 Read 跟 Write 的「无缝」链接，即其中没有插入别人的 Write。
+
+![image-20191229203510380](REVIEW.assets/image-20191229203510380.png)
+
+就是这代码没那么简洁明了了…你要给人解释 LL/SC 估计也得费点功夫。
+
+#### Fetch and Add
+
+老规矩，上 C：
+
+```c
+int FetchAndAdd(int *ptr) {
+    int old = *ptr;
+    *ptr = old + 1;
+    return old;
+}
+```
+
+这个就有点意思了。它解决了 x += 1 无法保证原子性的问题：最经典的 Race Condition Demo 就是开两个线程分别给全局变量 += 1，最后肯定加出来比正确结果少，是吧。
+
+而如果用 `FetchAndAdd` 实现，那么就可以严格保证你的递增是正确的；不仅如此，你还能知道准确的递增之前（当然递增之後也就是 + 1 了）的值。绝对原子。
+
+提供的这一功能所能实现的就是 Ticket Lock 了。
+
+![image-20191229203842596](REVIEW.assets/image-20191229203842596.png)
+
+基本策略是：`FetchAndAdd` 保证了每个请求锁的过程都会被分到独一无二的一个 Ticket，并且过程还能明确地知道这个 Ticket 的值。
+
+如果仅仅有 Increase 而没有 Fetch，那么就无法保证拿 Ticket 的正确性了。
+
+所以锁这个东西，一定是要把 Read 跟 Write 绑在一起，没有办法的。
+
+### Bootstrapping
+
+>   引导，自力更生
+
+![image-20191229204049243](REVIEW.assets/image-20191229204049243.png)
+
+如何解决一个很少出现的的 Corner Case？
+
+*   实现一个 Special Case 下可以用的解决方案，完全利用 Special Case 下 Special 的特征；
+
+如何将其填补到通用的解决方案中去？
+
+*   找出针对每一种 Special Case 的解决方案；
+*   将通用的问题化归到特殊情况下去。
+
+### Lock Performance
+
+>   锁的性能表现
+
+首先，锁是一定会降低性能的。它的本质就是在合适的时候阻塞线程的运行，以保证某种程度上的正确性。
+
+要求的正确性越严苛，阻塞的情况发生越多，那么锁的性能也就越差。
+
+这是理所应当的。
+
+#### Deadlock
+
+性能差到极致，就是死锁。
+
+可以简单理解成互相拿着对方要的东西，互相不撒手。结果双方都停止工作。
+
+#### Deadlock's Rule
+
+如果我们修改代码，保证每个线程拿到的锁都以反向释放，那么就可以保证一定不存在死锁问题。
+
+这是可以被证明的。
+
+反过来说，代码一点点微小改动都可能带来性能的大幅改善或恶化。
+
+#### What causes Deadlock?
+
+四个条件，构成充要：
+
+*   Limited access
+
+    资源有限，只能被有限个实例使用。
+
+    >   也就是说，存在有人需要排队的情况。
+    >
+    >   可以将互斥锁理解为「只有一个」的资源。
+
+*   No preemption 
+
+    不存在相应的抢占策略：一旦拿到了资源，只有他自己有权释放。
+
+*   Multiple independent requests (hold and wait)
+
+    存在多个独立的请求：这会带来边 Hold 边 Wait 的情况。
+
+    换句话说，存在「一边拿着一些资源一边请求另外的资源」的情形。
+
+*   在 wait-for 图中存在环。
+
+这些看起来都是很自然的事情；但是要留意，这些是充分必要条件，也就是可以跟「有可能出现死锁现象」划等号的。
+
+#### Avoiding
+
+通常来说，只要在多线程里用到了锁，这件事情就是不可避免的。
+
+我们通常有这么两类解决方案：一类积极的，一类消极的。
+
+##### Pessimistic
+
+消极方案是先做一个 a priori：沙盘推演。
+
+先看看在目前的情况下我能拿到什么锁，不能拿到什么锁，是否有可能出现死锁。假如有可能出现，那我直接放弃所有拿锁。
+
+##### Optimistic
+
+积极方案是正常情况下不去考虑出现 Deadlock 的情况，而是等出现了之后再去考虑收拾他。
+
+「在出现之後收拾」的办法，首先你得能 Detect 死锁的出现。
+
+通常利用 Timeout 时间来判断。在检测出来之後，是 Abort 掉一个线程，还是用 Preemption 机制抢走某一个线程的锁，这都由你决定了。
+
+#### Livelock
+
+这个很奇怪：既然是 Live，就说明没有死锁，那有什么问题呢？
+
+实际上，Live Lock 的定义是双方规律性地做同样的事情，并且在很特殊的情况下，这种不断的 Retry 刚好阻止了正常运转。
+
+打个比方，双方同时伸手去摸一个文件，约定如果刚好碰到对方摸，那就等待 500 ms 之后重试。结果他们刚好每次都碰上手，每次双方都立刻缩回手，并且在 500 ms 后重复这一动作。结果大家都摸不到这个文件。
+
+大概就是这么个意思。
