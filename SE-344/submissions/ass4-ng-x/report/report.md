@@ -509,6 +509,8 @@ CreateThread( nullptr, 0, foo, nullptr, 0, nullptr );
 
 因此为了实现混合音频的播放，这里使用了 `System.Windows.Media` 中提供的 `MediaPlayer` 对象来承担音频播放的任务。
 
+使用前请务必 `using System.Windows.Media`。
+
 在产生场景切换时，音乐调度器会收到通知，并调整启用的音轨。
 
 ##### 程序执行
@@ -519,5 +521,75 @@ CreateThread( nullptr, 0, foo, nullptr, 0, nullptr );
 
 使用前请务必 `using System.Diagnostics`。
 
+##### 依赖
 
+主程序使用 C# 书写，依赖于 Microsoft .NET Framework 4.7.2。
 
+此外，需要 `wmp.dll` 以实现音频播放功能。
+
+### 问题和解决
+
+#### ST 坐标系和 UV 坐标系
+
+ply 格式中可能使用 ST 坐标系来描述贴图，也可能使用 UV 坐标系。
+
+这两种描述方法只是坐标轴的原点和方向不同，本质上并无区别。
+
+在读取时一定要细心留意这两种不同的情况并分别处理，否则就会产生贴图错误。
+
+#### Blend Mode 和 Depth Test
+
+深度测试在大部分时候都应当开启，除非希望手动渲染半透明的物体或使用非默认的混合模式，不希望 OpenGL 自动将被遮挡物体从渲染管线中移除。这种时候还是应当禁用它。
+
+#### MediaPlayer 和 SoundPlayer
+
+MediaPlayer 由 `System.Windows.Media` 提供，而 SoundPlayer 则是由 `System.Media` 提供。
+
+它们之间的差别（之一）是 SoundPlayer 不支持多个实例同时活跃，较早的播放实例会被自动停止。
+
+由于在本例中需要用到音轨的混合，因此使用 MediaPlayer 而不用 SoundPlayer。
+
+>   另外的解决方案是直接 `@DllImport("winmm.dll")` 并直接调用 DirectSound 的  C/C++ 风格的接口。
+>
+>   具体的实现参见 `./hypervisor/SimultaneousMediaPlayer.cs` 文件。
+>
+>   实际测试发现在部分虚拟机环境下并不能正常工作，因此不推荐使用。
+
+#### SOIL 里的坑
+
+在 Debug 的过程中，留意到 SOIL 在读取部分类型的贴图文件时，会出现图片倒置的错误，即旋转了 180 度的问题。
+
+为了尽量减少程序的负担，采取直接将原始图片旋转 180 度的策略来修正问题。
+
+STBI 库未发现此类问题。
+
+#### 机能限制
+
+鉴于测试机器并没有独立显卡，且 OpenGL 实现是 VMWare 虚拟机提供的，性能堪忧。因此程序在绘制最高分辨率佛像模型的时候会出现严重的掉帧，绘制速率甚至不到 10 帧每秒。
+
+因此佛像的旋转速度相应地调快了些，以适应显示效果。
+
+另外，程序中大部分用于流程控制的代码都并非基于经过的帧数而是执行程序以来的真实时间。因此掉帧不会对程序流程产生影响。
+
+### 笔记
+
+自第九周（2019 年 11 月 7 日）以来的笔记参见 `./notes` 目录下的 Markdown 和 TeX 文件。
+
+### 致谢
+
+#### Documentations
+
+*   [learnopengl.com](https://learnopengl.com)
+*   [opengl-tutorial.org](http://www.opengl-tutorial.org)
+
+#### Third-Party Libraries
+
+*   [**glew**](http://glew.sourceforge.net), the OpenGL extension wrangler library
+*   [**glfw**](https://www.glfw.org), multi-platform library for OpenGL
+*   [**freeGLUT**](http://freeglut.sourceforge.net), open-source alternative to GLUT
+*   [**tinyobj**](https://github.com/syoyo/tinyobjloader/), tiny but powerful wavefront obj loader
+*   [**tinyply**](https://github.com/ddiakopoulos/tinyply), c++11 ply 3d mesh format importer & exporter
+*   [**SOIL**](https://github.com/paralin/soil), simple OpenGL image library
+*   [**glm**](https://glm.g-truc.net), OpenGL mathematics library 
+
+#### SE-344 staff
