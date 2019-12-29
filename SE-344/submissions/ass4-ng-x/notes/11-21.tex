@@ -1,0 +1,540 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Nov 21 Thu}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-344::CG}\label{header-n2}}
+
+Computer Graphics, again.
+
+上節課我們講到的是幾何變換在計算機動畫中的應用。
+
+所有這些東西都需要我們「重定位」我們的點、線、面的幾何信息。
+
+\hypertarget{header-n6}{%
+\subsubsection{進行變換}\label{header-n6}}
+
+\hypertarget{header-n7}{%
+\paragraph{矩陣變換}\label{header-n7}}
+
+為了實現我們的「重定位」，基本要做的就是利用 4×4 的矩陣來修理元數據。
+
+等等，為什麼是 4×4？
+
+為了實現齊次坐標系。
+
+為何要齊次坐標系？
+
+表示平移。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  为什么引入齐次坐标可以表示平移？
+\end{enumerate}
+
+首先我们用一个矢量来表示空间中一个点：\includegraphics{https://www.zhihu.com/equation?tex=r+=+{[}+r_\{x\},+r_\{y\},+r_\{z\}{]}+}
+如果我们要将其平移，平移的矢量为：\includegraphics{https://www.zhihu.com/equation?tex=t={[}+t_\{x\},+t_\{y\},+t_\{z\}{]}+}
+那么正常的做法就是：\includegraphics{https://www.zhihu.com/equation?tex=r+++t+={[}+r_\{x\}+t_\{x\},+r_\{y\}+t_\{y\},+r_\{z\}+t_\{z\}{]}+}
+
+如果不引入齐次坐标，单纯采用3×3矩阵乘法来实现平移
+你想做的就是找到一个矩阵\includegraphics{https://www.zhihu.com/equation?tex=m}，使得
+\includegraphics{https://www.zhihu.com/equation?tex=r/cdot+m+=+}\includegraphics{https://www.zhihu.com/equation?tex=r+++t+={[}+r_\{x\}+t_\{x\},+r_\{y\}+t_\{y\},+r_\{z\}+t_\{z\}{]}+}
+然后你就会发现你永远也找不到这样的矩阵
+
+所以我们需要新引入一个维度，原来\includegraphics{https://www.zhihu.com/equation?tex=r+=+{[}+r_\{x\},+r_\{y\},+r_\{z\},1{]}+}
+那么我们可以找到一个4×4的矩阵来实现平移
+\includegraphics{https://www.zhihu.com/equation?tex=/left{[}+1,0,0,0+/right{]}}
+\includegraphics{https://www.zhihu.com/equation?tex=/left{[}+0,1,0,0+/right{]}}
+\includegraphics{https://www.zhihu.com/equation?tex=/left{[}+0,0,1,0+/right{]}}
+\includegraphics{https://www.zhihu.com/equation?tex=/left{[}+t_\{x\}+,t_\{y\},t_\{z\},1+/right{]}}
+现在，就有：
+\includegraphics{https://www.zhihu.com/equation?tex=r/cdot+m+=+}\includegraphics{https://www.zhihu.com/equation?tex=r+++t+={[}+r_\{x\}+t_\{x\},+r_\{y\}+t_\{y\},+r_\{z\}+t_\{z\},+1{]}+}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  为什么要引入齐次坐标来表示平移？
+\end{enumerate}
+
+在计算机图形学中，坐标转换通常不是单一的，一个几何体在每一帧可能都设计了多个平移，旋转，缩放等变化，这些变化我们通常使用串接各个子变化矩阵的方式得到一个最终变化矩阵，从而减少计算量。所以我们需要将平移也表示为变化矩阵的形式。因此，只能引入齐次坐标系。
+
+\hypertarget{header-n23}{%
+\paragraph{矩陣級聯}\label{header-n23}}
+
+級聯？為何？
+
+因為對於同一個節點，可能我們需要對其應用多個矩陣對其進行變形。然而，考慮到一次次利用矩陣進行變換耗時過多，我們決定先把級聯的矩陣計算為獨一個變換矩陣，再將其
+Apply 到實際的受變換者上。
+
+就這樣了。
+
+級聯之後的矩陣還是一個 4×4
+的變換矩陣。將其應用到對象上的過程稱為複合變換。
+
+\hypertarget{header-n28}{%
+\paragraph{公式推導}\label{header-n28}}
+
+去看上節課的內容。
+
+\hypertarget{header-n30}{%
+\paragraph{反射變換}\label{header-n30}}
+
+有一個有趣的東西：如何按照指定平面對某一物體實施「鏡像」？
+
+回答：只需要「繞此平面」在四維空間中旋轉 180 度就好了。
+
+很可惜我們不能直觀想像或是理解四維空間。太弱了。
+
+\hypertarget{header-n34}{%
+\subsubsection{觀察變換}\label{header-n34}}
+
+上面我們已經做好了變換工作。那麼用戶該如何去觀察呢？
+
+觀察本質上就是三維空間的信息將其投影到指定的投影平面中，變成一個二維像，丟給用戶看。
+
+\hypertarget{header-n37}{%
+\paragraph{觀察坐標系}\label{header-n37}}
+
+「Vision Coordinate」
+
+觀察坐標系需要指定的事務包括：
+
+\begin{itemize}
+\item
+  Position。相機所在的位置。這也就是觀察坐標系的坐標原點。
+\item
+  Looking-at
+  Direction。相機所觀察的方向。（指定一個方向太麻煩了，我們一般再指定一個點）
+\item
+  View-up Direction。指定相機朝上的方向。
+\end{itemize}
+
+這三個值就可以唯一確定這個座標系了。
+
+View-up Direction 方向定義為 \(yv\) 軸，Looking-at Direction 方向定義為
+\(zv\) 軸。相機所在位置 Position 定義為坐標原點，按照左手座標系建系。
+
+\hypertarget{header-n49}{%
+\paragraph{矩陣變換}\label{header-n49}}
+
+如何從世界座標系 World Coordinate 轉換到觀察座標系 Vision Coordinate？
+
+也是個套路；先平移，再旋轉。結束了。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  將觀察原點平移到世界座標系的原點；
+\item
+  進行旋轉變換，將 \(xv\)、\(yv\)、\(zv\) 座標軸旋轉到和
+  \(x\)、\(y\)、\(z\) 座標軸重合。
+\end{enumerate}
+
+做完這兩步，就拿到了所需的變換矩陣。
+
+\hypertarget{header-n58}{%
+\subsubsection{投影}\label{header-n58}}
+
+這裏，主要有兩種投影方式：一是平行投影；二是透視投影。
+
+\hypertarget{header-n60}{%
+\paragraph{平行投影}\label{header-n60}}
+
+平行投影的特點是：投影不改變圖形尺寸關係和平行關係。
+
+即，原圖中平行的線還是平行；不平行的還是不平行。
+
+所有的投影線都是平行的。
+
+\hypertarget{header-n64}{%
+\paragraph{透視投影}\label{header-n64}}
+
+這種投影方法更困難。
+
+在投影過程中，先確定一個離投影平面足夠遠的滅點 \(vP\)（Vanishing
+Point），作為投影參考點；
+
+將其與目標點連線並延長到與觀察平面的交點處作為投影結果點。
+
+簡單說，可以實現「近大遠小」的效果。\emph{幾乎}類似人眼的觀察效果。
+
+本質上，是基於三角形相似的線性縮放的結果。
+
+\begin{quote}
+P.S.
+人眼觀察的效果實際上並不是這麼簡單的。但這種線性簡化的效果已經足夠好了。
+\end{quote}
+
+\hypertarget{header-n72}{%
+\paragraph{FoV}\label{header-n72}}
+
+Field of View。觀察體，在觀察平面上的一部分。
+
+我們在做投影時，並不會直接將所有的物體都向上投影；人的視野是有限的，不可能盡收眼底。
+
+因此我們用觀察平面上的兩個點確定一個矩形區域，並決定只投影在這個窗口中可見的物體。
+
+\hypertarget{header-n76}{%
+\paragraph{遠端面 \& 近端面}\label{header-n76}}
+
+對透視投影的優化。
+
+只有在近端面和遠端面之間的物體才對其進行投影，否則直接去除。
+
+比遠端面更遠的物體投影出來沒啥意義，投出來肯定也很小；（甚至比滅點還遠就根本投不出來了）
+
+比近端面更近的物體很可能會「一葉障目」，嚴重影響視線。丟掉它們！
+
+\begin{quote}
+P.S.
+投影滅點絕不可以設定在近端面和遠端面之間。否則中間的物體會被錯誤投影。
+\end{quote}
+
+\hypertarget{header-n83}{%
+\subsubsection{APIs}\label{header-n83}}
+
+OpenGL 提供了設定 FoV、ViewPort 的方法。
+
+窗口（Window）定義的是世界座標系中需要顯示的區域。
+
+視口（ViewPort）定義的是投影之後要取的區域。
+
+硬件提供了三維空間中的 Clipping 方法。
+
+OpenGL 也封裝好了。直接 Call 就好了。
+
+\hypertarget{header-n89}{%
+\paragraph{視點變換}\label{header-n89}}
+
+\((eyex, eyey, eyez)\) 定義了視點的位置；
+
+\((centerx, centery, centerz)\) 定義了參考點的位置；
+
+\((upx, upy, upz)\) 定義了視口上方的點位置。
+
+這樣三個點就決定了我們的座標系。
+
+\hypertarget{header-n94}{%
+\paragraph{透視投影}\label{header-n94}}
+
+採用 \texttt{glFrustrum()} 函數來聲明透視投影。
+
+留意到在這個函數裡，沿視線方向，\(x\) 軸跟 \(y\)
+軸不一定是對稱的。可以獨立設定其方向。
+
+如果一定要求正向視線，那麼就調用 \texttt{glPerspective()} 函數。
+
+\hypertarget{header-n98}{%
+\paragraph{正視投影}\label{header-n98}}
+
+調用 \texttt{glOrtho()} 函數來實現正投影。
+
+\hypertarget{header-n100}{%
+\paragraph{矩陣棧}\label{header-n100}}
+
+\texttt{glPushMatrix()} 和 \texttt{glPopMatrix()}
+可以將變換矩陣作為一個棧進行處理；確保每一步的過程都可以被觀察，不易出現大問題。
+
+\hypertarget{header-n102}{%
+\subsubsection{Summary}\label{header-n102}}
+
+以上就是計算機動畫的一點點入門內容。
+
+\hypertarget{header-n104}{%
+\subsection{SE-344::CG}\label{header-n104}}
+
+再開始。這一次我們講：建模與動畫。
+
+\hypertarget{header-n106}{%
+\subsubsection{建模與動畫}\label{header-n106}}
+
+多邊形拼出來的表面，總歸是不能完美的。要麼達不到想要的精度，要麽佔用空間巨大。
+
+精度不夠的結果當然大家都知道了；佔用空間過大呢，會導致爆炸式的計算量增長。中間計算結果存儲也同樣會爆炸。
+
+因此我們希望在建模的過程中，對於一個具體的模型，是用一個「緊湊」的曲線曲面對其進行表示。
+
+僅僅存儲很少量的數據點，儘可能精確地表示原來的模型。
+
+而且，繪製結果連續光滑平整。
+
+這⋯有可能嗎？
+
+\hypertarget{header-n113}{%
+\paragraph{優點}\label{header-n113}}
+
+利用曲線曲面進行模型描述，可以根據我們的需求來任意調整採樣密度，在不需要很精確的地方直接使用差勁的模型效果，在需要精確的地方進行額外計算來解決問題。
+
+究其根本，因為這些節點都是根據「曲面公式」計算出來的。所以，我們才能夠根據需求來改計算精度。
+
+\hypertarget{header-n116}{%
+\subsubsection{曲線曲面的表示和繪製}\label{header-n116}}
+
+\hypertarget{header-n117}{%
+\paragraph{顯式表示}\label{header-n117}}
+
+\textasciitilde Explicitly Representation\textasciitilde{}
+
+就是一個普通的 \(y = f(x)\) 函數。一個 \(x\) 唯一對應一個 \(y\)。
+
+很可惜，因為這一點，我們無法表示那些封閉曲線和多值曲線。
+
+顯示表示還是太弱了啊。
+
+\hypertarget{header-n122}{%
+\paragraph{隱式表示}\label{header-n122}}
+
+\textasciitilde Implicitly Representation\textasciitilde{}
+
+\(x ^ 2 + y ^ 2 = r ^ 2\)。類似這樣的一個公式做為曲線曲面的表示。
+
+這個（或許）可以表示封閉和多值曲線了。
+
+\hypertarget{header-n126}{%
+\paragraph{Myth}\label{header-n126}}
+
+上面的 Implicit 和 Explicit 都是座標軸相關的。
+
+也就是說，只要在座標軸中進行移動，就可能會根本地改變表達式的形式。
+
+況且，基於解方程的計算在編程時會帶來麻煩的精度問題。
+
+能否有一種表示方法，和座標軸的選擇無關，僅僅和圖形本身有關的表示方法？
+
+\hypertarget{header-n131}{%
+\paragraph{參數表示}\label{header-n131}}
+
+\textasciitilde Parametric Representation\textasciitilde{}
+
+就是這種方法了。
+
+一般形式為 \(x = x(t); y = y(t)\) 的形式；\(x\) 跟 \(y\)
+都唯一地由獨立參數 \(t\) 決定。
+
+通過規格化 \(t\)（規定 \(t\) 的取值範圍），可以容易地對曲線進行裁減。
+
+況且無需進行複雜的表達式變形和解方程，只要代入，求值就行了！
+
+咱們就用這種方法。
+
+\hypertarget{header-n138}{%
+\subsubsection{參數方程的好處}\label{header-n138}}
+
+\hypertarget{header-n139}{%
+\paragraph{自由度}\label{header-n139}}
+
+所謂自由度，就是影響圖形的參量個數。簡單看，就是方程中可變參數的個數。
+
+在參數方程中，通常來說自由度更大，方便進行圖形形狀的細緻調整。
+
+\hypertarget{header-n142}{%
+\paragraph{矩陣化}\label{header-n142}}
+
+參數方程非常方便做矩陣化。
+
+\hypertarget{header-n144}{%
+\paragraph{規避邊角值}\label{header-n144}}
+
+上面的表示方法可能在斜率無窮大的時候需要進行特殊處理。
+
+然而參數方程表示法不需要特別處理。
+
+\hypertarget{header-n147}{%
+\paragraph{便於擴展}\label{header-n147}}
+
+可以輕易地將二維參數曲線擴展到三維。
+
+加一句 \(z = 0\) 就是了！
+
+（P.S.
+我覺得這也是在扯淡⋯⋯上面的表示方法根本一句話都不用加，就可以在高維裏表示了⋯）
+
+（雖然確實可以簡單的擴展⋯⋯）
+
+\hypertarget{header-n152}{%
+\subsubsection{參數曲線}\label{header-n152}}
+
+\hypertarget{header-n153}{%
+\paragraph{一般表示}\label{header-n153}}
+
+\(x = x(t), y = y(t), z = z(t).\)
+
+說了跟沒說一樣的一般表示。
+
+習慣上，將 \(t\) 的範圍限定在 \([0, 1]\) 中。
+
+\hypertarget{header-n157}{%
+\paragraph{位置矢量}\label{header-n157}}
+
+在曲線上任意一點的位置矢量定義為 \([x(t), y(t), z(t)]\)。
+
+\hypertarget{header-n159}{%
+\paragraph{切矢量}\label{header-n159}}
+
+\textasciitilde Tangent Vector\textasciitilde{}
+
+專門用 \(T\) 來表示曲線上任意一點的切矢量。
+
+利用極限情況下，弧長約等於弦長的特點來計算切矢量。
+
+\hypertarget{header-n163}{%
+\subsubsection{樣條}\label{header-n163}}
+
+\hypertarget{header-n164}{%
+\paragraph{概念}\label{header-n164}}
+
+\textasciitilde{}Spline\textasciitilde{}
+
+是一個傳統手工藝的概念；
+
+A traditional spline used for drawing smooth curves.
+
+The wooden spline is bent into shape using spline weights.
+
+根據給定的一些點建構出來的曲線，是謂樣條曲線。
+
+\hypertarget{header-n170}{%
+\paragraph{線性插值}\label{header-n170}}
+
+Linear Interpolation
+
+線性插值：簡單說就是把給出來的點連起來⋯
+
+雖然還是不光滑，好歹連續了⋯
+
+\hypertarget{header-n174}{%
+\paragraph{二次插值}\label{header-n174}}
+
+用二次函數來擬合圖形，比上面的好一點兒了⋯
+
+用相鄰的三個點來擬合一個二次函數。
+
+跟二次插值比起來，線性插值本質上也就是用每連續的兩個點「擬合」一個一次函數⋯
+
+（雖然這麼講還是很掉價）
+
+\hypertarget{header-n179}{%
+\paragraph{光滑和光順}\label{header-n179}}
+
+看起來是主觀的詞彙。但是實際上是有數學的表徵的。
+
+\hypertarget{header-n181}{%
+\subparagraph{平面曲線：光順的條件}\label{header-n181}}
+
+\begin{itemize}
+\item
+  要求二階（G\textsuperscript{2}）幾何連續；
+\item
+  不存在多餘的拐點；
+\item
+  曲率變化盡可能小。
+\end{itemize}
+
+\hypertarget{header-n189}{%
+\subparagraph{曲線之間：連續的條件}\label{header-n189}}
+
+分為兩種黑話⋯
+
+「參數連續性」C 和「幾何連續性」G。
+
+C\textsuperscript{0} \& G\textsuperscript{0}
+
+兩段曲線如果有一個公共接續點 P，則稱為 C\textsuperscript{0} 和
+G\textsuperscript{0} 連續。
+
+這個條件是很弱的⋯⋯只要連上就算。
+
+C\textsuperscript{1}
+
+在 P 處如果兩曲線的切矢量方向相同，大小相等，則稱為 C\textsuperscript{1}
+連續。
+
+G\textsuperscript{1}
+
+在 P 處如果兩曲線的切矢量方向相同（不要求大小相等），則稱為
+G\textsuperscript{1} 連續。
+
+C\textsuperscript{n}
+
+在 P 處如果兩曲線的 n 階導矢量方向相同，大小相等，則稱為
+C\textsuperscript{n} 連續。
+
+G\textsuperscript{n}
+
+在 P 處如果兩曲線的 n 階導矢量方向相同（不要求大小相等），則稱為
+G\textsuperscript{n} 連續。
+
+\begin{quote}
+可以感覺到，在 \(n \ge 2\) 時，C\textsuperscript{n} 連續的條件似乎都比
+G\textsuperscript{n} 連續的條件要強很多。
+\end{quote}
+
+\hypertarget{header-n205}{%
+\subparagraph{黑話}\label{header-n205}}
+
+所以，學會了這些黑話，以後就能弄明白連續性表示的意思了。
+
+\end{document}

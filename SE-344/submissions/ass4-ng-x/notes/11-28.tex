@@ -1,0 +1,164 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\date{}
+
+\begin{document}
+
+\hypertarget{header-n0}{%
+\section{Nov 28 Thu}\label{header-n0}}
+
+\hypertarget{header-n2}{%
+\subsection{SE-344::CG}\label{header-n2}}
+
+\hypertarget{header-n3}{%
+\subsubsection{擬合的方式}\label{header-n3}}
+
+\hypertarget{header-n4}{%
+\paragraph{插值}\label{header-n4}}
+
+上回講過的，多種多樣的插值方法。還有兩種 N 階的方法。
+
+\hypertarget{header-n6}{%
+\paragraph{逼近樣條}\label{header-n6}}
+
+我不祈求所有的點都能經過；只要最後的 Bias 和最小就行了。
+
+\begin{quote}
+放棄局部最優，選擇全局最優。
+\end{quote}
+
+如果強行要求經過每個點，或許會造成「扭曲」的情形，導致光順性受到影響。
+
+這種時候，光順性比起局部最優性更重要。
+
+\hypertarget{header-n12}{%
+\subsubsection{樣條曲線的表示}\label{header-n12}}
+
+怎麼表示⋯⋯一條參數曲線？
+
+三種\textbf{等價}的方式。
+
+\hypertarget{header-n15}{%
+\paragraph{給定一組邊界條件}\label{header-n15}}
+
+\hypertarget{header-n16}{%
+\paragraph{列出邊界條件的矩陣表示}\label{header-n16}}
+
+\hypertarget{header-n17}{%
+\paragraph{列出一組擬合函數}\label{header-n17}}
+
+以 Hermit 三次樣條曲線為例。
+
+\hypertarget{header-n19}{%
+\subsubsection{Bezier 曲線}\label{header-n19}}
+
+Bezier
+曲線非常著名！一種以逼近為基礎的參數曲線。（採用的是上面的逼近樣條。）
+
+\hypertarget{header-n21}{%
+\paragraph{定義}\label{header-n21}}
+
+\({\mathbf  {B}}(t)=\sum _{{i=0}}^{n}{\mathbf  {P}}_{i}{\mathbf  {b}}_{{i,n}}(t),\quad t\in [0,1]\)
+
+即多項式
+
+\({\mathbf  {b}}_{{i,n}}(t)={n \choose i}t^{i}(1-t)^{{n-i}},\quad i=0,\ldots n\)
+
+又稱作\emph{n}階的\href{https://zh.wikipedia.org/w/index.php?title=伯恩斯坦多項式\&action=edit\&redlink=1}{伯恩斯坦基底多項式}，同時追加定義
+0\textsuperscript{0} = 1。
+
+伯恩斯坦的調和函數：天才！\(B~i, n~(t)\) 具有非常對稱的形式。
+
+點\textbf{P}\textsubscript{i}稱作貝茲曲線的\textbf{控制點}。\href{https://zh.wikipedia.org/wiki/多邊形}{多邊形}以帶有\href{https://zh.wikipedia.org/wiki/線}{線}的貝茲點連接而成，起始於\textbf{P}0並以\textbf{P*}n*終止，稱作\textbf{貝茲多邊形}（或\textbf{控制多邊形}）。貝茲多邊形的\href{https://zh.wikipedia.org/wiki/凸包}{凸包}（convex
+hull）包含有 Bezier 曲線。
+
+\hypertarget{header-n28}{%
+\paragraph{特性}\label{header-n28}}
+
+本身曲線的波動幾乎總是小於邊界多邊形的波動。
+
+也就是說，曲線的起伏總是要比控制多邊形小。
+
+這個特點非常好，確保了它的形狀可控，光順性可以得到保障。
+
+\hypertarget{header-n32}{%
+\paragraph{升級}\label{header-n32}}
+
+本來是 n 階的 Bezier 曲線，原地不動、形狀不變，突然變成了 n + 1 階？
+
+這可能嗎？当然可能了。
+
+通過增加控制節點，我們可以在不改變當前曲線形狀的情況下，實現對曲線更靈活的控制。
+
+亦即，在原有的包裹多邊形的一條邊上，加入一個控制點（使得他們三點共線）。
+
+這樣，即可以保證圖形結構不改變，同時還能更精確地控制圖形（因為多一個控制點能帶來更多的變化，這是自然的。）
+
+\hypertarget{header-n38}{%
+\paragraph{缺點}\label{header-n38}}
+
+這個控制點一多，就非常難算⋯
+
+況且，在控制點多時，單個控制點對整體的影響力非常之小。
+
+\begin{quote}
+人類也很難直觀想像出調整控制點所帶來的影響。
+\end{quote}
+
+\hypertarget{header-n43}{%
+\subsubsection{B 樣條曲線}\label{header-n43}}
+
+Bezier 曲線的問題就是指定點有多少，就會有多少控制點。
+
+這樣，做局部針對性調整就很困難。
+
+B 樣條曲線的改進就在於：提供的點數目跟實際的控制點數目------可以不同。
+
+跟 Bezier
+唯一不一樣的地方就是可以隨意選擇控制點數目，公式表示都是类似的。
+
+\end{document}
