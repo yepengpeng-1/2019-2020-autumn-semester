@@ -2072,3 +2072,113 @@ void function(char *str) {
 
 ![image-20191230194802539](REVIEW.assets/image-20191230194802539.png)
 
+## Lecture 28: Minimizing TCB
+
+### Inside Compilers
+
+#### Learning Compilers
+
+![image-20191230195039587](REVIEW.assets/image-20191230195039587.png)
+
+考虑我们加入转义字符 `\v` 的过程：
+
+一开始在编译器里，还没有 `\v` 这个字符，所以我们要手动返回 ASCII 码；然后用旧编译器编译这个新编译器。
+
+现在，这个新编译器认识 `\n` 了，我们就可以把它改写成 III 的样子了。因为新编译器已经认识 `\v` 了。
+
+#### Compile a Compiler
+
+这就提醒我们了，编译器也是编译器编译的。
+
+看源代码没问题，不能说明你的程序编译之后还是没问题。
+
+![image-20191230195348113](REVIEW.assets/image-20191230195348113.png)
+
+一张图可以说明。
+
+### Reconstructing OS
+
+目前，OS 的体量绝对配得上 Monolithic 这个词。
+
+![image-20191230195501572](REVIEW.assets/image-20191230195501572.png)
+
+Linux Bug 的数量也是爆炸式的。
+
+### Types of OS
+
+OS 按照内核的构造来分类，可以分为微内核、宏内核和混合内核。
+
+#### Monolithic Kernel
+
+![image-20191230195633062](REVIEW.assets/image-20191230195633062.png)
+
+![image-20191230195647411](REVIEW.assets/image-20191230195647411.png)
+
+##### Pros
+
+*   Relatively few crossings
+
+*   Shared kernel address space
+
+*   Performance
+
+##### Cons
+
+*   Flexibility
+
+*   Stability
+
+*   Experimentation
+
+#### Micro Kernel
+
+![image-20191230195741601](REVIEW.assets/image-20191230195741601.png)
+
+![image-20191230195748617](REVIEW.assets/image-20191230195748617.png)
+
+能不加入 Kernel 的就不要加入。
+
+![image-20191230195811772](REVIEW.assets/image-20191230195811772.png)
+
+##### Pros
+
+*   Easier to develop services
+*   Fault isolation
+*   Customization
+*   Small kernel, easier to optimize
+
+##### Cons
+
+*   Lots of boundaries crossings
+*   (Relatively) poor performance
+
+### Root of Trust
+
+信任的根在哪里？
+
+笛卡尔说过，「你唯一不能怀疑的，就是你在怀疑这件事本身。」
+
+Jerome Saltzer 说过，「每个程序都应该只请求最低限度的权限来完成它的工作。」
+
+Xia Yubin 说过，TCB 应该尽可能地小。
+
+#### TCB: Trust Computing Base
+
+可信计算的根本…根本在哪里？
+
+![image-20191230200252041](REVIEW.assets/image-20191230200252041.png)
+
+Process 不信任别的 Process，但信任自己全部的 Threads；
+
+User Software 不信任别的 Softwares，但信任 OS；
+
+OS 不信任任何，除了硬件…
+
+从头到尾信任下去，总该有一个「根本」吧？
+
+##### Base
+
+软件信任的终点直到 BIOS、VMM、kernel loader、kernel……为止。
+
+硬件的信任直到 TPM、secure processor……为止。
+
