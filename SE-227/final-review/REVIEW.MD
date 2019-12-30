@@ -1205,3 +1205,205 @@ Xia YB 的目标没有变：Build Reliable Systems from Unreliable Components。
 ### Summary
 
 ![image-20191230141128021](REVIEW.assets/image-20191230141128021.png)
+
+## Lecture 19: Distributed Transactions
+
+>   接着讲分布式事务…
+
+### Replication Consistency
+
+>   重复一致性
+
+在多处重复存储的同一数据，怎么保证他们的一致性？
+
+也包括积极和消极两种。
+
+*   积极型
+    *   容忍（一段时间的）不一致，并在稍后修复他们。
+    *   假如「Out of Sync」（失去同步）的数据可以被容忍，那这种方法没问题。
+
+*   消极型
+    *   一定要求备份之间具有强有力的一致性。
+    *   假如失去同步的数据会带来非常严重的问题，就用这种策略。
+
+#### Optimistic Replication
+
+积极型具体怎么实现的呢？
+
+*   每次做修改的时候，都记录下进行操作的时间戳（Timestamp）。
+*   在恢复同步之后，再根据修改时间决定保留谁。
+
+>   Strawman 曰：拥有最大 mtime 的文件才能被保留。
+
+##### Clock Matters
+
+要保证同步的结果符合预期，很重要的一件事就是保证「时钟」在各个机器中同步。
+
+否则，生成的时间戳就不一致了。
+
+因此，我们有必要对 Replica 中的机器进行 Clock Synchronizing（时钟同步），确保时间戳的计算基准一致。
+
+#### Pessimistic Replication
+
+消极的人做事会比较认真（暴论）
+
+因此消极策略就必须做更多的事情来保证不出问题。
+
+这种策略的代表是 RSM 和 Paxos。
+
+##### Goal
+
+我们最终的目标还是实现类似于单机的效果：As if there's only one single copy.
+
+##### Strawman's Idea
+
+*   客户端给每个服务器都发送一遍请求，但不要求他们都成功；有一台成功就算完。
+
+遗憾的是可能出现 Network Partition：区隔问题。在这种情况下，每个客户端都只会连接一个固定的服务器，数据都只会进入那一区，Replica 就无从谈起。
+
+##### Handling Network Partitions
+
+客户端始终认定多数决。如果能访问到三台服务器，其中两台返回一致，那么两台就是多数决；如果只能访问两台服务器，或者三台服务器的数据都不一样，那么就只好等待了。
+
+这种情况下，就能处理 Single Failure 的问题了。
+
+##### Quorum
+
+>   法定人数
+
+你要求多少台服务器才能进行多数决？
+
+总不能一台服务器你就「多数决」，那不成。
+
+![image-20191230153234511](REVIEW.assets/image-20191230153234511.png)
+
+计算公式：Q~r~ & Q~w~ − Q~r~ + Q~w~ > N~replicas~。
+
+只有此条件满足才足够。
+
+## Lecture 20: RSM & Paxos
+
+还是接着我们上面的讲：消极的 Replica 策略。
+
+### RSM
+
+全称 Replicated State Machines。
+
+>    听着就专业。
+
+#### Definition
+
+*   通用的一套保证 Replica 一致性的方法。
+    *   对于一组初始状态一致的服务器…
+    *   对于按照相同顺序来到的相同 Input 的 Operation…
+    *   在没有随机扰动的情况下…
+    *   总会到达相同的终态。
+
+这一策略提供的保证还是很强的。
+
+#### Usage
+
+在我们使用 RSM 的过程中，最难保证的就是：
+
+如何确认对每一台服务器，所有请求的顺序都是一致的？
+
+如果发给单台服务器的请求顺序不一致，那么 RSM 条件不满足，就可能结束于不同的终态。
+
+### P/B Model
+
+Primary & Backup 模型。
+
+也就是主／备模型。不可以让所有的服务器具有相同的地位，无法保证他们拿到的 Operation 的顺序一致。那就没法决定听谁的了。
+
+#### General Idea
+
+基本的想法是：Coordinator 只去跟 Primary Server 沟通交流，而由 Primary 服务器去跟众多 Backup 服务器沟通。
+
+假如 Primary 服务器挂了，Coordinator 就会自动切换到 Backup 服务器提供服务，将他的地位提升到 Primary。
+
+#### Network Partition Issues
+
+在这种情况下遇到 NP 的时候，怎么办呢？
+
+这时候可能不同的 Coordinator 会连接到不同的 Server，并且他们都认为自己正在连接的就是 Primary。
+
+而不同的 Server 之间就存在不一致性，这问题就大了。
+
+![image-20191230154717816](REVIEW.assets/image-20191230154717816.png)
+
+#### View Server
+
+>   视图服务器
+
+看起来仅凭 Coordinator 跟 Server 还是会犯错，他们都看不到全局。
+
+需要一个在高点观察整个系统的服务器来解决问题。
+
+经由 View Server 来决定谁是 Primary，谁们是 Backup。
+
+![image-20191230155528821](REVIEW.assets/image-20191230155528821.png)
+
+现在结构图看起来是这样。
+
+VS 何德何能就能处理好 Network Partition 的问题呢？
+
+因为它遵循下面一些规则：
+
+1.  Primary must wait for backup to accept each request  
+
+2.  Non-primary must reject direct coordinator requests
+    *   That's what happened in the earlier failure, in the interim between the failure and S2 hearing that it was primary
+
+3.  Primary must reject forwarded requests
+    *   i.e., it won't accept an update from the backup
+
+4.  Primary in view **i** must have been primary or backup in view **i-1**  
+
+### Paxos
+
+#### Structures
+
+![image-20191230155803696](REVIEW.assets/image-20191230155803696.png)
+
+#### Procedure
+
+【Phase 0】首先，Client 还是地给 Proposer 发送请求。
+
+![image-20191230160618895](REVIEW.assets/image-20191230160618895.png)
+
+【Phase 1a】Leader 就创建一个最新的 Proposal ID（越大越新）并把它发送给 Quorum。
+
+![image-20191230160629129](REVIEW.assets/image-20191230160629129.png)
+
+【Phase 1b】Acceptor 来判定 Proposal ID 是否是最新的。如果这个 ID 比曾经见到过得还旧，那就丢弃它。否则，就把这个最大 pID 及其对应的值返回，并且更新自己的记忆。
+
+![image-20191230160639582](REVIEW.assets/image-20191230160639582.png)
+
+【Phase 2a】Leader 会从 Acceptor 中收集 Promise。假如收集到的数量足够，就把值 V 放到 Proposal 里面去。然后，发送 Accept Request 连带刚刚拿到的值 V 给 Quorum。
+
+![image-20191230160647359](REVIEW.assets/image-20191230160647359.png)
+
+【Phase 2b】Acceptor 会判断 Promise 是否仍然被持有。假如是的话，就注册值 V，并且发送一个 Accepted Message 给 Proposer 跟 Learners。假如不被持有，就忽略这条消息。
+
+![image-20191230160655182](REVIEW.assets/image-20191230160655182.png)
+
+【Phase 3】Learner 会给 Client 一个回应，与此同时可能根据 Request 采取一些行动。
+
+![image-20191230160732546](REVIEW.assets/image-20191230160732546.png)
+
+## CAP Theorem
+
+#### Unsolvable
+
+分散式運算機系統不可能同時提供以下所有三項保證。
+
+*   一致性（所有節點同時查看相同的資料）
+*   可用性（保證每個請求都會收到有關其成功還是失敗的回應）
+*   分區容差（系統繼續運行，儘管系統部分出現任意消息丟失或故障）
+
+这个我们之前也提到过。
+
+在它们三者之间做权衡，你会得到这么一个 3R 图：
+
+![image-20191230160910848](REVIEW.assets/image-20191230160910848.png)
+
