@@ -1,4 +1,4 @@
-# SE-227
+SE-227
 
 那么我们开始复习 CSE 下半学期的内容吧。
 
@@ -823,3 +823,114 @@ int FetchAndAdd(int *ptr) {
 打个比方，双方同时伸手去摸一个文件，约定如果刚好碰到对方摸，那就等待 500 ms 之后重试。结果他们刚好每次都碰上手，每次双方都立刻缩回手，并且在 500 ms 后重复这一动作。结果大家都摸不到这个文件。
 
 大概就是这么个意思。
+
+## Lecture 17: Thread & CV
+
+>    此 CV 非彼 Computer Vision…
+
+### Intro
+
+#### Producer & Consumer Problem
+
+生产者／消费者问题。简单说，就是独立运行的两个线程进行互相影响的操作。
+
+独立，是因为它们具有各自的逻辑和执行流程；互相影响，是基于他们共享的一块 Buffer（缓冲区）。
+
+Producer 负责往缓冲区里放数据。假如缓冲区已经满了，它就必须等待。
+
+Consumer 负责从缓冲区里拿出数据。假如缓冲区还是空的，它就必须等待。
+
+用经典的流媒体播放器为例：後台的网络请求线程会不断地进行网络请求，往缓冲区里塞还没播放的影片；而前台的播放线程则会按照一定速度从缓冲区里拿数据，并实现连续播放的效果。
+
+假如网络请求太快而播放线程跟不上，那么就会导致缓冲区塞满，网络请求器也不会继续进行请求。而假如网络请求太慢导致缓冲区时常净空，播放线程拿不到数据，则必须等待 Producer 的下一个生产动作。这时候就会「缓冲中…」了。
+
+用 Xia Yubin 的话来讲，这种策略就是 enable communication while keep isolation，在保证隔离的情况下启用通信交流。
+
+而那块 Buffer 就是交流的关键。
+
+但在那些「大规模、分离式」的系统中，就没有那么容易用一块共享的 Buffer 作为 Shared 了；为了保证隔离化和模块化，一般我们会采用类似 RPC 这类技术来实现信息的交流。
+
+在实际的计算机系统中，也有在 Kernel 态保留 Buffer、只允许通过特定 API 来读写 Buffer 的实例。
+
+### Bounded Buffer
+
+#### Bounded Buffer & APIs
+
+Bounded Buffer 就是我们上面提到的：空间有限的缓冲区。
+
+他提供的 API 是这样的：
+
+```c++
+void send(void* content);
+void* receive();
+```
+
+像一块甜蛋糕一样简单。但是留意到 `send` 和 `receive` 永远不会需要一个返回值指示操作能不能完成。
+
+只要他们返回了，就代表成功完成了 Produce／Consume 的操作。换句话说，如果没能完成操作，他们就不会返回。
+
+假如缓冲区满了／空的，那么他们根本不会返回控制流，而是会持续阻塞。
+
+这种实现的问题就是长时间的 Hanging，吊着不返回。
+
+况且，没有一个办法来实现 Sequence Coordination（顺序协调）。Consumer 的排队跟他们最终 Consume 的先后没有关系，完全是随机的。
+
+Producer 也可以看作是争抢者；他们争抢 Buffer 的空位。
+
+#### Bounded Buffer Implementation
+
+![image-20191230102324211](REVIEW.assets/image-20191230102324211.png)
+
+这是一种比较典型的 `send` 的实现。注意其中红色双向箭头指向的两行语句。是否可能交换他们？
+
+当然不行了。在这里我们所做的是：先写入内存，再将 `bb.in`  + 1。
+
+但如果我们先写入 `bb.in` ，再写内存 Buffer，那就意味着我们在实际做事之前先声张开来。
+
+特别注意 Send 跟 Send 之间肯定是不能重合的，一定有锁保护。
+
+>   事实上这个例子里只有一个 Sender 和一个 Receiver…
+
+但 Send 跟 Receive 之间不存在互斥锁，他们有可能会交错。
+
+所以我们一定要小心保证，不存在这种「错误的瞬态」。
+
+下面是 Send 跟 Receive 的完整实现。
+
+![image-20191230102702265](REVIEW.assets/image-20191230102702265.png)
+
+#### Implicit Assumptions
+
+*   单个 Consumer，单个 Producer。
+*   在各自的 CPU 上运行
+*   Bounded Buffer 的 in 和 out 变量不溢出
+*   Read 和 Write 操作都 Coherence
+*   Bounded Buffer 的 in 和 out 变量都满足 Before / After 的原子性
+*   The result of executing a statement becomes visible to other threads in program order
+
+>   怎么理解这个呢？意思是说单个线程所有的执行语句在其他线程看起来都是同样顺序的（不会乱序）。
+
+### Optimizations
+
+
+
+#### Concurrency
+
+>   有办法把这个 bb 给拓展到多核处理器上吗？
+
+事实上，这个（Single P Single C）的实现在双核 CPU 上工作完全良好。
+
+#### Multiple Senders
+
+>   不满足于 Single P Single C……能给我多个 Sender 吗？
+
+出现多个 Sender，就意味着他们可能同时调用 `send` 接口。
+
+甚至在总线上，寻址指令可能都在同时。
+
+很容易就能想出可能出问题的点：
+
+![image-20191230104246050](REVIEW.assets/image-20191230104246050.png)
+
+都以为自己作为 Producer 写入了一块内存，殊不知这块内存被两个人请求了。这样後写的人就白写了。
+
