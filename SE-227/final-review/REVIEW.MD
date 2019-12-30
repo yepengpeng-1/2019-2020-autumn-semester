@@ -1899,3 +1899,103 @@ Intel 著名的「炉芯熔毁」漏洞就是因为一类针对 Cache 的优化�
 
 有多大必要这么做？因为有的时候我们真的会做太过，有的时候又做的完全不够。
 
+## Lecture 26: Secure Channel, Local Security
+
+### Secure Channel
+
+何谓安全通道？
+
+在密码学中，安全通道是一种传输数据的方法，可以防止窃听和篡改。
+
+最容易想的方法就是加密，用秘密语言通信。
+
+#### Encryption
+
+![image-20191230190106100](REVIEW.assets/image-20191230190106100.png)
+
+留意到 encrypy 和 decrypt 是互逆运算，只需要持有一个 key。
+
+然而 MAC 生成出来就不是给你解密的。它保证的是除非你知道 key，否则不可能生成出对应的 token。
+
+#### Problems
+
+如下图所示，假如我们仅仅用 encrypt 和 MAC 来确保安全信道，就无法阻止重放攻击。
+
+![image-20191230190328894](REVIEW.assets/image-20191230190328894.png)
+
+#### Add a `seq`
+
+更好的办法是每次生成一个任意的随机信息 seq，跟 Message 一起发过去。这样，每次的 MAC(k, m | seq) 都不一样了。重放就无效了。
+
+![image-20191230190750102](REVIEW.assets/image-20191230190750102.png)
+
+#### Reflection Attack
+
+但是问题是攻击者可以做「反射攻击」：
+
+![image-20191230190901220](REVIEW.assets/image-20191230190901220.png)
+
+把发过去的 c|h 发还给自己，就有可能达成攻击目的。
+
+解决方案也很简单：发送和接收用不一样的 Key 就成了。
+
+#### Final Solution
+
+![image-20191230191005586](REVIEW.assets/image-20191230191005586.png)
+
+### Before That
+
+在开始的开始，双方该如何交换他们的密钥，这是加解密所必须的？
+
+#### Key Exchange
+
+![image-20191230191157896](REVIEW.assets/image-20191230191157896.png)
+
+为了在一开始交换双方的 Keys，我们利用了这么一个数学特性：
+
+*   给出一个数字 g 和质数 p，令 $g^r mod\ p = A$，在我们知道 $g$、$p$、$A$ 的情况下都很难算出 $r$。
+
+因此 Alice 跟 Bob 可以互相挑选随机数 a 和 b，分别计算 $g^a mod\ p$ 和 $g^b mod\ p$ 并告诉对方。这样，对方都能知道 $g^{ab} mod\ p$ 的值了。我们就以这个作为密钥；而监听到这个信息的攻击者无法从中推算出 a 或是 b，也就保证了密钥的安全。
+
+#### Diffie-Hellman Key Exchange
+
+有一种用心险恶的手段：
+
+![image-20191230191722037](REVIEW.assets/image-20191230191722037.png)
+
+作为一个中间人直接参与到密钥交换的步骤，并且始终扮演这一角色以便解密他们的通信。
+
+太可怕了。
+
+### RSA Algorithm
+
+上面的问题是：即密钥分发的安全性无法保证。
+
+#### Dual-Keys
+
+RSA 要求两把密钥：分别称为 Public Key 和 Private Key。
+
+他们并不是随便选的，而是满足这个条件：
+
+`sign(secret_key, message) => sig`
+
+`verify(public_key, message, sig) => true/false`
+
+#### Process
+
+公钥是可以公开的，以任何方式（包括 Insecure 方式）都行，因为目的就是为了让大家都知道。
+
+而 Skey 跟 Pkey 的特性也让一件事情成为可能：验证一个 Message 是否真的来自某个人。
+
+#### Symmetric & Asymmetric
+
+所谓对称的加密，就是加密和解密的密钥是一致的。
+
+非对称加密，即加密和解密的密钥不一致，但都是成对出现的。
+
+通常来说是以 $M^K$ = Public + Private 的做法来拆分。
+
+### Local Security
+
+应该不会考（逃
+
