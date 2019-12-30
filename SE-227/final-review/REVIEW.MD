@@ -1999,3 +1999,76 @@ RSA 要求两把密钥：分别称为 Public Key 和 Private Key。
 
 应该不会考（逃
 
+## Lecture 27: ROP & CFI
+
+### Return-Oriented Programming
+
+#### Stack Buffer Overflow Attack
+
+回忆一下我们之前做的 ICS Lab 3。
+
+本质上是类似于这种
+
+```c
+void function(char *str) {
+   char buf[16];
+   strcpy(buf,str);
+}
+```
+
+没有边界检查和长度限制的 `strcpy`。这是毒药。
+
+我们可以通过构造过长的字符串来改写栈空间中 `char buf[16]` 之后的内存，最重要的就是放 Return Address 的内存了。
+
+如果能改写这一部分，那么可以跳转到任何内存位置继续执行了。
+
+甚至可以自己在栈上写一些代码，然后跳转到栈上执行（这是最简单的一种方式）。
+
+#### Data Execution Prevention
+
+也就是防止数据被执行。
+
+他就是告诉 CPU：你别读到什么内存位置都拿去执行啊。
+
+比如你读到一块栈上的内存，就不可能用来作为 Instr 执行啊。那是数据段啊。
+
+![image-20191230193629257](REVIEW.assets/image-20191230193629257.png)
+
+这样，你精心写在 Stack 上的代码在 PC 被跳进去之后，直接遇到 NX（不可执行）标识位，然后就报错了，你的攻击代码也就执行不下去了。
+
+#### Code Reuse Attack
+
+也是我们在 ICS Lab 里用过的手段：既然你不让执行我写在栈里的 Code，那我从你的大段程序代码里找出一些我要用的小指令，然后拿来做坏事。
+
+这种手段不用多说，我一辈子也忘不了。
+
+![image-20191230194123927](REVIEW.assets/image-20191230194123927.png)
+
+#### Defense
+
+防御措施还是很多的，比如：
+
+*   拒绝你看我的 Binary File
+    *   比如，作为一个服务器程序运行，骇客就无法返汇编我的二进制；
+*   ASLR，把代码位置随机化，这样你就无法预料我的代码地址
+*   Canary，金丝雀法
+    *   在栈底部放置一些无用的特定数值，作为金丝雀。假如金丝雀死了（被您的 Overflow 给弄没了），那就说明你改写了栈，拒绝继续执行。
+
+![image-20191230194458465](REVIEW.assets/image-20191230194458465.png)
+
+### Control Flow Integrity
+
+>   所谓 CFI，就是怎么保证程序的控制流是我预先规划好的？
+
+![image-20191230194650877](REVIEW.assets/image-20191230194650877.png)
+
+#### CFG
+
+>    Control Flow Graph
+
+我们先把我们程序的控制流图给他画出来。
+
+这样，我们就可以添加一些检查代码，确认「当我来到这里的时候，我还在这张 Graph 的合理位置上」。
+
+![image-20191230194802539](REVIEW.assets/image-20191230194802539.png)
+
