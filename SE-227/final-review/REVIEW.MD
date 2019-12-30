@@ -1,4 +1,4 @@
-SE-227
+#SE-227
 
 那么我们开始复习 CSE 下半学期的内容吧。
 
@@ -933,4 +933,83 @@ Producer 也可以看作是争抢者；他们争抢 Buffer 的空位。
 ![image-20191230104246050](REVIEW.assets/image-20191230104246050.png)
 
 都以为自己作为 Producer 写入了一块内存，殊不知这块内存被两个人请求了。这样後写的人就白写了。
+
+#### Locked Send
+
+![image-20191230114339050](REVIEW.assets/image-20191230114339050.png)
+
+这样加的锁，正确吗？
+
+可能有两个 Sender 同时判断 `if bb.in - bb.out < N`，然后同时落入 TRUE 分支。
+
+然而如果此时 Buffer 只有一个空位，那么就会造成在不该 Send 的时候发送 Send。
+
+#### Locked Send: Corrected
+
+![image-20191230115727673](REVIEW.assets/image-20191230115727673.png)
+
+我们把判断 `< N` 的代码也放进锁来，就不是问题了。
+
+#### Locked Send: Another
+
+![image-20191230115806624](REVIEW.assets/image-20191230115806624.png)
+
+只是换了一个包围锁的位置。基本类似。
+
+### `yield()`... What?
+
+#### Intro
+
+我们在使用「锁」的时候，会产生大量的 Spinning 的。也就是，不断地在各个线程之间切换，而其中大部分线程都是在 While 循环中 Spinning 着。
+
+好浪费啊！有没有什么办法在条件不满足的时候，直接不要调度给他呢？
+
+#### The Yield: System Call
+
+这个 System Call 主要做这几件事情：
+
+*   Suspend Running Thread
+    *   把调用这个 System Call 的线程挂起，但是记录下他的帧指针和页表指针
+*   Choose New Thread
+    *   用 Round Robin 找下一个可以运行的线程，直到找到一个可以运行的线程（有可能就是他自己）
+*   Resume Thread to Run
+    *   把那个线程叫醒，恢复上下文继续运行。
+
+我们需要的数据结构是：
+
+*   threads table
+*   CPUs table
+*   t_lock
+
+---
+
+#### `send()` with `yield()`
+
+![image-20191230122325889](REVIEW.assets/image-20191230122325889.png)
+
+用例子来讲一下。在我们发现 Send 条件不满足的时候，先把锁放了，然后 yield 自己等下次被唤醒。
+
+这样，不会有一个失败的 Sender 始终拿着锁 Spin，而是智慧地放弃调度权等下次拿锁。
+
+#### Yield's Implementation
+
+![image-20191230123257797](REVIEW.assets/image-20191230123257797.png)
+
+Yield 的具体实现是这个样子的。
+
+假如所有的其他 thread 都不是 Runnable，那就会到她自己身上继续执行。
+
+### Conditional Variables
+
+留意到上面的实现有个问题。有大量的 Check，而且反复地拿锁放锁也不好，很浪费。
+
+有没有什么办法，让 Buffer 有空位的时候，才去唤醒 Sender Thread，而如果没有就让它继续睡？
+
+天底下哪有这样的好事？
+
+标题里的 CV 就是「条件变量」的意思。
+
+#### Solution
+
+![image-20191230124012234](REVIEW.assets/image-20191230124012234.png)
 
