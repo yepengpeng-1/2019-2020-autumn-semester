@@ -770,8 +770,8 @@ Ply 格式的读取基于 tinyply 的包装函数实现。
 留意到因为要实现贴图，\texttt{.ply}
 格式的读取器需要同时读取定点位置、法向量方向、贴图 UV 坐标。
 
-\hypertarget{header-n234}{%
-\subparagraph{坐标转换}\label{header-n234}}
+\hypertarget{header-n222}{%
+\subparagraph{坐标转换}\label{header-n222}}
 
 经过文本编辑器打开分析我下载的 \texttt{.ply}
 文件，发现它并没有提供贴图所用的 UV 坐标，而是提供了 ST 坐标。
@@ -783,13 +783,13 @@ ST 坐标系和 UV
 
 所以做一次变换即可。
 
-\hypertarget{header-n246}{%
-\subparagraph{贴图读取}\label{header-n246}}
+\hypertarget{header-n227}{%
+\subparagraph{贴图读取}\label{header-n227}}
 
 参见第一部分中的「材质加载」部分。
 
-\hypertarget{header-n254}{%
-\subparagraph{模型绘制}\label{header-n254}}
+\hypertarget{header-n229}{%
+\subparagraph{模型绘制}\label{header-n229}}
 
 要在绘制三角形的时候，同时将物体表面的贴图和法向量（用于光照计算）绘制出来，只需要在调用
 \texttt{glVertex} 之前调用 \texttt{glNormal} 指定法向量方向，并调用
@@ -798,8 +798,8 @@ ST 坐标系和 UV
 另外，别忘了用 \texttt{glBindTexture} 和
 \texttt{glEnable(GL\_TEXTURE\_2D)} 来启用材质哦。
 
-\hypertarget{header-n263}{%
-\subparagraph{光照绘制}\label{header-n263}}
+\hypertarget{header-n232}{%
+\subparagraph{光照绘制}\label{header-n232}}
 
 参见 Assignment \#3 中的光照绘制。
 
@@ -813,8 +813,8 @@ ST 坐标系和 UV
 \caption{}
 \end{figure}
 
-\hypertarget{header-n276}{%
-\subparagraph{背景贴图}\label{header-n276}}
+\hypertarget{header-n237}{%
+\subparagraph{背景贴图}\label{header-n237}}
 
 为了实现暗室之中反射的效果，我们在这个房间周围放置四个平面，在未贴图的情况下如下图所示：
 
@@ -828,19 +828,19 @@ ST 坐标系和 UV
 
 比照第二部分「雾气弥漫」中的背景绘制实现即可。
 
-\hypertarget{header-n284}{%
-\paragraph{第四部分：佛祖保佑}\label{header-n284}}
+\hypertarget{header-n242}{%
+\paragraph{第四部分：佛祖保佑}\label{header-n242}}
 
-\hypertarget{header-n286}{%
-\subparagraph{环境搭建}\label{header-n286}}
+\hypertarget{header-n243}{%
+\subparagraph{环境搭建}\label{header-n243}}
 
 由于此部分和上一节的环境一致（还是在那个房间里），因此将其直接拷贝过来，并且稍微把摄影机视角抬高一点，以体现佛祖的神圣性。
 
 另外，为了使得各个方向来的光线可以分辨，这里我们在三个等距方向上放置了三盏
 RGB 灯光。这样方向就能直观地通过颜色的不同来区分了。
 
-\hypertarget{header-n293}{%
-\subparagraph{模型加载}\label{header-n293}}
+\hypertarget{header-n246}{%
+\subparagraph{模型加载}\label{header-n246}}
 
 事实上，这里最难办的部分就是模型加载了。鉴于分辨率最高的模型文件大小达到了数十
 MiB，在测试机器上需要耗费数十秒钟加载，因此同步的读取显然不现实。
@@ -867,18 +867,18 @@ MiB，在测试机器上需要耗费数十秒钟加载，因此同步的读取�
 
 调用 \texttt{CreateThread} 函数即可启动子线程啦。
 
-\hypertarget{header-n313}{%
-\subparagraph{模型绘制}\label{header-n313}}
+\hypertarget{header-n255}{%
+\subparagraph{模型绘制}\label{header-n255}}
 
 跟第三部分基本类似，只是这里不需要贴图，只需要调整模型材质和色泽即可。
 
-\hypertarget{header-n316}{%
-\paragraph{第五部分：超监督}\label{header-n316}}
+\hypertarget{header-n257}{%
+\paragraph{第五部分：超监督}\label{header-n257}}
 
 所谓的「超监督」就是依次调度上面四个子程序的外壳程序。同时她还负责背景音乐的播放。
 
-\hypertarget{header-n320}{%
-\subparagraph{音频读取}\label{header-n320}}
+\hypertarget{header-n259}{%
+\subparagraph{音频读取}\label{header-n259}}
 
 每个叙事阶段都有特定的背景音乐，有一些场景还有多种音效的混合。
 
@@ -889,8 +889,8 @@ MiB，在测试机器上需要耗费数十秒钟加载，因此同步的读取�
 
 在产生场景切换时，音乐调度器会收到通知，并调整启用的音轨。
 
-\hypertarget{header-n330}{%
-\subparagraph{程序执行}\label{header-n330}}
+\hypertarget{header-n264}{%
+\subparagraph{程序执行}\label{header-n264}}
 
 超监督本身没有场景绘制的功能，因此其中出现的资源都是 Photoshop
 画出来的。
@@ -900,18 +900,18 @@ MiB，在测试机器上需要耗费数十秒钟加载，因此同步的读取�
 
 使用前请务必 \texttt{using\ System.Diagnostics}。
 
-\hypertarget{header-n724}{%
-\subparagraph{依赖}\label{header-n724}}
+\hypertarget{header-n268}{%
+\subparagraph{依赖}\label{header-n268}}
 
 主程序使用 C\# 书写，依赖于 Microsoft .NET Framework 4.7.2。
 
 此外，需要 \texttt{wmp.dll} 以实现音频播放功能。
 
-\hypertarget{header-n342}{%
-\subsubsection{问题和解决}\label{header-n342}}
+\hypertarget{header-n271}{%
+\subsubsection{问题和解决}\label{header-n271}}
 
-\hypertarget{header-n346}{%
-\paragraph{ST 坐标系和 UV 坐标系}\label{header-n346}}
+\hypertarget{header-n272}{%
+\paragraph{ST 坐标系和 UV 坐标系}\label{header-n272}}
 
 ply 格式中可能使用 ST 坐标系来描述贴图，也可能使用 UV 坐标系。
 
@@ -919,14 +919,14 @@ ply 格式中可能使用 ST 坐标系来描述贴图，也可能使用 UV 坐�
 
 在读取时一定要细心留意这两种不同的情况并分别处理，否则就会产生贴图错误。
 
-\hypertarget{header-n351}{%
-\paragraph{Blend Mode 和 Depth Test}\label{header-n351}}
+\hypertarget{header-n276}{%
+\paragraph{Blend Mode 和 Depth Test}\label{header-n276}}
 
 深度测试在大部分时候都应当开启，除非希望手动渲染半透明的物体或使用非默认的混合模式，不希望
 OpenGL 自动将被遮挡物体从渲染管线中移除。这种时候还是应当禁用它。
 
-\hypertarget{header-n357}{%
-\paragraph{MediaPlayer 和 SoundPlayer}\label{header-n357}}
+\hypertarget{header-n278}{%
+\paragraph{MediaPlayer 和 SoundPlayer}\label{header-n278}}
 
 MediaPlayer 由 \texttt{System.Windows.Media} 提供，而 SoundPlayer 则是由
 \texttt{System.Media} 提供。
@@ -946,8 +946,8 @@ DirectSound 的 C/C++ 风格的接口。
 实际测试发现在部分虚拟机环境下并不能正常工作，因此不推荐使用。
 \end{quote}
 
-\hypertarget{header-n370}{%
-\paragraph{SOIL 里的坑}\label{header-n370}}
+\hypertarget{header-n286}{%
+\paragraph{SOIL 里的坑}\label{header-n286}}
 
 在 Debug 的过程中，留意到 SOIL
 在读取部分类型的贴图文件时，会出现图片倒置的错误，即旋转了 180
@@ -957,8 +957,8 @@ DirectSound 的 C/C++ 风格的接口。
 
 STBI 库未发现此类问题。
 
-\hypertarget{header-n740}{%
-\paragraph{机能限制}\label{header-n740}}
+\hypertarget{header-n290}{%
+\paragraph{机能限制}\label{header-n290}}
 
 鉴于测试机器并没有独立显卡，且 OpenGL 实现是 VMWare
 虚拟机提供的，性能堪忧。因此程序在绘制最高分辨率佛像模型的时候会出现严重的掉帧，绘制速率甚至不到
@@ -968,17 +968,17 @@ STBI 库未发现此类问题。
 
 另外，程序中大部分用于流程控制的代码都并非基于经过的帧数而是执行程序以来的真实时间。因此掉帧不会对程序流程产生影响。
 
-\hypertarget{header-n735}{%
-\subsubsection{笔记}\label{header-n735}}
+\hypertarget{header-n294}{%
+\subsubsection{笔记}\label{header-n294}}
 
 自第九周（2019 年 11 月 7 日）以来的笔记参见 \texttt{./notes} 目录下的
 Markdown 和 TeX 文件。
 
-\hypertarget{header-n755}{%
-\subsubsection{致谢}\label{header-n755}}
+\hypertarget{header-n296}{%
+\subsubsection{致谢}\label{header-n296}}
 
-\hypertarget{header-n756}{%
-\paragraph{Documentations}\label{header-n756}}
+\hypertarget{header-n297}{%
+\paragraph{Documentations}\label{header-n297}}
 
 \begin{itemize}
 \item
@@ -987,8 +987,8 @@ Markdown 和 TeX 文件。
   \href{http://www.opengl-tutorial.org}{opengl-tutorial.org}
 \end{itemize}
 
-\hypertarget{header-n775}{%
-\paragraph{Third-Party Libraries}\label{header-n775}}
+\hypertarget{header-n303}{%
+\paragraph{Third-Party Libraries}\label{header-n303}}
 
 \begin{itemize}
 \item
@@ -1014,7 +1014,7 @@ Markdown 和 TeX 文件。
   library 
 \end{itemize}
 
-\hypertarget{header-n816}{%
-\paragraph{SE-344 staff}\label{header-n816}}
+\hypertarget{header-n319}{%
+\paragraph{SE-344 staff}\label{header-n319}}
 
 \end{document}

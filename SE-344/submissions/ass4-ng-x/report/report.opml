@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title></title>
+    <dateModified></dateModified>
+    <ownerName></ownerName>
+  </head>
+  <body>
+<outline text="SE-344">
+  <outline text="Assignment Final Report">
+    <outline text="概述">
+      <outline text="第一部分：技术框架">
+        <outline text="GLFW" _note="由于 GLFW 相较于 FreeGLUT 提供了更接近底层的 Shader&#10;支持，因此第一部分涉及到法线贴图的动画将基于 GLFW 开发。&#10;&#10;使用的 GLFW 版本是 `3.3`。">
+        </outline>
+        <outline text="FreeGLUT" _note="由于这一 Utility Toolkit 提供了封装过的大量的实用工具函数，极大地简化了&#10;OpenGL 的开发进程，因此後续一些相对简单的动画制作将基于 FreeGLUT 完成。&#10;&#10;使用的 FreeGLUT 版本是 `3.2.1`。">
+        </outline>
+        <outline text="SOIL" _note="由于本次作业涉及到大量背景和材质图片的读取，而 OpenGL 本身没有提供除&#10;`.bmp` 格式之外的图片读取器。因此，引入了 SOIL 库作为 `.png`&#10;格式素材的读取器。">
+        </outline>
+        <outline text="编译环境" _note="使用的操作系统是 Windows 10 x64 LTSC 1809 (`17763.737`)。&#10;&#10;使用的 IDE 是 Visual Studio 2019 Community (`16.2.4`)。">
+        </outline>
+        <outline text="编程语言" _note="为了方便管理及控制复杂度，本次大作业的主体部分被拆分成了四个基于 OpenGL&#10;的程序，每一个对应故事情节中的一部分。他们分别基于 GLFW 和&#10;FreeGLUT，均以 C++ 写成。&#10;&#10;为了方便展示观看，还使用 C\#&#10;写了一个调度器。她将按照故事剧情依次进行调度，同时播放适当的音频以渲染气氛。">
+        </outline>
+      </outline>
+      <outline text="第二部分：运行时截图">
+        <outline text="Intro 页面" _note="![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/1.intro.png)&#10;&#10;&gt; 静态片头画面。">
+        </outline>
+        <outline text="Notebook 页面" _note="![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/2.book.png)&#10;&#10;&gt; 笔记本翻转着进入镜头。同时，可以感受到光线带来的表面凹凸效果。&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/3.room.png)&#10;&#10;&gt; 笔记本渐渐飘远，进入下一场景。">
+        </outline>
+        <outline text="Smoke 页面" _note="![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/4.fog.and.book.png)&#10;&#10;&gt; 具有粒子效果的迷雾扩散并遮盖了笔记本。&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/5.fog.png)&#10;&#10;&gt; 笔记本已经看不见了。&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/6.fog.vanished.png)&#10;&#10;&gt; 迷雾散去，出现了一间暗室。">
+        </outline>
+        <outline text="Darkroom 页面" _note="![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/7.mysterious.room.png)&#10;&#10;&gt; 过场静态图片。进入下一场景。&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/8.dark.room.png)&#10;&#10;&gt; 暗室里几乎什么都看不见，除了面前的一堆石头和四面隐隐发光的墙。&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/9.flashlight.png)&#10;&#10;&gt; 按 Space&#10;&gt; 键打开手电筒，可以看到明显的高光效果和石头表面凹凸不平的效果。&#10;&gt;&#10;&gt; 按 W、A、S、D 键调整光源的位置。按 R 键复位。&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/10.exploded.png)&#10;&#10;&gt; 按下 B 键，炸弹从天而降，碰撞到石头之後产生爆炸。">
+        </outline>
+        <outline text="Buddha 页面" _note="![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/11.buddha.png)&#10;&#10;&gt; 静态过场图片。进入下一场景。&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/12.buddha.low.png)&#10;&#10;&gt; 此时场景仍然在之前的房间里，但相较上一个画面亮度提高了些，视角也有所改变。&#10;&gt;&#10;&gt; 初始情况下，模型分辨率很低。&#10;&gt;&#10;&gt; 为了更明显地表现出方向感和纵深感，场景中放置了三盏 R、G、B&#10;&gt; 色的灯光，彼此相隔 $\\frac 1 3$ 个圆摆放。&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/13.buddha.medium.png)&#10;&#10;&gt; 模型在运行时动态地加载并使用了中等分辨率的模型。&#10;&gt;&#10;&gt; 可以看出此时模型表面光滑了一些。&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/14.buddha.high.png)&#10;&#10;&gt; 模型在运行时动态地加载并使用了高分辨率的模型。&#10;&gt;&#10;&gt; 此时模型的表面光滑了不少，表面带着银色的光泽。&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/15.buddha.finest.png)&#10;&#10;&gt; 模型在运行时动态地加载并使用了最高分辨率的模型。&#10;&gt;&#10;&gt; 此时模型的表面已经相当光滑了，表面还带着金色的光泽。">
+        </outline>
+        <outline text="Outro 页面" _note="![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/16.fin.png)&#10;&#10;&gt; 展示了开发过程中引用的第三方库以及参考网站。&#10;&gt;&#10;&gt; 非常感谢。">
+        </outline>
+      </outline>
+      <outline text="第三部分：操作说明" _note="-   在 Supervisor 外壳程序中，可点按左下角的「关于」按钮来查看信息。&#10;&#10;-   在 Supervisor 外壳程序中，可点按左下角的「离开」按钮来结束程序。&#10;&#10;-   在 Supervisor 外壳程序中，可以通过点按左上角的 `&lt;` 和 `&gt;`&#10;    按钮在不同页面之间切换。&#10;&#10;-   在 Supervisor 外壳程序中，还可以通过点按屏幕顶部的 Tab&#10;    菜单页来切换分页。&#10;&#10;-   在 Darkroom 页面子程序中，点按空格键即可打开「手电筒」。&#10;&#10;-   在 Darkroom 页面子程序中，在手电筒开启的状态下可通过按 W、A、S、D&#10;    来调整灯光位置。&#10;&#10;-   在 Darkroom 页面子程序中，在手电筒开启的状态下可通过按 R&#10;    来将灯光复位。&#10;&#10;-   在 Darkroom 页面子程序中，在手电筒开启的状态下可通过按 B&#10;    来引爆炸弹。">
+      </outline>
+    </outline>
+    <outline text="详细">
+      <outline text="第一部分：笔记出现">
+        <outline text="模型建构" _note="这一步骤中需要的模型相对简单：只是一个长宽比为&#10;$\\sqrt 2 : 1$、厚度随意的六面立方体而已。为了简单起见，不采用从 `.obj`&#10;或 `.ply` 文件中读取模型的做法，而是直接将模型顶点数据硬编码到源代码中。&#10;&#10;&gt; 此部分对应的源文件为 `./1-title/source/ModelKits.hpp`。&#10;&#10;模型采用如下的结构体保存：&#10;&#10;    typedef struct modelRecord {&#10;        float* buffer;&#10;        size_t size;&#10;    } * modelRecordT;&#10;&#10;`float` 数组中，八个浮点数编为一组表示一个顶点；分别是 3 个顶点坐标、3&#10;个顶点法向量和 2 个顶点纹理坐标 u、v。&#10;&#10;正方体有六个面；每个面需要两个三角形拼凑而成。每个三角形有三个顶点（废话）。因此数组中的浮点数个数为&#10;6 × 2 × 3 × 8 = 288。&#10;&#10;由于 `float*` 类型无法携带数组大小信息，因此将 `size`&#10;包装在结构体中一并传递给渲染器。">
+        </outline>
+        <outline text="材质制作" _note="Assignment Final 中提供的贴图并非是标准的 Normal Mapping&#10;所需的材质。标准材质中的每个像素点的 R、G、B 分量分别对应了法线方向的&#10;x、y、z，其中 z 为垂直纸面向上的方向。&#10;&#10;由于大部分材质的起伏都不大，基本都沿着正规的 z&#10;方向，因此反映到材质图片中的 B（蓝色）分量就相对较高，整体色调就偏蓝。&#10;&#10;将给出的深度图转换为法线贴图的方式很多；这里采用了 `CrazyBump`&#10;软件来实现这一转换。&#10;&#10;转换前后的图片如图所示。&#10;&#10;![](/Volumes/Macintosh HD (Sierra)/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/origin_and_nrm.png)">
+        </outline>
+        <outline text="材质加载" _note="为了在保证图片质量的前提下尽量减小文件体积，所有贴图一律采用 `.png`&#10;格式保存。&#10;&#10;首先，使用 `glGenTextures` 函数初始化一类材质 ID。用 `glActiveTexture`&#10;函数将其在上下文中激活。&#10;&#10;接着，通过 `stbi_load` 函数即可将贴图文件读取到 `unsigned char* buffer`&#10;缓冲区中。&#10;&#10;随后，使用 `glTexImage2D` 函数即可使用缓冲区初始化材质。&#10;&#10;最后，别忘了用 `stbi_image_free` 释放缓冲区，以免内存泄漏。&#10;&#10;通过这种操作，依次引入三种材质：一种是 `title.png`&#10;对应的一般表面贴图；一种是 `title_spec.png` 对应的反射光贴图；一种是&#10;`title_NRM.png` 对应的法线贴图。&#10;&#10;&gt; 反射光贴图通过明/暗的区域来指定物体表面反射光的强度，以增强真实感。">
+        </outline>
+        <outline text="绘制模型" _note="GLFW 的模型绘制没有 FreeGLUT 那样良好的封装。因此步骤相对来说复杂一些。&#10;&#10;由于这里需要大量空间向量的计算，因此引入了 `glm` 库来辅助。&#10;&#10;为了实现镜头逐渐拉远的效果，使用下面的代码来计算视角向量：&#10;&#10;    if ( zoomOutSpeed &gt; 0.01f ) {&#10;      zoomOutSpeed *= 0.5f;&#10;    }&#10;&#10;    view = glm::translate( view, glm::vec3( 0.0f, 0.0f, -zoomOutSpeed ) );&#10;&#10;将视角位置向量 `view` 保存好，稍后会用到。&#10;&#10;同时模型还需要自转，因此使用下面的代码来旋转模型：&#10;&#10;    model = glm::rotate( model, radius, glm::vec3( 0.5f, 0.1f, 0.0f ) );&#10;&#10;代码将模型向量 `model` 以 (0.5, 0.1, 0.0) 向量为轴旋转 `radius` 度。&#10;&#10;最后，我们使用 `glBindVertexArray` 绑定顶点缓冲，并使用 `glDrawArrays`&#10;绘制模型。">
+        </outline>
+        <outline text="着色器" _note="尝试了很多种着色器的实现方法，最终采用的着色器是内嵌在&#10;`./1-title/rendering/shader.cpp` 中的那一种。&#10;&#10;其中顶点着色器相对简单，接受的参数包括一个 `position`、一个 `normal`&#10;和一个 `textureCoordinate`。就是我们上面的顶点缓冲区里的八项内容。&#10;&#10;另外还有全局变量 `projection`、`view`、`model` 和&#10;`normalMatrix`，分别代表投影灭点位置、视角位置、模型变换矩阵和法线变换矩阵。&#10;&#10;算法只有四行：&#10;&#10;    gl_Position = projection * view * model * vec4(position, 2.0f);&#10;    fragPosition = vec3(model * vec4(position, 2.0f));&#10;    outNormal = normalMatrix * normal;&#10;    textureCoordinates = inTextureCoordinates;&#10;&#10;最终的位置 `gl_Position`&#10;将会由投影点、视角位置、模型位置共同决定。将他们做叉乘来实现计算。&#10;&#10;而每个片段的 `fragPosition` 则直接用 `model` 和 `position` 叉乘得到。&#10;&#10;真实的法线方向也由输入的法线方向和坐标变换矩阵叉乘得到。&#10;&#10;而 `textureCoordinates` 保持不变，直接传递给片段着色器。&#10;&#10;片段着色器就比较复杂了。为了实现凹凸效果，我们需要对法向量开刀，将其改写为&#10;Normal Mapping 的数据。&#10;&#10;留意到法线贴图中，R、G、B 分量的取值范围都是&#10;\[0, 1\]；然而实际的法线方向取值范围则是 \[ − 1, 1\]。&#10;&#10;因此我们必须进行一次线性变换来将其进行重定向，将每一个分量进行  × 2 − 1&#10;的操作：&#10;&#10;    vec3 normalMap = texture(material.emission, textureCoordinates).rgb * 2.0 - 1.0;&#10;    vec3 normalNormal = normalize(normalMap.rgb);&#10;&#10;随后，为了计算环境光的颜色，利用下面的公式：&#10;&#10;    vec3 ambientLight = ambientStrength * lightColor * vec3(texture(material.diffuse, textureCoordinates));&#10;&#10;计算「光强 × 光色 ×（漫反射系数 结合&#10;贴图坐标）」，即可得到环境光对物体产生的颜色影响。&#10;&#10;用同样的方法计算漫反射光的颜色：&#10;&#10;    vec3 diffuseColor = diffuseStrength * lightColor * vec3(texture(material.diffuse, textureCoordinates));&#10;&#10;接着，计算反射光的颜色，利用下面的公式：&#10;&#10;    vec3 specular = specularStrength * lightColor * vec3(texture(material.specular, textureCoordinates));&#10;&#10;计算「光强 × 光色 ×（镜面反射系数 结合&#10;贴图坐标）」，即可得到反射光对物体产生的颜色影响。&#10;&#10;最后，将三种颜色混合在一起，即可得到最终的片段颜色了。&#10;&#10;    gl_FragColor = vec4(ambientLight + diffuseColor + specular, 1.0f);">
+        </outline>
+        <outline text="电闪雷鸣" _note="为了模拟闪电的效果，采用下面这个随便写的随机算法来实现：&#10;&#10;    if ( int( rand_color * 27544 ) % 13 == 0 ) {&#10;      // simulates the storm effect&#10;      glClearColor( rand_color, rand_color, rand_color, 1.0f );&#10;    }&#10;    else {&#10;      glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );&#10;    }&#10;&#10;本质上就是随机用带颜色的笔刷绘制背景而已。配合上外壳程序的声音效果还勉强能看。">
+        </outline>
+      </outline>
+      <outline text="第二部分：雾气弥漫">
+        <outline text="粒子系统" _note="这一部分的难点主要是如何模拟真实的雾气弥漫和消散的效果。因此，自行实现了一个简单的、带有增值、耗散的粒子系统。&#10;&#10;&gt; 此部分代码参见文件 `./2-smoke/particles/particle_generator.hpp`。&#10;&#10;每个粒子具有下面一些属性：&#10;&#10;    struct Particle {&#10;        float posx, posy;&#10;        float spdx, spdy;&#10;        float alpha;&#10;        bool  valid;&#10;    };&#10;&#10;依次为二维空间中的位置、速度，粒子的透明度，以及是否有效的标识位。&#10;&#10;由于对于「雾气」来说，粒子存活的时间越久，透明度越低，且半径越大（由于扩散的稀释效应）。&#10;&#10;因此将三个变量综合到同一个 `alpha` 变量中，方便。&#10;&#10;关键的粒子系统更新函数主要做下面这些事情：&#10;&#10;-   按照每个粒子的速度更新其位置；&#10;&#10;-   令每个粒子在一定范围内随机地失去生命值（对应上面的 `alpha`）；&#10;&#10;-   假如粒子越界、或是生命值降低为 0，则将其从粒子系统中清除；&#10;&#10;-   随机更新粒子的速度。&#10;&#10;由于每次更新包含对数组本身的更新，因此采用互斥锁 `mutex` 来防止 Race。">
+        </outline>
+        <outline text="绘制粒子" _note="第二部分的需求很简单，因此也就没有使用 GLFW 的理由了。&#10;&#10;核心代码如下：&#10;&#10;    for ( const auto&amp; i : master-&gt;particles ) {&#10;            float radius      = ( 1.5f - i.alpha ) * 50.0f;&#10;            auto  actualAlpha = i.alpha / 3.0f;&#10;&#10;            double n = double( random_int() % 6 ) + 6;  // fragment count&#10;&#10;            glColor4f( 1.0f, 1.0f, 1.0f, actualAlpha );&#10;            glBegin( GL_TRIANGLE_FAN );&#10;            _glVertex3f( i.posx, i.posy, 0.1f );&#10;&#10;            glColor4f( 1.0f, 1.0f, 1.0f, 0.0f );&#10;            for ( size_t ic = 0; ic &lt;= n; ic++ ) {&#10;                _glVertex3f( i.posx + radius * cos( 2 * M_PI / n * ic ), i.posy + radius * sin( 2 * M_PI / n * ic ), 0.1f );&#10;            }&#10;            glEnd();&#10;    }&#10;&#10;由于 FreeGLUT 不提供绘制圆的函数，因此需要手动用三角形来贴近圆形。&#10;&#10;为了减少突兀的渐变，将贴近圆形边缘的顶点不透明度设定为 0。&#10;&#10;另外，需要在 `onRender`&#10;函数每次被调用时，更新一次整个粒子系统，以便实现扩散效果。">
+        </outline>
+        <outline text="混色" _note="特别留意，通常带深度检测的 OpenGL&#10;绘制不会绘制被前排物体覆盖的后排物体，而在这里我们不希望这种事情发生，因为半透明的粒子可能会相互遮盖产生混色，我们需要他们都被绘制。&#10;&#10;因此，我们不要开启深度检测功能，同时使用下面的代码启动混色：&#10;&#10;    glEnable( GL_BLEND );&#10;    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );&#10;&#10;这样，烟雾效果就基本实现了。">
+        </outline>
+        <outline text="背景绘制" _note="FreeGLUT 在渲染材质的混色时，会产生诡异的问题，拒绝绘制任何元素。&#10;&#10;也就是说，以贴图的方式绘制背景这条路行不通。&#10;&#10;因此作为 Workaround，这里使用了 SOIL&#10;手动读取背景图片的每个像素，并将其绘制到屏幕上。&#10;&#10;&gt; 具体的代码参见 `./2-smoke/TexLoader/texLoader.hpp`。&#10;&#10;由于整个图形都在二维空间中，因此绘制性能还勉强过得去。要是三维的肯定慢炸了">
+        </outline>
+        <outline text="时间控制" _note="由于这一部分需要精确控制时间，因此需要有办法获取当前运行时间。&#10;&#10;通过 `glutGet( GLUT_ELAPSED_TIME )` 即可获取自 GLUT&#10;初始化到目前为止所经过的时间。&#10;&#10;单位是毫秒。">
+        </outline>
+      </outline>
+      <outline text="第三部分：石室炸弹">
+        <outline text="模型准备" _note="这一部分采用了两种不同的三维模型格式。&#10;&#10;一种是炸弹模型使用的 WaveFront Object 格式（直接从 Assignment 3 里 Copy&#10;过来的）；另一种是从某素材网上下载的石堆模型及贴图，其中模型采用&#10;Standard Ply 格式存储。">
+        </outline>
+        <outline text="贴图准备" _note="炸弹不用贴图，直接调出比较反光的材质就很真实了；而石头则需要采用贴图。&#10;&#10;![](/Volumes/Macintosh HD (Sierra)/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/rock_mapping.png)&#10;&#10;这里，采用了一些拼贴的办法来减小贴图文件的大小。">
+        </outline>
+        <outline text="模型读取" _note="WaveFront 格式的读取方式比照 Assignment \#3 实现。&#10;&#10;Ply 格式的读取基于 tinyply 的包装函数实现。&#10;&#10;&gt; `.obj` 格式的读取器参见 `./3-bomb/ObjLoader/ObjLoaderWrapped.hpp`。&#10;&gt;&#10;&gt; `.ply` 格式的读取器参见 `./3-bomb/PlyLoader/PlyReaderWrapped.hpp`。&#10;&#10;留意到因为要实现贴图，`.ply`&#10;格式的读取器需要同时读取定点位置、法向量方向、贴图 UV 坐标。">
+        </outline>
+        <outline text="坐标转换" _note="经过文本编辑器打开分析我下载的 `.ply` 文件，发现它并没有提供贴图所用的&#10;UV 坐标，而是提供了 ST 坐标。&#10;&#10;ST 坐标系和 UV&#10;坐标系是对同一数据的不同表示。幸好他们可以通过这一公式简单的转化：&#10;&#10;*s* = *u*、*t* = 1 − *v*。&#10;&#10;所以做一次变换即可。">
+        </outline>
+        <outline text="贴图读取" _note="参见第一部分中的「材质加载」部分。">
+        </outline>
+        <outline text="模型绘制" _note="要在绘制三角形的时候，同时将物体表面的贴图和法向量（用于光照计算）绘制出来，只需要在调用&#10;`glVertex` 之前调用 `glNormal` 指定法向量方向，并调用 `glTexCoords`&#10;指定贴图坐标即可。&#10;&#10;另外，别忘了用 `glBindTexture` 和 `glEnable(GL_TEXTURE_2D)`&#10;来启用材质哦。">
+        </outline>
+        <outline text="光照绘制" _note="参见 Assignment \#3 中的光照绘制。&#10;&#10;特别地，为了模拟手电筒的效果，我们会在一定范围内随机地扰动光照位置，模拟手持手电筒的颤抖效果，增强真实感。&#10;&#10;特别要注意，假如我们不提供法线方向，则光线效果十分微弱，完全没有立体感；但我们提供了这一信息之後，光线模拟的结果就相对比较真实了。&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/normal_and_no_normal.png)">
+        </outline>
+        <outline text="背景贴图" _note="为了实现暗室之中反射的效果，我们在这个房间周围放置四个平面，在未贴图的情况下如下图所示：&#10;&#10;![](/Users/yue/Documents/GitHub/2019-2020-autumn-semester/SE-344/submissions/ass4-ng-x/report/report.assets/wall_no_mapping.png)&#10;&#10;然後，我们只需要在四面上贴上提供的暗室图片材质就行了。&#10;&#10;比照第二部分「雾气弥漫」中的背景绘制实现即可。">
+        </outline>
+      </outline>
+      <outline text="第四部分：佛祖保佑">
+        <outline text="环境搭建" _note="由于此部分和上一节的环境一致（还是在那个房间里），因此将其直接拷贝过来，并且稍微把摄影机视角抬高一点，以体现佛祖的神圣性。&#10;&#10;另外，为了使得各个方向来的光线可以分辨，这里我们在三个等距方向上放置了三盏&#10;RGB 灯光。这样方向就能直观地通过颜色的不同来区分了。">
+        </outline>
+        <outline text="模型加载" _note="事实上，这里最难办的部分就是模型加载了。鉴于分辨率最高的模型文件大小达到了数十&#10;MiB，在测试机器上需要耗费数十秒钟加载，因此同步的读取显然不现实。&#10;&#10;因此我们采取一个折衷的办法：在开始绘制之前，仅仅加载最低分辨率的模型，并开启一个子线程加载中等分辨率的模型；在中等分辨率模型加载线程完成加载後，会开启一个新线程来加载高分辨率的模型……以此类推，程序能够在後台按照顺序加载由低到高分辨率的模型。&#10;&#10;由于程序在 Windows 环境下编译，因此使用 Windows 风格的多线程 API。&#10;&#10;在此之前需要先引入 `Windows.h`。&#10;&#10;    DWORD WINAPI fun( LPVOID lpParameter );&#10;&#10;以这种形式定义的函数即可被作为一个子线程执行。&#10;&#10;    CreateThread( nullptr, 0, foo, nullptr, 0, nullptr );&#10;&#10;调用 `CreateThread` 函数即可启动子线程啦。">
+        </outline>
+        <outline text="模型绘制" _note="跟第三部分基本类似，只是这里不需要贴图，只需要调整模型材质和色泽即可。">
+        </outline>
+      </outline>
+      <outline text="第五部分：超监督" _note="所谓的「超监督」就是依次调度上面四个子程序的外壳程序。同时她还负责背景音乐的播放。">
+        <outline text="音频读取" _note="每个叙事阶段都有特定的背景音乐，有一些场景还有多种音效的混合。&#10;&#10;因此为了实现混合音频的播放，这里使用了 `System.Windows.Media` 中提供的&#10;`MediaPlayer` 对象来承担音频播放的任务。&#10;&#10;使用前请务必 `using System.Windows.Media`。&#10;&#10;在产生场景切换时，音乐调度器会收到通知，并调整启用的音轨。">
+        </outline>
+        <outline text="程序执行" _note="超监督本身没有场景绘制的功能，因此其中出现的资源都是 Photoshop&#10;画出来的。&#10;&#10;她通过调用 `System.Diagnostics.Process.Start`&#10;函数来实现唤起子程序的功能，并在程序结束时回调主线程进入下一阶段。&#10;&#10;使用前请务必 `using System.Diagnostics`。">
+        </outline>
+        <outline text="依赖" _note="主程序使用 C\# 书写，依赖于 Microsoft .NET Framework 4.7.2。&#10;&#10;此外，需要 `wmp.dll` 以实现音频播放功能。">
+        </outline>
+      </outline>
+    </outline>
+    <outline text="问题和解决">
+      <outline text="ST 坐标系和 UV 坐标系" _note="ply 格式中可能使用 ST 坐标系来描述贴图，也可能使用 UV 坐标系。&#10;&#10;这两种描述方法只是坐标轴的原点和方向不同，本质上并无区别。&#10;&#10;在读取时一定要细心留意这两种不同的情况并分别处理，否则就会产生贴图错误。">
+      </outline>
+      <outline text="Blend Mode 和 Depth Test" _note="深度测试在大部分时候都应当开启，除非希望手动渲染半透明的物体或使用非默认的混合模式，不希望&#10;OpenGL 自动将被遮挡物体从渲染管线中移除。这种时候还是应当禁用它。">
+      </outline>
+      <outline text="MediaPlayer 和 SoundPlayer" _note="MediaPlayer 由 `System.Windows.Media` 提供，而 SoundPlayer 则是由&#10;`System.Media` 提供。&#10;&#10;它们之间的差别（之一）是 SoundPlayer&#10;不支持多个实例同时活跃，较早的播放实例会被自动停止。&#10;&#10;由于在本例中需要用到音轨的混合，因此使用 MediaPlayer 而不用&#10;SoundPlayer。&#10;&#10;&gt; 另外的解决方案是直接 `@DllImport(&quot;winmm.dll&quot;)` 并直接调用 DirectSound&#10;&gt; 的 C/C++ 风格的接口。&#10;&gt;&#10;&gt; 具体的实现参见 `./hypervisor/SimultaneousMediaPlayer.cs` 文件。&#10;&gt;&#10;&gt; 实际测试发现在部分虚拟机环境下并不能正常工作，因此不推荐使用。">
+      </outline>
+      <outline text="SOIL 里的坑" _note="在 Debug 的过程中，留意到 SOIL&#10;在读取部分类型的贴图文件时，会出现图片倒置的错误，即旋转了 180&#10;度的问题。&#10;&#10;为了尽量减少程序的负担，采取直接将原始图片旋转 180 度的策略来修正问题。&#10;&#10;STBI 库未发现此类问题。">
+      </outline>
+      <outline text="机能限制" _note="鉴于测试机器并没有独立显卡，且 OpenGL 实现是 VMWare&#10;虚拟机提供的，性能堪忧。因此程序在绘制最高分辨率佛像模型的时候会出现严重的掉帧，绘制速率甚至不到&#10;10 帧每秒。&#10;&#10;因此佛像的旋转速度相应地调快了些，以适应显示效果。&#10;&#10;另外，程序中大部分用于流程控制的代码都并非基于经过的帧数而是执行程序以来的真实时间。因此掉帧不会对程序流程产生影响。">
+      </outline>
+    </outline>
+    <outline text="笔记" _note="自第九周（2019 年 11 月 7 日）以来的笔记参见 `./notes` 目录下的 Markdown&#10;和 TeX 文件。">
+    </outline>
+    <outline text="致谢">
+      <outline text="Documentations" _note="-   [learnopengl.com](https://learnopengl.com)&#10;&#10;-   [opengl-tutorial.org](http://www.opengl-tutorial.org)">
+      </outline>
+      <outline text="Third-Party Libraries" _note="-   [**glew**](http://glew.sourceforge.net), the OpenGL extension&#10;    wrangler library&#10;&#10;-   [**glfw**](https://www.glfw.org), multi-platform library for OpenGL&#10;&#10;-   [**freeGLUT**](http://freeglut.sourceforge.net), open-source&#10;    alternative to GLUT&#10;&#10;-   [**tinyobj**](https://github.com/syoyo/tinyobjloader/), tiny but&#10;    powerful wavefront obj loader&#10;&#10;-   [**tinyply**](https://github.com/ddiakopoulos/tinyply), c++11 ply 3d&#10;    mesh format importer &amp; exporter&#10;&#10;-   [**SOIL**](https://github.com/paralin/soil), simple OpenGL image&#10;    library&#10;&#10;-   [**glm**](https://glm.g-truc.net), OpenGL mathematics library">
+      </outline>
+      <outline text="SE-344 staff">
+      </outline>
+    </outline>
+  </outline>
+</outline>
+  </body>
+</opml>
