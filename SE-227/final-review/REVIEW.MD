@@ -1639,3 +1639,145 @@ Thoughput(A+B) ≤ minimum(Throughput(A), Throughput(B))。
 
 谨慎使用，好吧。
 
+## Lecture 23: Performance II
+
+今天主要讲讲调度对于性能的影响。
+
+### Scheduling
+
+计算机系统的每一层抽象里，都跟调度分不开。
+
+如何分配处理器的时间？我们引入了线程调度。
+
+如何分配 RAM 空间？我们引入了内存地址空间。
+
+如何分配打印机资源？我们引入了打印任务。
+
+如何分配磁盘？我们引入了磁盘请求。
+
+如何分配网络资源？我们引入了 Packets。
+
+如何分配内存总线？我们引入了内存请求。
+
+总归，调度是不可以没有的，否则就会带来混乱和延迟。
+
+#### Difficulties
+
+大家都知道，最难的点是如何在资源不足的情况下调度。
+
+要是资源数多于请求数，那太简单了，每人一个都还有剩。
+
+然而在资源不足的情况下，你还缺少具体的信息、缺少办法来强制回收资源（自己也建立在这层抽象上面），真实困难重重。
+
+#### Ideal Scheduler
+
+理想的调度器么…
+
+*   延迟小。就是你最好少干点事情，否则给你卡半天大家不要干活了）
+*   吞吐量大。这个跟上面一个意思（
+*   资源占用低。不希望一个资源调度器自己占太多资源（？）
+*   公平性。每个请求都有基本相同的概率获取资源，而非被少数垄断。
+*   Scalability。最后，希望在压力增大的时候不要显著降低吞吐率，而是将其保持在一个水平不变。就像上面的图一样最好。
+
+留意到，这些要求并不是都能实现，在某些情况下甚至相互矛盾。
+
+但我们应该分情况讨论，尽量设计出最好的调度器。
+
+#### Measuring Time
+
+我们如何一个请求的处理时间？三种方式：
+
+1.  **Response time** − Response time is the time taken to start responding to the request. A scheduler must aim to minimize response time for interactive users.
+2.  **Turnaround time** − Turnaround time refers to the time between the moment of submission of a job/ process and the time of its completion. Thus how long it takes to execute a process is also an important factor.
+3.  **Waiting time** − It is the time a job waits for resource allocation when several jobs are competing in multiprogramming system. The aim is to minimize the waiting time.
+
+Copied from [here](https://www.tutorialspoint.com/operating_system/os_process_scheduling_qa1.htm). 比起来 PPT 里完全不是人话。
+
+Response Time：从请求发出开始要经过多长时间才能进行响应（被调度到）？
+
+Turnaround Time：从请求发出开始要经过多长时间才能完全完成？
+
+Waiting Time：在产生资源竞争的时候，单个线程要等待多久？
+
+### Scheduling Strategies
+
+主要的调度策略包括：
+
+#### FCFS
+
+也就是 First Come First Server。
+
+##### Example
+
+![image-20191230173203267](REVIEW.assets/image-20191230173203267.png)
+
+到得早的人先享用资源。
+
+![image-20191230173232862](REVIEW.assets/image-20191230173232862.png)
+
+##### Analysis
+
+首先这个算法是公平的。
+
+但是因为太简单（贬义），我们一般只把它用在打印机调度程序上。
+
+##### Convoy Effect
+
+在使用 FCFS 的资源调度里，我们有一种很特别的现象：Convoy 现象。
+
+![222-2](REVIEW.assets/222-2.png)
+
+>   -   The I/O bound processes are first allocated CPU time. As they are less CPU intensive, they quickly get executed and goto I/O queues.
+>   -   Now, the CPU intensive process is allocated CPU time. As its burst time is high, it takes time to complete.
+>   -   While the CPU intensive process is being executed, the I/O bound processes complete their I/O operations and are moved back to ready queue.
+>   -   However, the I/O bound processes are made to wait as the CPU intensive process still hasn’t finished. **This leads to I/O devices being idle.**
+>   -   When the CPU intensive process gets over, it is sent to the I/O queue so that it can access an I/O device.
+>   -   Meanwhile, the I/O bound processes get their required CPU time and move back to I/O queue.
+>   -   However, they are made to wait because the CPU intensive process is still accessing an I/O device. As a result, **the CPU is sitting idle now**.
+
+简单说，用这种策略最后不是 I/O 设备闲着，就是 CPU 闲着。总归没法充分利用资源。
+
+这不好。
+
+#### SJF
+
+Shortest Job First 指的是让（耗时）最短的任务先做！
+
+![image-20191230173842697](REVIEW.assets/image-20191230173842697.png)
+
+也就是，在上例中的 ABC 请求会按照这种顺序被调度。
+
+注意这种简单的情况不考虑打断。也就是，在执行的过程中遇到了一个刚到的耗时更短的任务，不会打断当前任务的。
+
+调度器只会在当前活跃任务结束的时候按照时间排序，决定谁来进入下一步调度。
+
+![image-20191230174054195](REVIEW.assets/image-20191230174054195.png)
+
+#### RR
+
+亦即 Round Robin 算法。
+
+![image-20191230174125568](REVIEW.assets/image-20191230174125568.png)
+
+每隔一段时间就打断目前正在执行的任务（这里是一秒），并轮流地引入下一个任务。
+
+![image-20191230174227596](REVIEW.assets/image-20191230174227596.png)
+
+#### PSP
+
+Priority Scheduling Policy。按优先级调度策略。
+
+给每一个到来的任务都分配一个优先级（可以是动态的，也可以是静态的）。
+
+每次调度，都选出优先级最高的任务运行。
+
+>   现代 CPU 的调度策略是基于优先级和 Round Robin 的混合调度。
+
+### Performance vs. Security
+
+性能和安全…如何权衡？
+
+#### Meltdown
+
+Intel 著名的「炉芯熔毁」漏洞就是因为一类针对 Cache 的优化使得面对不同输入的执行时间不同，结果可被用于探测内存分布的问题。
+
