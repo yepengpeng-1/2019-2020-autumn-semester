@@ -77,8 +77,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass4-ng-x\bin;$(IncludePath)</IncludePath>
-    <LibraryPath>Z:\文稿\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass4-ng-x\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>Z:\文件\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass4-ng-x\bin;$(IncludePath)</IncludePath>
+    <LibraryPath>Z:\文件\GitHub\2019-2020-autumn-semester\SE-344\submissions\ass4-ng-x\bin;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

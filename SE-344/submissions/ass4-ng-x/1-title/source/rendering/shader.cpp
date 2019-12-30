@@ -56,11 +56,11 @@ static std::string pixelShader = R"glsl(
 	void main() {
 		if (true) {
 			vec3 normalMap = texture(material.emission, textureCoordinates).rgb * 2.0 - 1.0;
-			vec3 normalNormal = normalize(normalMap.rgb);
+			// vec3 normalNormal = normalize(normalMap.rgb);
 			float ambientStrength = 0.1;
 			vec3 ambientLight = ambientStrength * lightColor * vec3(texture(material.diffuse, textureCoordinates));
 
-			vec3 N = normalize(normalNormal);
+			vec3 N = normalize(normalMap * outNormal);
 			vec3 L = normalize(lightPosition - fragPosition);
 			float diffuseStrength = max(dot(N, L), 0.0f);
 			vec3 diffuseColor = diffuseStrength * lightColor * vec3(texture(material.diffuse, textureCoordinates));

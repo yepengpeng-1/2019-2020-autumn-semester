@@ -49,6 +49,8 @@ GLuint        wallTexture;
 // 2 - high resolution
 // 3 - best resolution
 
+void changeGoldenLight();
+
 static void onTimerTicked() {
     if ( !satisfied ) {
         return;
@@ -57,6 +59,7 @@ static void onTimerTicked() {
     if ( currentState == 2 && time >= 60000 ) {
         std::cout << "switched to best resolution" << std::endl;
         switchLightColor();
+        changeGoldenLight();
         currentState = 3;
     }
     else if ( currentState == 1 && time >= 40000 ) {
@@ -67,6 +70,7 @@ static void onTimerTicked() {
     else if ( currentState == 0 && time >= 20000 ) {
         std::cout << "switched to medium resolution" << std::endl;
         switchLightColor();
+
         currentState = 1;
     }
     // might complete in 3 ~ 4 seconds
@@ -85,7 +89,12 @@ inline void drawTriangleWithoutTexture( const float3& vert, float3 normal /*, fl
 }
 
 // environment light
-GLfloat ambientLight[] = { 0.1f, 0.1f, 0.1f, 0.1f };
+GLfloat ambientLight[]         = { 0.1f, 0.1f, 0.1f, 0.1f };
+GLfloat ambientLightWithGold[] = { 0.3f, 0.15f, 0.0f, 0.1f };
+
+void changeGoldenLight() {
+    std::memcpy( ambientLight, ambientLightWithGold, sizeof( ambientLight ) );
+}
 
 GLfloat lightPos1[] = { 0, 1.5, 2.0, 1.0 };
 GLfloat specular1[] = { 1.0f, 0.0f, 0.0f, 1.0f };
