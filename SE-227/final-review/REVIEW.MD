@@ -1503,3 +1503,139 @@ Block Chain 的增长是一环扣一环的。如果要修改之前的结点，�
 代价也是有的。它速度极慢，使用困难。
 
 但那没办法。就是这么设计的。
+
+## Lecture 22: Performance
+
+>   好想提升效率啊
+
+### Bad Performance: Why?
+
+#### Hardware
+
+花钱买新设备总还是可以的。至少到目前为止，新硬件的性能总还是在提高。
+
+![image-20191230163033880](REVIEW.assets/image-20191230163033880.png)
+
+>   Moore's Law 说连续翻倍可能夸张了点。
+
+#### Software
+
+感觉性能成问题，多半是你系统设计垃圾，代码写的差，欠优化。
+
+那还是从软件上解决一下吧。
+
+##### Find the Bottleneck
+
+优化不是漫无目的的。首先我们要对照系统设计架构，结合时间测量器，测出每一部分对性能的总体影响占比，然后对大头（也就是瓶颈）进行针对性的优化。
+
+这样**优化工作**的效率是最高的。
+
+![image-20191230163331818](REVIEW.assets/image-20191230163331818.png)
+
+相对粗粒度一点的分块，就是这三类。要么砍软件功能，要么优化系统结构，要么买硬件。
+
+你自个选吧。
+
+### Performance Metrics: How?
+
+>   衡量性能
+
+上面的第一步：怎么衡量每一个部件对整体的效率影响？
+
+四部分。
+
+*   Capacity
+*   Latency
+*   Throughput
+*   Utilization
+
+#### Capacity
+
+Capaticy 指的是总体的「能力」。
+
+例如，内存设备的容量、处理器的频率、等等…都是 Capacity 的范畴。
+
+#### Latency
+
+延迟：从拿到请求到完成请求这一过程的耗时。
+
+鉴于信息在系统组件中传递需要耗时间，因此我们有
+
+Latency(A+B) ≥ Latency(A) + Latency(B)。
+
+#### Throughput
+
+吞吐量：所做的事情（量化为 Capacity）和所耗的时间之比。
+
+因为信息传递的耗时，以及串行系统的阻塞性也可以知道
+
+Thoughput(A+B) ≤ minimum(Throughput(A), Throughput(B))。
+
+系统中吞吐量最小的那个节点就是制约整体吞吐量的那位了。
+
+我们尊称之为 Bottleneck。
+
+#### Utilization
+
+实际被使用到的 Capaticy 占设备总体 Capaticy 的比值，称之为利用率。
+
+这个很直观，CPU Cycle 数、内存占用率、磁盘占用率等等都是。
+
+#### Relationship
+
+![image-20191230164129994](REVIEW.assets/image-20191230164129994.png)
+
+用户很少的时候，Latency 保持在较低的值，Throughput 均匀增长（此时制约量为需求数。），Utilization 很低。
+
+![image-20191230164223652](REVIEW.assets/image-20191230164223652.png)
+
+这种状态在系统尚未满载的时候持续…
+
+![image-20191230164241732](REVIEW.assets/image-20191230164241732.png)
+
+在资源饱和之后，Throughput 不再增长了（因为 User 的增加反过来导致 Latency 增加，结果 Throughput 涨不起来）。
+
+### Fighting with Bottlenecks: Yay!
+
+#### Where
+
+通常来说，造成瓶颈的因素很多。
+
+*   物理限制
+    *   光速有限（……）
+    *   内存、磁盘有限
+    *   CPU 主频有限
+*   共享
+    *   多个用户共享一台设备
+    *   多个客户端共享一台服务器
+
+#### How
+
+假设我们现在找到了 Bottleneck 的所在。那么我们能怎么修正呢？
+
+##### Solution 1: Batching
+
+通常来说，把细碎的小操作打包成一个大操作都能节约边际成本。
+
+##### Solution 2: Dallying
+
+>   Dally 差不多就是 Delay 的意思，磨磨蹭蹭。
+
+比如，本来要立即写入磁盘的文件，拖着不写，而是放在 Temp 里；Caches 也是这种概念的体现。
+
+##### Solution 3: Speculation
+
+猜测。猜你会做的事情并且提前做好，你真的决定要做的时候就会很快。
+
+比如，Processor 的预测指令执行，File System 的 Prefetch 等等，都是 Speculation 的体现。
+
+#### How...ever
+
+然而，上面三种 Solution 都毫无疑问地引入了复杂性。
+
+不说你算法写的不好的话可能还会降低性能，
+
+这些复杂性会带来大量的 Concurrency 问题。
+
+谨慎使用，好吧。
+
