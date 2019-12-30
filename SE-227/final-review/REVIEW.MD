@@ -2176,9 +2176,185 @@ OS 不信任任何，除了硬件…
 
 从头到尾信任下去，总该有一个「根本」吧？
 
-##### Base
-
 软件信任的终点直到 BIOS、VMM、kernel loader、kernel……为止。
 
 硬件的信任直到 TPM、secure processor……为止。
 
+## Lecture 29 & 30: Isolation
+
+### Virtual Machine
+
+虚拟机是虚拟化的基础上的产物。
+
+#### Why VM?
+
+*   整合性
+    *   允许你在一台机器上无缝运行多个 OS
+*   隔离性
+    *   每个 VM 都互不干扰，错误不扩散
+*   可维护性
+    *   非常方便部署、备份、迁移
+*   安全性
+    *   病毒很难逃逸
+
+![image-20191230201237582](REVIEW.assets/image-20191230201237582.png)
+
+### CPU Virtualization
+
+![image-20191230201316172](REVIEW.assets/image-20191230201316172.png)
+
+实际上要虚拟化绝对不简单，需要很多硬件共同配合完成。
+
+CPU 要能为每一个 VM 分配各自的 Kernel 和 User Mode；
+
+Memory 要能为每个 VM 分配各自的虚拟 MMU，并保持它们之间的隔离
+
+每一个 VM 都会得到虚拟的 I/O 设备。
+
+#### CPU Virtualization
+
+![image-20191230201621113](REVIEW.assets/image-20191230201621113.png)
+
+CPU 的虚拟化和 Process 的抽象，有什么异同？
+
+每个 Process 都意为她有全部的 CPU 时间，而不关心其他所有的进程。
+
+这些进程由 OS 负责调度管理，通过分时分片的方式分付各进程使用，并且通过 Process Context 保存与恢复的方式实现了进程的切换。
+
+#### OS on OS
+
+![image-20191230202005577](REVIEW.assets/image-20191230202005577.png)
+
+我们试着把 OS 作为一个 App 在 Host OS 上运行。也就是，整个 Guest OS 都在用户态运行。
+
+这样做有什么问题？
+
+![image-20191230202102014](REVIEW.assets/image-20191230202102014.png)
+
+系统启动的时候，会通过一条特殊的指令来禁用中断。
+
+这可是 Privileged Instruction，一般程序不让用的。
+
+所以这种 OS on OS 的办法，连 OS 都启动不了。
+
+>   呵呵。
+
+#### Solution: Trap & Emulate
+
+![image-20191230202309181](REVIEW.assets/image-20191230202309181.png)
+
+既然不能直接调用授权的指令，那我给他包一层吧。
+
+要是 Guest OS 想要执行一条内核模式下才允许的指令，那就陷入 Host OS 的系统中断里，并且由 Host OS 处理之后再 Emulate（模拟），改写指令并发给 CPU。
+
+解决了这个问题，我们的 OS 就能运行在 Application Mode 里了。
+
+#### Problems: Trap & Emulate
+
+留意到这种解决方法虽然看起来美好，但是并不是所有的体系结构都能够被 Virtualize 的。
+
+有一些结构根本就无法实现这种 Trap & Emulate。
+
+![image-20191230202712961](REVIEW.assets/image-20191230202712961.png)
+
+另外，Trap 的时间花费是非常高的。
+
+#### Fix: Trap & Emulate
+
+对于 x86 那些无法翻译的指令，我们的策略是：
+
+1. Instruction Interpretation
+
+    用软件模拟这些指令的结果
+
+2. Binary Translator
+
+    把他们转写成其他等价的指令
+
+3. Para-virtualization
+
+    把他们在源代码里就给替换掉
+
+4. 换 CPU（大雾
+
+#### Instruction Interpretation
+
+![image-20191230202948404](REVIEW.assets/image-20191230202948404.png)
+
+*   Positives
+
+    Easy to implement & minimal complexity
+
+*   Negatives
+
+    Very Slow!
+
+#### Binary Translator
+
+![image-20191230203057458](REVIEW.assets/image-20191230203057458.png)
+
+![image-20191230203114016](REVIEW.assets/image-20191230203114016.png)
+
+![image-20191230203123651](REVIEW.assets/image-20191230203123651.png)
+
+![image-20191230203130944](REVIEW.assets/image-20191230203130944.png)
+
+##### Issues
+
+*   PC synchronization on interrupts
+    *   Now interrupt will only happen at basic block boundary
+    *   But on real machine, interrupt may happen at any instruction
+*   Carefully handle self-modifying code (SMC)
+    *   Notified on writes to translated guest code
+
+#### Para-virtualization
+
+这就是比较 Dirty 的 Hack 了…
+
+![image-20191230203248685](REVIEW.assets/image-20191230203248685.png)
+
+#### Upgrading CPU
+
+这就不说了…
+
+### Memory Virtualization
+
+#### Virtualizing the Page Tables
+
+虚拟化页表……
+
+为了区分虚拟化的内存，我们引入一些新的专门名词：
+
+*   GVA: Guest Virtual Address
+*   GPA: Guest Physical Address
+*   HPA: Host Physical Address
+
+另外要留意，GPA 跟 HPA 不一定一样。一台机器的内存资源不一定全部分配给了虚拟机。
+
+所以直接让 CR3 指向 Guest OS 页表不能用。
+
+#### Solution 1: Shadow Paging
+
+![image-20191230203719551](REVIEW.assets/image-20191230203719551.png)
+
+![image-20191230203732320](REVIEW.assets/image-20191230203732320.png)
+
+#### Solution 2: Direct Paging
+
+![image-20191230203831088](REVIEW.assets/image-20191230203831088.png)
+
+直接不用 GPA，只用 GVA 和 HPA；让 Guest OS 直接管理那一份 HPA 内存。
+
+![image-20191230203926043](REVIEW.assets/image-20191230203926043.png)
+
+#### Solution 3: Hardware Supported Memory Virtualization
+
+有一些有追求有梦想的硬件提供了内存虚拟化实现：
+
+![image-20191230204010861](REVIEW.assets/image-20191230204010861.png)
+
+![image-20191230204018951](REVIEW.assets/image-20191230204018951.png)
+
+#### I/O 虚拟化
+
+OS 再讲。
