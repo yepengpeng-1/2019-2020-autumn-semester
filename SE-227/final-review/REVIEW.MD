@@ -1096,3 +1096,112 @@ Yield 的具体实现是这个样子的。
 *   CV：提供了更高效的线程睡眠／唤醒 API。
 *   抢占：强行夺取控制权。
 
+## Lecture 18: Distributed Transactions
+
+Xia YB 的目标没有变：Build Reliable Systems from Unreliable Components。
+
+### Intro
+
+举个例子，我们的 Bank 系统大如磐石，必须分拆。我们规定由两台服务器提供服务，其中一台处理 A-M 的事务；另外一台处理 N-Z 的事务。
+
+那么问题就来了：有可能有一些事务需要跨服务器进行。比如 Alice 要给 Zulu 转账，两台服务器都必须知晓并给出正确的记录。
+
+#### Coordinator
+
+这就需要有一个协调人「Coordinator」负责服务器的调度。客户端不知道也不应当知道有几台服务器，自己该去找哪台服务器。客户端只需要找到 Coordinator，报上自己的大名，由协调人来帮助把这个请求转发给对应的服务器。
+
+只涉及到一台服务器的请求很简单。
+
+![image-20191230135131875](REVIEW.assets/image-20191230135131875.png)
+
+涉及到两台，因为有 Coordinator 的抽象，也还算能做。
+
+![image-20191230135207007](REVIEW.assets/image-20191230135207007.png)
+
+#### Network
+
+网络世界充满了延迟、复杂和丢失。
+
+任何消息都可能会丢失、延迟到达或重复到达。
+
+为了不在这一层上面浪费心思，我们选择用 RPC 来建构抽象。
+
+*   通过 Persistent Sender 来保证「至少一次」
+*   通过 Duplicate Suppression 来保证「至多一次」
+
+非常遗憾，基于 RPC 的消息传送机制并非原子的。
+
+我们在后面可以看到很多出错的情形。
+
+#### Problems
+
+多个服务器的情形很可能不一致。
+
+比如，Coordinator 对两台服务器的 Commit，一个成功一个失败。甚至一个成功，一个直接 Crash。
+
+那么对第一个「成功」的 Commit 也不算数了。但按照我们现在的做法，没法简单地把它给召回。（你还得考虑召回是不是成功，etc…麻烦大了）
+
+#### Solution: Two-phase Commit
+
+两步 Commit 法。
+
+把 Commit 分两步走。
+
+*   第一步，叫做 Preparation 或者 Voting。
+    *   这一步里，底层的 Transactions 要么 Abort（对应上面的 Commit 失败），要么 **Tentatively** committed（暂定成功，对应上面的 Commit 成功）。
+    *   然后，顶层收集这些「一步 Commit」的信息：要么是 Abort 了，要么是「暂定 Commit」了。
+*   第二步，才是真正的 Commitment。
+    *   这一步里，只有顶层达成一致意见，也就是底层都做好了 Commit 的准备，才进行最后的 Commit 确认。
+    *   否则，整个 Commit 大业尽毁。
+
+#### Another Problems
+
+![image-20191230140302527](REVIEW.assets/image-20191230140302527.png)
+
+看起来很美好，大家都先做好准备，一致决定之後才去进行 Commit。
+
+非常遗憾的是，消息传递是不可靠的。
+
+甚至连「准备好了」「没准备好」这种消息都没办法可靠地发送给网络中的其他结点。
+
+我们必须提出新的概念来解决这个难题。
+
+### Multiple-Site Atomicity
+
+多点式原子性。
+
+#### Coordinator's Job
+
+对于上面的协调人「Coordinator」来说，他的任务就是收集底层人民的呼声；
+
+假如人民说 ABORT 或者不说话，那就说明不能 COMMIT，对外返回 ABORT。
+
+>   更聪明一点的协调人会把任务分配给其他 Worker…以免脏节点污染
+
+假如人民全部都说 COMMIT READY，那就对外发布 COMMIT 令。
+
+#### Worker's Job
+
+对于普罗大众来说，他们的任务就是：在什么都没收到的情况下，反复广播自己目前的状态 PREPARED，意为「我准备好进行 COMMIT 了！」。
+
+而在收到 Coordinator 的 COMMIT 令後，直接调用 Commit 提交更改。
+
+就是这么回事。
+
+#### Worker's Failure
+
+试想一下，假如一个 Worker 在 Commit Point 之后爆炸了，我们怎么办？
+
+*   我们没办法 Abort 掉 Transaction。
+*   我们希望 Worker 自己能从错误中恢复。
+*   我们希望 Worker 能记录所有 Transaction 目前的状态（是不是 Pepared for Commit）。
+
+因此，我们决定：
+
+*   Worker 一准备好，就把 Prepared 这件事写到自己的 Log 里。
+*   Worker 一旦 Crash 重启，会进入 Recovery Mode。
+*   恢复模式下会读取 Log，并确定目前的准备状态。
+
+### Summary
+
+![image-20191230141128021](REVIEW.assets/image-20191230141128021.png)
