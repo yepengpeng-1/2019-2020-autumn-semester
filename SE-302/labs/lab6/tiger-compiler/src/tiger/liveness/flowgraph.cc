@@ -36,14 +36,21 @@ bool IsMove( G::Node< AS::Instr >* n ) {
     return node->kind == AS::Instr::Kind::MOVE;
 }
 
-template < class T > inline G::Node< T >* findNodeByInfo( std::vector< G::Node< T >* > vec, T* infoP ) {
+inline G::Node< AS::Instr >* findLabel( const std::vector< G::Node< AS::Instr >* >& vec, const TEMP::Label* label ) {
     for ( const auto& node : vec ) {
-        if ( node->NodeInfo() == infoP ) {
-            return node;
+        if ( node->NodeInfo()->kind == AS::Instr::Kind::LABEL ) {
+            auto labelInstr = reinterpret_cast< AS::LabelInstr* >( node->NodeInfo() );
+            if ( labelInstr->label == label ) {
+                return node;
+            }
         }
     }
     return nullptr;
 }
+
+// template < class T > inline void appendNode( G::NodeList< T >*& nodeL, const G::Node< T >* node ) {
+//     nodeL = new G::NodeList< T >( node, nodeL );
+// }
 
 G::Graph< AS::Instr >* AssemFlowGraph( AS::InstrList* il, F::Frame* f ) {
     auto                                 instrList = il;
@@ -55,19 +62,42 @@ G::Graph< AS::Instr >* AssemFlowGraph( AS::InstrList* il, F::Frame* f ) {
         auto node = graph->NewNode( head );
         nodes.push_back( node );
     }
+
+    // shouldn't be different, anyway
+    assert( nodes.size() == graph->nodecount );
+
+    size_t counter = 0, limit = nodes.size();
     for ( auto& node : nodes ) {
         auto info = node->NodeInfo();
         switch ( info->kind ) {
         case AS::Instr::Kind::LABEL: {
             auto labelNode = reinterpret_cast< AS::LabelInstr* >( info );
+            if ( counter != limit - 1 ) {
+                // appendNode<>( node->Succ(), nodes[ counter + 1 ] );
+                graph->AddEdge( node, nodes[ counter + 1 ] );
+            }
         } break;
-        case AS::Instr::Kind::MOVE:
+        case AS::Instr::Kind::MOVE: {
             auto moveNode = reinterpret_cast< AS::MoveInstr* >( info );
-            break;
-        case AS::Instr::Kind::OPER:
+            if ( counter != limit - 1 ) {
+                // appendNode<>( node->Succ(), nodes[ counter + 1 ] );
+                graph->AddEdge( node, nodes[ counter + 1 ] );
+            }
+        } break;
+        case AS::Instr::Kind::OPER: {
             auto operNode = reinterpret_cast< AS::OperInstr* >( info );
-            break;
+            auto target   = operNode->jumps->labels;
+            while ( target ) {
+                auto head      = target->head;
+                target         = target->tail;
+                auto labelNode = findLabel( nodes, head );
+                if ( labelNode ) {
+                    graph->AddEdge( node, labelNode );
+                }
+            }
+        } break;
         }
+        ++counter;
     }
 }
 
