@@ -8,13 +8,12 @@
 namespace COL {
 
 class Result {
- public:
-  TEMP::Map* coloring;
-  TEMP::TempList* spills;
+public:
+    TEMP::Map*      coloring;
+    TEMP::TempList* spills;
 };
 
-Result Color(G::Graph<TEMP::Temp>* ig, TEMP::Map* initial, TEMP::TempList* regs,
-             LIVE::MoveList* moves);
+Result Color( G::Graph< TEMP::Temp >* ig, TEMP::Map* initial, TEMP::TempList* regs, LIVE::MoveList* moves );
 
 }  // namespace COL
 

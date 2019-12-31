@@ -8,12 +8,12 @@
 
 namespace FG {
 
-TEMP::TempList* Def(G::Node<AS::Instr>* n);
-TEMP::TempList* Use(G::Node<AS::Instr>* n);
+TEMP::TempList* Def( G::Node< AS::Instr >* n );
+TEMP::TempList* Use( G::Node< AS::Instr >* n );
 
-bool IsMove(G::Node<AS::Instr>* n);
+bool IsMove( G::Node< AS::Instr >* n );
 
-G::Graph<AS::Instr>* AssemFlowGraph(AS::InstrList* il, F::Frame* f);
+G::Graph< AS::Instr >* AssemFlowGraph( AS::InstrList* il, F::Frame* f );
 
 }  // namespace FG
 

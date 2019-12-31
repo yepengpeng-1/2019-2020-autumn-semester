@@ -10,21 +10,20 @@
 namespace LIVE {
 
 class MoveList {
- public:
-  G::Node<TEMP::Temp>*src, *dst;
-  MoveList* tail;
+public:
+    G::Node< TEMP::Temp >*src, *dst;
+    MoveList*             tail;
 
-  MoveList(G::Node<TEMP::Temp>* src, G::Node<TEMP::Temp>* dst, MoveList* tail)
-      : src(src), dst(dst), tail(tail) {}
+    MoveList( G::Node< TEMP::Temp >* src, G::Node< TEMP::Temp >* dst, MoveList* tail ) : src( src ), dst( dst ), tail( tail ) {}
 };
 
 class LiveGraph {
- public:
-  G::Graph<TEMP::Temp>* graph;
-  MoveList* moves;
+public:
+    G::Graph< TEMP::Temp >* graph;
+    MoveList*               moves;
 };
 
-LiveGraph Liveness(G::Graph<AS::Instr>* flowgraph);
+LiveGraph Liveness( G::Graph< AS::Instr >* flowgraph );
 
 }  // namespace LIVE
 
