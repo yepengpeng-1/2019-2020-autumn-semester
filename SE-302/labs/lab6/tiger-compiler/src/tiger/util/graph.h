@@ -1,6 +1,9 @@
 #ifndef TIGER_UTIL_GRAPH_H_
 #define TIGER_UTIL_GRAPH_H_
 
+// should be turned off when submitting lab 6
+#define ALL_SPILL 1
+
 #include "tiger/util/table.h"
 #include <iostream>
 
@@ -33,7 +36,7 @@ public:
 
     int            nodecount;
     NodeList< T >* mynodes = nullptr;
-    NodeList< T >* mylast = nullptr;
+    NodeList< T >* mylast  = nullptr;
 };
 
 template < class T > class Node {
@@ -103,7 +106,7 @@ template < class T > Node< T >* Graph< T >::NewNode( T* info ) {
     NodeList< T >* p = new NodeList< T >( n, nullptr );
     n->mygraph_      = this;
     ++this->nodecount;
-    n->mykey_        = this->nodecount;
+    n->mykey_ = this->nodecount;
 
     if ( this->mynodes == nullptr ) {
         this->mylast  = p;
