@@ -79,11 +79,27 @@ void sweepEnv() {
     color.clear();
 }
 
+#define ALL_SPILL 1
+
 Result Color( G::Graph< TEMP::Temp >* ig, TEMP::Map* initiall /* deliberately misspell */, TEMP::TempList* regs, LIVE::MoveList* moves ) {
     auto result     = Result();
     result.coloring = TEMP::Map::Empty();
-    result.spills   = nullptr;
+    // result.spills   = nullptr;
 
+    if ( ALL_SPILL ) {
+        // for debugging's hack only. don't use it in lab6 release.
+        auto            node = ig->Nodes();
+        TEMP::TempList* list = nullptr;
+        while ( node ) {
+            auto head = node->head;
+            node      = node->tail;
+            list      = new TEMP::TempList( head->NodeInfo(), list );
+        }
+        // dirty!
+        result.spills = list;
+    }
+    else {
+    }
     return result;
 }
 
