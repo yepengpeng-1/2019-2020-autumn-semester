@@ -15,6 +15,9 @@ public:
     TEMP::TempList* spills;
 };
 
+// register count
+static const size_t K = 10;
+
 typedef G::Node< TEMP::Temp >             tempNode;
 typedef std::pair< tempNode*, tempNode* > Move;
 typedef Move                              Edge;

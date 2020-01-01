@@ -2,7 +2,7 @@
 #define TIGER_FRAME_TEMP_H_
 
 #include "tiger/symbol/symbol.h"
-
+#include <algorithm>
 namespace TEMP {
 
 using Label = S::Symbol;
