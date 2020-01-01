@@ -17,7 +17,9 @@ public:
 };
 
 // register count
-static const size_t K = 10;
+static size_t K = 10;
+
+static std::string RegisterNames[] = { "%1", "%2", "%3", "%4", "%5", "%6", "%7", "%8", "%9", "%10" };
 
 typedef G::Node< TEMP::Temp >             tempNode;
 typedef std::pair< tempNode*, tempNode* > Move;

@@ -363,6 +363,7 @@ Result Color( G::Graph< TEMP::Temp >* ig, TEMP::Map* initiall /* deliberately mi
     result.coloring = TEMP::Map::Empty();
     // result.spills   = nullptr;
 
+    Main( ig );
     if ( ALL_SPILL ) {
         // for debugging's hack only. don't use it in lab6 release.
         auto            node = ig->Nodes();
@@ -382,6 +383,10 @@ Result Color( G::Graph< TEMP::Temp >* ig, TEMP::Map* initiall /* deliberately mi
             spilled = new TEMP::TempList( p->NodeInfo(), spilled );
         }
         result.spills = spilled;
+
+        for ( auto it = coloredNodes.begin(); it != coloredNodes.end(); ++it ) {
+            result.coloring->Enter( ( *it )->NodeInfo(), &RegisterNames[ color[ *it ] ] );
+        }
     }
     return result;
 }

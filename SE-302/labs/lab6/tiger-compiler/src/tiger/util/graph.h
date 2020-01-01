@@ -2,7 +2,7 @@
 #define TIGER_UTIL_GRAPH_H_
 
 // should be turned off when submitting lab 6
-#define ALL_SPILL 1
+#define ALL_SPILL 0
 
 #include "tiger/util/table.h"
 #include <iostream>
