@@ -789,3 +789,65 @@
  JUMP(
   NAME L22)
  LABEL L22
+
+
+
+============================
+
+
+
+ LABEL L8
+ MOVE(
+  MEM(
+   BINOP(PLUS,
+    TEMP t100,
+    CONST -8)),
+  CONST 10)
+ LABEL L1
+ CJUMP(GE,
+  MEM(
+   BINOP(PLUS,
+    TEMP t100,
+    CONST -8)),
+  CONST 0,
+  L2,L3)
+ LABEL L3
+ JUMP(
+  NAME L7)
+ LABEL L2
+ EXP(
+  CALL(
+   NAME printi,
+    MEM(
+     BINOP(PLUS,
+      TEMP t100,
+      CONST -8)),
+    MEM(
+     BINOP(PLUS,
+      TEMP t100,
+      CONST -8))))
+ MOVE(
+  MEM(
+   BINOP(PLUS,
+    TEMP t100,
+    CONST -8)),
+  BINOP(MINUS,
+   MEM(
+    BINOP(PLUS,
+     TEMP t100,
+     CONST -8)),
+   CONST 1))
+ CJUMP(EQ,
+  MEM(
+   BINOP(PLUS,
+    TEMP t100,
+    CONST -8)),
+  CONST 2,
+  L4,L5)
+ LABEL L5
+ JUMP(
+  NAME L1)
+ LABEL L4
+ JUMP(
+  NAME L3)
+ LABEL L7

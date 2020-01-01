@@ -96,6 +96,7 @@ void sweepEnv() {
 }
 
 void Main( G::Graph< TEMP::Temp >* ig ) {
+    assertAll();
     std::cout << "[regalloc] going to make worklist" << std::endl;
     MakeWorklist( ig->Nodes() );
     std::cout << "[regalloc] completed making worklist." << std::endl;
@@ -413,7 +414,7 @@ void AssignColors() {
     }
 }
 
-Result Color( G::Graph< TEMP::Temp >* ig, std::set< COL::tempNode* > initiall /* deliberately misspell */, TEMP::TempList* regs, LIVE::MoveList* moves ) {
+Result Color( G::Graph< TEMP::Temp >* ig, std::set< COL::tempNode* > initiall /* deliberately misspell */, std::set< TEMP::Temp* > regs, LIVE::MoveList* moves ) {
     auto result     = Result();
     result.coloring = TEMP::Map::Empty();
     // result.spills   = nullptr;
@@ -431,6 +432,10 @@ Result Color( G::Graph< TEMP::Temp >* ig, std::set< COL::tempNode* > initiall /*
     while ( graphNodes ) {
         auto body  = graphNodes->head;
         graphNodes = graphNodes->tail;
+
+        if ( Contains( regs, body->NodeInfo() ) ) {
+            continue;
+        }
 
         // managing himself's pred and succ, then don't need to manage others.
         // they're all mutual.
@@ -452,8 +457,15 @@ Result Color( G::Graph< TEMP::Temp >* ig, std::set< COL::tempNode* > initiall /*
             conflicts.insert( head );
             adjSet.insert( Edge( body, head ) );
         }
+        std::cout << "=== Summary of node #t" << body->NodeInfo()->Int() << "===" << std::endl;
         degree.insert( { body, body->Degree() } );
+        std::cout << " [ degree ] " << body->Degree() << std::endl;
         adjList.insert( { body, conflicts } );
+        std::cout << " [ conflicts ] " << std::endl;
+        for ( const auto& c : conflicts ) {
+            std::cout << "\t#t" << c->NodeInfo()->Int() << std::endl;
+        }
+        std::cout << " [ conflicts ] over" << std::endl;
     }
 
     Main( ig );

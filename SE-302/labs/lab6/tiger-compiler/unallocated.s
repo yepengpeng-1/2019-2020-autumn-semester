@@ -419,3 +419,52 @@ addq $0, t102
 popq %rbp
 ret
 
+
+
+
+============================
+
+
+
+L8:
+movq $10, t114
+movq t114, -8(t100)
+L1:
+movq -8(t100), t115
+movq t115, t117
+movq $0, t116
+movq t116, t118
+cmpq t118, t117
+jge L2
+L3:
+jmp L7
+L2:
+movq -8(t100), t120
+movq t120, %rsi
+movq -8(t100), t119
+movq t119, %rdi
+pushq %r10
+pushq %r11
+callq printi
+popq %r11
+popq %r10
+movq -8(t100), t121
+movq t121, t123
+movq $1, t122
+subq t122, t123
+movq t123, -8(t100)
+movq -8(t100), t124
+movq t124, t126
+movq $2, t125
+movq t125, t127
+cmpq t127, t126
+je L4
+L5:
+jmp L1
+L4:
+jmp L3
+L7:
+addq $8, t101
+popq %rbp
+ret
+

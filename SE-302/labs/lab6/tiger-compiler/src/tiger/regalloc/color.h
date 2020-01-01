@@ -26,7 +26,7 @@ static std::string RegisterNames[] = { "%r12", "%r13", "%r14", "%r15", "%r8", "%
 typedef G::Node< TEMP::Temp >             tempNode;
 typedef std::pair< tempNode*, tempNode* > Move;
 typedef Move                              Edge;
-Result                                    Color( G::Graph< TEMP::Temp >* ig, std::set< COL::tempNode* > initiall, TEMP::TempList* regs, LIVE::MoveList* moves );
+Result                                    Color( G::Graph< TEMP::Temp >* ig, std::set< COL::tempNode* > initiall, std::set< TEMP::Temp* > regs, LIVE::MoveList* moves );
 
 static std::set< tempNode* >    precolored;
 static std::set< tempNode* >    initial;

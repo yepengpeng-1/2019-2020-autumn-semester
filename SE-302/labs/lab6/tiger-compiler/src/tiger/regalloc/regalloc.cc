@@ -303,6 +303,11 @@ inline TEMP::TempList* generateRegs( F::Frame* f ) {
     return fin;
 }
 
+inline std::set< TEMP::Temp* > generateRegSet( F::Frame* f ) {
+    std::set< TEMP::Temp* > set{ f->stackPointer(), f->framePointer(), f->returnValue(), f->R12(), f->R13(), f->R14(), f->R15(), f->R8(), f->R9(), f->RBX(), f->RCX(), f->RDI(), f->RDX(), f->RSI() };
+    return set;
+}
+
 inline bool isNamedRegister( F::Frame* f, TEMP::Temp* temp ) {
     TEMP::Temp* regTemps[] = { f->stackPointer(), f->framePointer(), f->returnValue(), f->R12(), f->R13(), f->R14(), f->R15(), f->R8(), f->R9(), f->RBX(), f->RCX(), f->RDI(), f->RDX(), f->RSI() };
     for ( size_t i = 0; i < sizeof( regTemps ) / sizeof( regTemps[ 0 ] ); i++ ) {
@@ -334,7 +339,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
             initiall.insert( node );
         }
 
-        auto palette = COL::Color( liveGraph.graph, initiall, generateRegs( f ), liveGraph.moves );
+        auto palette = COL::Color( liveGraph.graph, initiall, generateRegSet( f ), liveGraph.moves );
 
         if ( palette.spills ) {
             il = spillTempFoolishly( f, il, palette.spills );

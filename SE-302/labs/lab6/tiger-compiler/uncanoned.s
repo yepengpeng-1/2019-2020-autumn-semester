@@ -1811,3 +1811,77 @@
    CALL(
     NAME try,
      TEMP t100)))
+
+
+============================
+
+
+
+ EXP(
+  ESEQ(
+   MOVE(
+    MEM(
+     BINOP(PLUS,
+      TEMP t100,
+      CONST -8)),
+    CONST 10),
+   ESEQ(
+    SEQ(
+     LABEL L1,
+     SEQ(
+      CJUMP(GE,
+       MEM(
+        BINOP(PLUS,
+         TEMP t100,
+         CONST -8)),
+       CONST 0,
+       L2,L3),
+      SEQ(
+       LABEL L2,
+       SEQ(
+        EXP(
+         ESEQ(
+          EXP(
+           CALL(
+            NAME printi,
+             MEM(
+              BINOP(PLUS,
+               TEMP t100,
+               CONST -8)),
+             MEM(
+              BINOP(PLUS,
+               TEMP t100,
+               CONST -8)))),
+          ESEQ(
+           MOVE(
+            MEM(
+             BINOP(PLUS,
+              TEMP t100,
+              CONST -8)),
+            BINOP(MINUS,
+             MEM(
+              BINOP(PLUS,
+               TEMP t100,
+               CONST -8)),
+             CONST 1)),
+           ESEQ(
+            SEQ(
+             CJUMP(EQ,
+              MEM(
+               BINOP(PLUS,
+                TEMP t100,
+                CONST -8)),
+              CONST 2,
+              L4,L5),
+             SEQ(
+              LABEL L4,
+              SEQ(
+               JUMP(
+                NAME L3),
+               LABEL L5))),
+            CONST 0)))),
+        SEQ(
+         JUMP(
+          NAME L1),
+         LABEL L3))))),
+    CONST 0)))
