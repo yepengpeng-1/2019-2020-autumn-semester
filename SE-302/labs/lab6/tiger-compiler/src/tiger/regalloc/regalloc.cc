@@ -303,6 +303,16 @@ inline TEMP::TempList* generateRegs( F::Frame* f ) {
     return fin;
 }
 
+inline bool isNamedRegister( F::Frame* f, TEMP::Temp* temp ) {
+    TEMP::Temp* regTemps[] = { f->stackPointer(), f->framePointer(), f->returnValue(), f->R12(), f->R13(), f->R14(), f->R15(), f->R8(), f->R9(), f->RBX(), f->RCX(), f->RDI(), f->RDX(), f->RSI() };
+    for ( size_t i = 0; i < sizeof( regTemps ) / sizeof( regTemps[ 0 ] ); i++ ) {
+        if ( temp == regTemps[ i ] ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
     auto result = Result();
     while ( true ) {
@@ -318,8 +328,7 @@ Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
         while ( currentNode ) {
             auto node   = currentNode->head;
             currentNode = currentNode->tail;
-            if ( node->NodeInfo() == f->framePointer() || node->NodeInfo() == f->stackPointer() || node->NodeInfo() == f->returnValue() ) {
-                currentNode = currentNode->tail;
+            if ( isNamedRegister( f, node->NodeInfo() ) ) {
                 continue;
             }
             initiall.insert( node );
