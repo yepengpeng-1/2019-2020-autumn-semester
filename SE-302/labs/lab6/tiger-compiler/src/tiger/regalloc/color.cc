@@ -83,6 +83,7 @@ Result Color( G::Graph< TEMP::Temp >* ig, TEMP::Map* initiall /* deliberately mi
     auto result     = Result();
     result.coloring = TEMP::Map::Empty();
     result.spills   = nullptr;
+
     return result;
 }
 

@@ -104,10 +104,10 @@ LiveGraph Liveness( G::Graph< AS::Instr >* flowgraph ) {
     outLiveMap.clear();
 
     LiveGraph liveGraph;
-    liveGraph.graph = new G::Graph<TEMP::Temp>();
+    liveGraph.graph = new G::Graph< TEMP::Temp >();
     liveGraph.moves = nullptr;
-    auto      tempGraph = liveGraph.graph;
-    auto      moveList  = liveGraph.moves;
+    auto tempGraph  = liveGraph.graph;
+    auto moveList   = liveGraph.moves;
 
     // 1st - create temp nodes
     auto instrs = flowgraph->Nodes();
@@ -141,7 +141,7 @@ LiveGraph Liveness( G::Graph< AS::Instr >* flowgraph ) {
 
     // std::cout << "tempNodes has " << tempNodes.size() << " elements. They are: " << std::endl;
     // for ( auto it = tempNodes.begin(); it != tempNodes.end(); it++ ) {
-        // std::cout << " - " << ( *it )->NodeInfo() << std::endl;
+    // std::cout << " - " << ( *it )->NodeInfo() << std::endl;
     // }
 
     // 2nd - create move items
