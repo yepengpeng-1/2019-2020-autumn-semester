@@ -33,22 +33,27 @@ inline void pushTempList( TEMP::TempList* list ) {
     while ( list ) {
         auto body = list->head;
         list      = list->tail;
+        // std::cout << "  pushed one @ " << body << std::endl;
         tempSet.insert( body );
     }
 }
 
+inline void pushLabel( TEMP::Label* ) {}
+
 inline void appendNode( G::Node< AS::Instr >* node ) {
-    TEMP::TempList* temps;
     switch ( node->NodeInfo()->kind ) {
     case AS::Instr::Kind::LABEL:
-        /* absolutely doesn't provide active variables */
+        // auto labelInstr = reinterpret_cast< AS::LabelInstr* >( node->NodeInfo() );
+        // pushLabel( labelInstr->label );
         break;
     case AS::Instr::Kind::MOVE: {
+        // std::cout << "append MOVE" << std::endl;
         auto moveInstr = reinterpret_cast< AS::MoveInstr* >( node->NodeInfo() );
         pushTempList( moveInstr->src );
         pushTempList( moveInstr->dst );
     } break;
     case AS::Instr::Kind::OPER: {
+        // std::cout << "append OPER" << std::endl;
         auto operInstr = reinterpret_cast< AS::OperInstr* >( node->NodeInfo() );
         pushTempList( operInstr->src );
         pushTempList( operInstr->dst );
@@ -60,10 +65,13 @@ inline void appendNode( G::Node< AS::Instr >* node ) {
 
 template < class T > inline G::Node< T >* findNodeByTemp( const std::vector< G::Node< T >* >& vec, T* temp ) {
     for ( auto it = vec.begin(); it != vec.end(); it++ ) {
+        // std::cout << " [fNbT] compare " << *it << " and " << temp << std::endl;
         if ( ( *it )->NodeInfo() == temp ) {
             return *it;
         }
     }
+    // std::cout << "You asked me to find " << temp << ", but nothing..." << std::endl;
+    assert( 0 );
     return nullptr;
 }
 
@@ -74,7 +82,8 @@ inline void createMove( G::Node< AS::Instr >* node, G::Graph< AS::Instr >* instr
         /* absolutely no initial active variables */
         break;
     case AS::Instr::Kind::MOVE: {
-        auto moveInstr  = reinterpret_cast< AS::MoveInstr* >( node->NodeInfo() );
+        auto moveInstr = reinterpret_cast< AS::MoveInstr* >( node->NodeInfo() );
+        // std::cout << "createMove here" << std::endl;
         liveGraph.moves = new LIVE::MoveList( findNodeByTemp( tempNodes, moveInstr->src->head ), findNodeByTemp( tempNodes, moveInstr->dst->head ), liveGraph.moves );
     } break;
     case AS::Instr::Kind::OPER:
@@ -95,6 +104,8 @@ LiveGraph Liveness( G::Graph< AS::Instr >* flowgraph ) {
     outLiveMap.clear();
 
     LiveGraph liveGraph;
+    liveGraph.graph = new G::Graph<TEMP::Temp>();
+    liveGraph.moves = nullptr;
     auto      tempGraph = liveGraph.graph;
     auto      moveList  = liveGraph.moves;
 
@@ -109,12 +120,29 @@ LiveGraph Liveness( G::Graph< AS::Instr >* flowgraph ) {
         // init i/o live map
         inLiveMap.insert( std::make_pair( body, std::set< TEMP::Temp* >() ) );
         outLiveMap.insert( std::make_pair( body, std::set< TEMP::Temp* >() ) );
+
         instrs = instrs->tail;
     }
 
     for ( auto it = tempSet.begin(); it != tempSet.end(); it++ ) {
-        tempNodes.push_back( tempGraph->NewNode( *it ) );
+        tempGraph->NewNode( *it );
     }
+
+    {
+        auto genNodes = tempGraph->Nodes();
+        while ( genNodes ) {
+            // std::cout << "genNodes = " << genNodes << ", its last = " << genNodes->tail << std::endl;
+            auto head = genNodes->head;
+            genNodes  = genNodes->tail;
+            // std::cout << "bump node " << head << std::endl;
+            tempNodes.push_back( head );
+        }
+    }
+
+    // std::cout << "tempNodes has " << tempNodes.size() << " elements. They are: " << std::endl;
+    // for ( auto it = tempNodes.begin(); it != tempNodes.end(); it++ ) {
+        // std::cout << " - " << ( *it )->NodeInfo() << std::endl;
+    // }
 
     // 2nd - create move items
     instrs = flowgraph->Nodes();
@@ -191,6 +219,7 @@ LiveGraph Liveness( G::Graph< AS::Instr >* flowgraph ) {
                         // ignore a <- c cases
                         continue;
                     }
+                    // std::cout << "MOVE here" << std::endl;
                     tempGraph->AddEdge( findNodeByTemp<>( tempNodes, defNode ), findNodeByTemp<>( tempNodes, *it ) );
                 }
             }
@@ -202,13 +231,14 @@ LiveGraph Liveness( G::Graph< AS::Instr >* flowgraph ) {
                 auto defNode = defTl->head;
                 defTl        = defTl->tail;
                 for ( auto it = outLive.begin(); it != outLive.end(); it++ ) {
+                    // std::cout << "OPER here" << std::endl;
                     tempGraph->AddEdge( findNodeByTemp<>( tempNodes, defNode ), findNodeByTemp<>( tempNodes, *it ) );
                 }
             }
         } break;
         }
     }
-    std::cout << "Over!" << std::endl;
+    // std::cout << "Over!" << std::endl;
     return liveGraph;
 }
 

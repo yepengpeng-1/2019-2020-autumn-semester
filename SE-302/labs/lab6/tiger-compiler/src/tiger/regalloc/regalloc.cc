@@ -287,9 +287,17 @@ inline bool isExcept( F::Frame* f, TEMP::Temp* temp ) {
 }
 
 Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
-    // TODO: Put your codes here (lab6).
+    std::cout << "entered regalloc" << std::endl;
+    auto instrGraph = FG::AssemFlowGraph( il, f );
+    std::cout << "done generating instrGraph" << std::endl;
+    auto liveGraph = LIVE::Liveness( instrGraph );
+    std::cout << "done generating liveGraph" << std::endl;
+
+    auto rs = COL::Color( liveGraph.graph, TEMP::Map::Empty(), nullptr, liveGraph.moves );
+
     auto result     = Result();
-    result.coloring = TEMP::Map::Empty();
+    result.coloring = rs.coloring;
+    auto spills     = rs.spills;
 
     std::vector< TEMP::Temp* > tempset;
     while ( true ) {

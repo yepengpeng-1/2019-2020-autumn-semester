@@ -2,6 +2,7 @@
 #define TIGER_UTIL_GRAPH_H_
 
 #include "tiger/util/table.h"
+#include <iostream>
 
 namespace G {
 
@@ -31,14 +32,19 @@ public:
     static void Show( FILE* out, NodeList< T >* p, void showInfo( T* ) );
 
     int            nodecount;
-    NodeList< T >* mynodes;
-    NodeList< T >* mylast;
+    NodeList< T >* mynodes = nullptr;
+    NodeList< T >* mylast = nullptr;
 };
 
 template < class T > class Node {
     template < class NodeType > friend class Graph;
 
 public:
+    /* to satisfy the std::set, which requires a sequence to perform input */
+    bool operator<( const Node< T >& rhs ) const {
+        return info_ < rhs.info_;
+    }
+
     /* Tell if there is an edge from this node to "to" */
     bool GoesTo( Node< T >* n );
 
@@ -96,18 +102,23 @@ template < class T > Node< T >* Graph< T >::NewNode( T* info ) {
     Node< T >*     n = new Node< T >();
     NodeList< T >* p = new NodeList< T >( n, nullptr );
     n->mygraph_      = this;
-    n->mykey_        = this->nodecount++;
+    ++this->nodecount;
+    n->mykey_        = this->nodecount;
 
-    if ( this->mylast == nullptr )
-        this->mynodes = this->mylast = p;
-    else
-        this->mylast = this->mylast->tail = p;
-
+    if ( this->mynodes == nullptr ) {
+        this->mylast  = p;
+        this->mynodes = this->mylast;
+    }
+    else {
+        this->mylast->tail = p;
+        this->mylast       = this->mylast->tail;
+    }
     n->succs_ = nullptr;
     n->preds_ = nullptr;
-    n->info_  = info;
+    // std::cout << "written info = " << info << std::endl;
+    n->info_ = info;
     return n;
-}
+}  // namespace G
 
 template < class T > bool Node< T >::GoesTo( Node< T >* n ) {
     return this->succs_->InNodeList( n );

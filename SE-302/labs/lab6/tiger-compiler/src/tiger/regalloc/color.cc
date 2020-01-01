@@ -23,7 +23,7 @@ template < class T > std::set< T > D( const std::set< T >& s1, const std::set< T
 void assertDegree() {
     auto bigUnion = U( simplifyWorklist, U( freezeWorkList, spillWorkList ) );
     for ( auto it = bigUnion.begin(); it != bigUnion.end(); it++ ) {
-        assert( degree[ *it ] = I( adjList[ *it ], U( precolored, U( simplifyWorklist, U( freezeWorkList, spillWorkList ) ) ) ).size() );
+        assert( degree[ *it ] == I( adjList[ *it ], U( precolored, U( simplifyWorklist, U( freezeWorkList, spillWorkList ) ) ) ).size() );
     }
 }
 
@@ -47,7 +47,15 @@ void assertSpill() {
     }
 }
 
-Result Color( G::Graph< TEMP::Temp > ig, TEMP::Map initiall /* deliberately misspell */, TEMP::TempList regs, LIVE::MoveList* moves ) {
+void assertAll() {
+    assertDegree();
+    assertSimplify();
+    assertFreeze();
+    assertSpill();
+}
+
+// cleans all static containers
+void sweepEnv() {
     precolored.clear();
     initial.clear();
     simplifyWorklist.clear();
@@ -69,9 +77,13 @@ Result Color( G::Graph< TEMP::Temp > ig, TEMP::Map initiall /* deliberately miss
     moveList.clear();
     alias.clear();
     color.clear();
+}
 
-    // TODO: Put your codes here (lab6).
-    return Result();
+Result Color( G::Graph< TEMP::Temp >* ig, TEMP::Map* initiall /* deliberately misspell */, TEMP::TempList* regs, LIVE::MoveList* moves ) {
+    auto result     = Result();
+    result.coloring = TEMP::Map::Empty();
+    result.spills   = nullptr;
+    return result;
 }
 
 }  // namespace COL

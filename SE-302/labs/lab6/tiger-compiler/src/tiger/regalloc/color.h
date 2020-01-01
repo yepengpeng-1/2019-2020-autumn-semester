@@ -21,7 +21,7 @@ static const size_t K = 10;
 typedef G::Node< TEMP::Temp >             tempNode;
 typedef std::pair< tempNode*, tempNode* > Move;
 typedef Move                              Edge;
-Result                                    Color( G::Graph< TEMP::Temp >* ig, TEMP::Map* initial, TEMP::TempList* regs, LIVE::MoveList* moves );
+Result                                    Color( G::Graph< TEMP::Temp >* ig, TEMP::Map* initiall, TEMP::TempList* regs, LIVE::MoveList* moves );
 
 static std::set< tempNode > precolored;
 static std::set< tempNode > initial;
