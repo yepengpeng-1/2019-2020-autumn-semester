@@ -6,8 +6,17 @@
 #include "tiger/frame/temp.h"
 #include "tiger/liveness/flowgraph.h"
 #include "tiger/util/graph.h"
+#include <algorithm>
+#include <map>
+#include <set>
+#include <vector>
 
 namespace LIVE {
+
+static std::set< TEMP::Temp* >                                    tempSet;
+static std::vector< G::Node< TEMP::Temp >* >                      tempNodes;
+static std::map< G::Node< AS::Instr >*, std::set< TEMP::Temp* > > inLiveMap;
+static std::map< G::Node< AS::Instr >*, std::set< TEMP::Temp* > > outLiveMap;
 
 class MoveList {
 public:

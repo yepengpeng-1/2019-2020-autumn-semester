@@ -36,6 +36,7 @@ bool IsMove( G::Node< AS::Instr >* n ) {
     return node->kind == AS::Instr::Kind::MOVE;
 }
 
+// 特化地 findLabel
 inline G::Node< AS::Instr >* findLabel( const std::vector< G::Node< AS::Instr >* >& vec, const TEMP::Label* label ) {
     for ( const auto& node : vec ) {
         if ( node->NodeInfo()->kind == AS::Instr::Kind::LABEL ) {
