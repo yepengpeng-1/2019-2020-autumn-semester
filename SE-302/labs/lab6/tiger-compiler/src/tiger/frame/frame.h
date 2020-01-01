@@ -73,6 +73,15 @@ public:
         return new F::InFrameAccess( offset );
     }  // namespace F
 
+    TEMP::Map* registers() {
+        static std::string regNames[] = { "%rbp", "%rsp", "%rax" };
+        auto               map        = TEMP::Map::Empty();
+        map->Enter( framePointer(), &regNames[ 0 ] );
+        map->Enter( stackPointer(), &regNames[ 1 ] );
+        map->Enter( returnValue(), &regNames[ 2 ] );
+    }
+
+    // %rbp
     static TEMP::Temp* framePointer() {
         // std::cout << "framePointer register requested" << std::endl;
         static TEMP::Temp* fp = nullptr;
@@ -86,6 +95,7 @@ public:
         return fp;
     }
 
+    // %rsp
     static TEMP::Temp* stackPointer() {
         // std::cout << "stackPointer register requested" << std::endl;
         static TEMP::Temp* sp = nullptr;
@@ -99,6 +109,7 @@ public:
         return sp;
     }
 
+    // %rax
     static TEMP::Temp* returnValue() {
         // std::cout << "returnValue register requested" << std::endl;
         static TEMP::Temp* rp = nullptr;
@@ -111,18 +122,106 @@ public:
         }
         return rp;
     }
-    static TEMP::Temp* radioRegister() {
-        // std::cout << "radioRegister requested" << std::endl;
-        static TEMP::Temp* rr = nullptr;
-        if ( !rr ) {
-            std::cout << "gonna return new radioRegister" << std::endl;
-            rr = TEMP::Temp::NewTemp();
+
+    static TEMP::Temp* RCX() {
+        static TEMP::Temp* rcx = nullptr;
+        if ( !rcx ) {
+            rcx = TEMP::Temp::NewTemp();
         }
-        else {
-            // std::cout << "gonna return existed radioRegister" << std::endl;
-        }
-        return rr;
+        return rcx;
     }
+
+    static TEMP::Temp* RDX() {
+        static TEMP::Temp* rdx = nullptr;
+        if ( !rdx ) {
+            rdx = TEMP::Temp::NewTemp();
+        }
+        return rdx;
+    }
+
+    static TEMP::Temp* RBX() {
+        static TEMP::Temp* rbx = nullptr;
+        if ( !rbx ) {
+            rbx = TEMP::Temp::NewTemp();
+        }
+        return rbx;
+    }
+
+    static TEMP::Temp* RSI() {
+        static TEMP::Temp* rsi = nullptr;
+        if ( !rsi ) {
+            rsi = TEMP::Temp::NewTemp();
+        }
+        return rsi;
+    }
+
+    static TEMP::Temp* RDI() {
+        static TEMP::Temp* rdi = nullptr;
+        if ( !rdi ) {
+            rdi = TEMP::Temp::NewTemp();
+        }
+        return rdi;
+    }
+
+    static TEMP::Temp* R8() {
+        static TEMP::Temp* r8 = nullptr;
+        if ( !r8 ) {
+            r8 = TEMP::Temp::NewTemp();
+        }
+        return r8;
+    }
+
+    static TEMP::Temp* R9() {
+        static TEMP::Temp* r9 = nullptr;
+        if ( !r9 ) {
+            r9 = TEMP::Temp::NewTemp();
+        }
+        return r9;
+    }
+
+    static TEMP::Temp* R12() {
+        static TEMP::Temp* r12 = nullptr;
+        if ( !r12 ) {
+            r12 = TEMP::Temp::NewTemp();
+        }
+        return r12;
+    }
+
+    static TEMP::Temp* R13() {
+        static TEMP::Temp* r13 = nullptr;
+        if ( !r13 ) {
+            r13 = TEMP::Temp::NewTemp();
+        }
+        return r13;
+    }
+
+    static TEMP::Temp* R14() {
+        static TEMP::Temp* r14 = nullptr;
+        if ( !r14 ) {
+            r14 = TEMP::Temp::NewTemp();
+        }
+        return r14;
+    }
+
+    static TEMP::Temp* R15() {
+        static TEMP::Temp* r15 = nullptr;
+        if ( !r15 ) {
+            r15 = TEMP::Temp::NewTemp();
+        }
+        return r15;
+    }
+    // static TEMP::Temp* radioRegister() {
+    //     // std::cout << "radioRegister requested" << std::endl;
+    //     static TEMP::Temp* rr = nullptr;
+    //     if ( !rr ) {
+    //         std::cout << "gonna return new radioRegister" << std::endl;
+    //         rr = TEMP::Temp::NewTemp();
+    //     }
+    //     else {
+    //         // std::cout << "gonna return existed radioRegister" << std::endl;
+    //     }
+    //     return rr;
+    // }
 
     // static TEMP::Temp* idiotRegister() {
     //     // std::cout << "idiot register requested" << std::endl;

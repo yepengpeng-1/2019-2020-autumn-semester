@@ -17,14 +17,16 @@ public:
 };
 
 // register count
-static size_t K = 10;
+static size_t K = 11;
 
-static std::string RegisterNames[] = { "%1", "%2", "%3", "%4", "%5", "%6", "%7", "%8", "%9", "%10" };
+// static std::string RegisterNames[] = { "%1", "%2", "%3", "%4", "%5", "%6", "%7", "%8", "%9", "%10" };
+static std::string RegisterNames[] = { "%r12", "%r13", "%r14", "%r15", "%r8", "%r9", "%rbx", "%rcx", "%rdi", "%rdx", "%rsi" };
+// { f->R12(), f->R13(), f->R14(), f->R15(), f->R8(), f->R9(), f->RBX(), f->RCX(), f->RDI(), f->RDX(), f->RSI() };
 
 typedef G::Node< TEMP::Temp >             tempNode;
 typedef std::pair< tempNode*, tempNode* > Move;
 typedef Move                              Edge;
-Result                                    Color( G::Graph< TEMP::Temp >* ig, TEMP::Map* initiall, TEMP::TempList* regs, LIVE::MoveList* moves );
+Result                                    Color( G::Graph< TEMP::Temp >* ig, std::set< COL::tempNode* > initiall, TEMP::TempList* regs, LIVE::MoveList* moves );
 
 static std::set< tempNode* >    precolored;
 static std::set< tempNode* >    initial;

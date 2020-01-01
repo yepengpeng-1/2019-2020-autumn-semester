@@ -290,16 +290,42 @@ static AS::InstrList* spillTempFoolishly( F::Frame* f, AS::InstrList* instrL, TE
     return head;
 }
 
+inline TEMP::TempList* generateRegs( F::Frame* f ) {
+    // rsp rbp used for stack managing
+    // rax for return value
+    // r10 r11 for stack operation internals
+    TEMP::Temp* regTemps[] = { f->R12(), f->R13(), f->R14(), f->R15(), f->R8(), f->R9(), f->RBX(), f->RCX(), f->RDI(), f->RDX(), f->RSI() };
+
+    TEMP::TempList* fin = nullptr;
+    for ( size_t i = 0; i < sizeof( regTemps ) / sizeof( regTemps[ 0 ] ); i++ ) {
+        fin = new TEMP::TempList( regTemps[ i ], fin );
+    }
+    return fin;
+}
+
 Result RegAlloc( F::Frame* f, AS::InstrList* il ) {
     auto result = Result();
     while ( true ) {
         std::cout << "[regalloc] entered regalloc once" << std::endl;
         auto instrGraph = FG::AssemFlowGraph( il, f );
         std::cout << "done generating instrGraph" << std::endl;
+
         auto liveGraph = LIVE::Liveness( instrGraph );
         std::cout << "done generating liveGraph" << std::endl;
 
-        auto palette = COL::Color( liveGraph.graph, TEMP::Map::Empty(), nullptr, liveGraph.moves );
+        std::set< COL::tempNode* > initiall;
+        auto                       currentNode = liveGraph.graph->Nodes();
+        while ( currentNode ) {
+            auto node   = currentNode->head;
+            currentNode = currentNode->tail;
+            if ( node->NodeInfo() == f->framePointer() || node->NodeInfo() == f->stackPointer() || node->NodeInfo() == f->returnValue() ) {
+                currentNode = currentNode->tail;
+                continue;
+            }
+            initiall.insert( node );
+        }
+
+        auto palette = COL::Color( liveGraph.graph, initiall, generateRegs( f ), liveGraph.moves );
 
         if ( palette.spills ) {
             il = spillTempFoolishly( f, il, palette.spills );

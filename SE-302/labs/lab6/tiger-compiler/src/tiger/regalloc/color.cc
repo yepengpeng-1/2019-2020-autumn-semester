@@ -28,6 +28,13 @@ template < class T > inline bool NotContains( const std::set< T >& set, T key ) 
     return set.find( key ) == set.end();
 }
 
+template < class T > inline void Sweep( std::set< T >& set, T key ) {
+    auto find = set.find( key );
+    if ( find != set.end() ) {
+        set.erase( find );
+    }
+}
+
 void assertDegree() {
     auto bigUnion = U( simplifyWorklist, U( freezeWorkList, spillWorkList ) );
     for ( auto it = bigUnion.begin(); it != bigUnion.end(); it++ ) {
@@ -89,7 +96,9 @@ void sweepEnv() {
 }
 
 void Main( G::Graph< TEMP::Temp >* ig ) {
+    std::cout << "[regalloc] going to make worklist" << std::endl;
     MakeWorklist( ig->Nodes() );
+    std::cout << "[regalloc] completed making worklist." << std::endl;
     do {
         if ( simplifyWorklist.size() ) {
             Simplify();
@@ -104,7 +113,9 @@ void Main( G::Graph< TEMP::Temp >* ig ) {
             SelectSpill();
         }
     } while ( simplifyWorklist.size() || worklistMoves.size() || freezeWorkList.size() || spillWorkList.size() );
+    std::cout << "[regalloc] going to assign colors" << std::endl;
     AssignColors();
+    std::cout << "[regalloc] assigned colors" << std::endl;
 }
 
 void AddEdge( G::Node< TEMP::Temp >* u, G::Node< TEMP::Temp >* v ) {
@@ -125,7 +136,9 @@ void AddEdge( G::Node< TEMP::Temp >* u, G::Node< TEMP::Temp >* v ) {
 void MakeWorklist( G::NodeList< TEMP::Temp >* nodes ) {
     for ( auto it = initial.begin(); it != initial.end(); /* do not use it++ here, but use erase's return value. */ ) {
         auto n = *it;
-        it     = initial.erase( it );
+        // special: remove from a set when traversing it.
+        // don't replace it with Sweep
+        it = initial.erase( it );
         if ( degree[ n ] >= K ) {
             spillWorkList.insert( n );
         }
@@ -139,7 +152,11 @@ void MakeWorklist( G::NodeList< TEMP::Temp >* nodes ) {
 }
 
 std::set< COL::tempNode* > Adjacent( COL::tempNode* n ) {
-    return D( adjList[ n ], U( std::set< COL::tempNode* >( selectedStack.begin(), selectedStack.end() ), coalescedNodes ) );
+    std::set< COL::tempNode* > stackContents;
+    for ( const auto& item : selectedStack ) {
+        stackContents.insert( item );
+    }
+    return D( adjList[ n ], U( stackContents, coalescedNodes ) );
 }
 
 std::set< COL::Move > NodeMoves( COL::tempNode* n ) {
@@ -147,43 +164,59 @@ std::set< COL::Move > NodeMoves( COL::tempNode* n ) {
 }
 
 bool MoveRelated( COL::tempNode* n ) {
+    std::cout << "[regalloc] evil MoveRelated call" << std::endl;
     return NodeMoves( n ).size() != 0;
 }
 
 void Simplify() {
-    auto it = simplifyWorklist.begin();
-    auto n  = *it;
-    simplifyWorklist.erase( it );
+    std::cout << "[regalloc] Simplify called" << std::endl;
 
+    auto n = *simplifyWorklist.begin();
+    Sweep( simplifyWorklist, n );
+
+    std::cout << "[regalloc] going to append selectedStack: " << n << std::endl;
     selectedStack.push_back( n );
     auto adjacents = Adjacent( n );
+    std::cout << "[regalloc] got adjacents ok" << std::endl;
     for ( auto& m : adjacents ) {
         DecrementDegree( m );
     }
+    std::cout << "[regalloc] simplify over" << std::endl;
 }
 
 void DecrementDegree( COL::tempNode* m ) {
+    std::cout << "[regalloc] decrementdegree called" << std::endl;
     size_t d    = degree[ m ];
     degree[ m ] = d - 1;
     if ( d == K ) {
         // c++'s foolish initializing rules.
         std::set< COL::tempNode* > mSet{ m };
         EnableMoves( U( Adjacent( m ), mSet ) );
-        spillWorkList.erase( spillWorkList.find( m ) );
+        std::cout << "[regalloc] done enablemoves, spillWorkList.size() = " << spillWorkList.size() << std::endl;
+        // spillWorkList.erase( spillWorkList.find( m ) );
+        Sweep( spillWorkList, m );
+        std::cout << "erased " << std::endl;
         if ( MoveRelated( m ) ) {
-            freezeWorkList.erase( freezeWorkList.find( m ) );
+            std::cout << "moverelated done, true branch" << std::endl;
+            // freezeWorkList.erase( freezeWorkList.find( m ) );
+            Sweep( freezeWorkList, m );
         }
         else {
-            simplifyWorklist.erase( simplifyWorklist.find( m ) );
+            std::cout << "moverelated done, false branch" << std::endl;
+            // simplifyWorklist.erase( simplifyWorklist.find( m ) );
+            Sweep( simplifyWorklist, m );
         }
     }
+    std::cout << "[regalloc] quit from decrementdegree" << std::endl;
 }
 
 void EnableMove( COL::tempNode* n ) {
     for ( auto m : NodeMoves( n ) ) {
         if ( Contains( activeMoves, m ) ) {
-            activeMoves.erase( activeMoves.find( m ) );
-            worklistMoves.erase( worklistMoves.find( m ) );
+            Sweep( activeMoves, m );
+            Sweep( worklistMoves, m );
+            // activeMoves.erase( activeMoves.find( m ) );
+            // worklistMoves.erase( worklistMoves.find( m ) );
         }
     }
 }
@@ -192,8 +225,10 @@ void EnableMoves( std::set< COL::tempNode* > nodes ) {
     for ( auto& n : nodes ) {
         for ( auto m : NodeMoves( n ) ) {
             if ( Contains( activeMoves, m ) ) {
-                activeMoves.erase( activeMoves.find( m ) );
-                worklistMoves.erase( worklistMoves.find( m ) );
+                Sweep( activeMoves, m );
+                Sweep( worklistMoves, m );
+                // activeMoves.erase( activeMoves.find( m ) );
+                // worklistMoves.erase( worklistMoves.find( m ) );
             }
         }
     }
@@ -219,7 +254,8 @@ void Coalesce() {
     else {
         u = x, v = y;
     }
-    worklistMoves.erase( worklistMoves.find( m ) );
+    Sweep( worklistMoves, m );
+    // worklistMoves.erase( worklistMoves.find( m ) );
     if ( u == v ) {
         coalescedMoves.insert( m );
         AddWorkList( u );
@@ -241,7 +277,8 @@ void Coalesce() {
 
 void AddWorkList( COL::tempNode* u ) {
     if ( NotContains( precolored, u ) && !MoveRelated( u ) && degree[ u ] < K ) {
-        freezeWorkList.erase( freezeWorkList.find( u ) );
+        // freezeWorkList.erase( freezeWorkList.find( u ) );
+        Sweep( freezeWorkList, u );
         simplifyWorklist.insert( u );
     }
 }
@@ -269,10 +306,12 @@ COL::tempNode* GetAlias( COL::tempNode* n ) {
 
 void Combine( COL::tempNode* u, COL::tempNode* v ) {
     if ( Contains( freezeWorkList, v ) ) {
-        freezeWorkList.erase( freezeWorkList.find( v ) );
+        // freezeWorkList.erase( freezeWorkList.find( v ) );
+        Sweep( freezeWorkList, v );
     }
     else {
-        spillWorkList.erase( spillWorkList.find( v ) );
+        // spillWorkList.erase( spillWorkList.find( v ) );
+        Sweep( spillWorkList, v );
     }
 
     coalescedNodes.insert( v );
@@ -283,15 +322,18 @@ void Combine( COL::tempNode* u, COL::tempNode* v ) {
         AddEdge( t, u );
         DecrementDegree( t );
         if ( degree[ u ] >= K && Contains( freezeWorkList, u ) ) {
-            freezeWorkList.erase( freezeWorkList.find( u ) );
-            spillWorkList.erase( spillWorkList.find( u ) );
+            // freezeWorkList.erase( freezeWorkList.find( u ) );
+            // spillWorkList.erase( spillWorkList.find( u ) );
+            Sweep( freezeWorkList, u );
+            Sweep( spillWorkList, u );
         }
     }
 }
 
 void Freeze() {
     auto u = *freezeWorkList.begin();
-    freezeWorkList.erase( freezeWorkList.find( u ) );
+    // freezeWorkList.erase( freezeWorkList.find( u ) );
+    Sweep( freezeWorkList, u );
     simplifyWorklist.insert( u );
     FreezeMoves( u );
 }
@@ -306,10 +348,12 @@ void FreezeMoves( COL::tempNode* u ) {
         else {
             v = GetAlias( y );
         }
-        activeMoves.erase( activeMoves.find( m ) );
+        // activeMoves.erase( activeMoves.find( m ) );
+        Sweep( activeMoves, m );
         frozenMoves.insert( m );
         if ( NodeMoves( v ).size() == 0 && degree[ v ] < K ) {
-            freezeWorkList.erase( freezeWorkList.find( v ) );
+            // freezeWorkList.erase( freezeWorkList.find( v ) );
+            Sweep( freezeWorkList, v );
             simplifyWorklist.insert( v );
         }
     }
@@ -318,12 +362,14 @@ void FreezeMoves( COL::tempNode* u ) {
 void SelectSpill() {
     // todo: use some good strategy to decide which one to spill
     auto m = *spillWorkList.begin();
-    spillWorkList.erase( spillWorkList.find( m ) );
+    // spillWorkList.erase( spillWorkList.find( m ) );
+    Sweep( spillWorkList, m );
     simplifyWorklist.insert( m );
     FreezeMoves( m );
 }
 
 void AssignColors() {
+    std::cout << "[regalloc] selectedStack size = " << selectedStack.size() << std::endl;
     while ( selectedStack.size() ) {
         auto n = selectedStack[ selectedStack.size() - 1 ];
         selectedStack.pop_back();
@@ -331,23 +377,32 @@ void AssignColors() {
         for ( size_t i = 0; i < K; i++ ) {
             okColors[ i ] = i;
         }
-        for ( auto& w : adjList[ n ] ) {
+        for ( auto w : adjList[ n ] ) {
             if ( Contains( U( coloredNodes, precolored ), GetAlias( w ) ) ) {
+                std::cout << "True" << std::endl;
                 auto rmColor = color[ GetAlias( w ) ];
-                auto v       = std::find( okColors.begin(), okColors.end(), rmColor );
-                if ( v != okColors.end() ) {
-                    okColors.erase( v );
-                }
-                else {
-                    std::cerr << "try to erase unexisted " << rmColor << " from the vector" << std::endl;
-                    assert( 0 );
-                }
+                std::remove( okColors.begin(), okColors.end(), rmColor );
+                // auto v       = std::find( okColors.begin(), okColors.end(), rmColor );
+                // if ( v != okColors.end() ) {
+                //     std::cout << "decalre erase!" << std::endl;
+                //     okColors.erase( v );
+                // }
+                // else {
+                //     std::cerr << "try to erase unexisted " << rmColor << " from the vector" << std::endl;
+                //     assert( 0 );
+                // }
             }
         }
+        std::cout << "okColors size = " << okColors.size() << std::endl;
+        for ( size_t i = 0; i < okColors.size(); i++ ) {
+            std::cout << "[regalloc] current okColor[" << i << "] = " << okColors[ i ] << std::endl;
+        }
+
         if ( okColors.size() == 0 ) {
             spilledNodes.insert( n );
         }
         else {
+            // std::cout << "going to insert " << okColors[ 0 ] << std::endl;
             coloredNodes.insert( n );
             auto c     = okColors[ 0 ];
             color[ n ] = c;
@@ -358,10 +413,48 @@ void AssignColors() {
     }
 }
 
-Result Color( G::Graph< TEMP::Temp >* ig, TEMP::Map* initiall /* deliberately misspell */, TEMP::TempList* regs, LIVE::MoveList* moves ) {
+Result Color( G::Graph< TEMP::Temp >* ig, std::set< COL::tempNode* > initiall /* deliberately misspell */, TEMP::TempList* regs, LIVE::MoveList* moves ) {
     auto result     = Result();
     result.coloring = TEMP::Map::Empty();
     // result.spills   = nullptr;
+
+    // std::vector< std::string* > registerNames;
+    // auto                        registers = regs;
+    // while ( registers ) {
+    //     registerNames.push_back( registers->head );
+    //     registers = registers->tail;
+    // }
+    initial = initiall;
+
+    auto graphNodes = ig->Nodes();
+
+    while ( graphNodes ) {
+        auto body  = graphNodes->head;
+        graphNodes = graphNodes->tail;
+
+        // managing himself's pred and succ, then don't need to manage others.
+        // they're all mutual.
+
+        std::set< tempNode* > conflicts;
+
+        auto preNode = body->Pred();
+        while ( preNode ) {
+            auto head = preNode->head;
+            preNode   = preNode->tail;
+            conflicts.insert( head );
+            adjSet.insert( Edge( body, head ) );
+        }
+
+        auto sucNode = body->Succ();
+        while ( sucNode ) {
+            auto head = sucNode->head;
+            sucNode   = sucNode->tail;
+            conflicts.insert( head );
+            adjSet.insert( Edge( body, head ) );
+        }
+        degree.insert( { body, body->Degree() } );
+        adjList.insert( { body, conflicts } );
+    }
 
     Main( ig );
     if ( ALL_SPILL ) {
@@ -384,7 +477,9 @@ Result Color( G::Graph< TEMP::Temp >* ig, TEMP::Map* initiall /* deliberately mi
         }
         result.spills = spilled;
 
+        std::cout << "[regalloc] coloredNodes count = " << coloredNodes.size() << std::endl;
         for ( auto it = coloredNodes.begin(); it != coloredNodes.end(); ++it ) {
+            std::cout << "[regalloc] gotta color name " << color[ *it ] << std::endl;
             result.coloring->Enter( ( *it )->NodeInfo(), &RegisterNames[ color[ *it ] ] );
         }
     }
