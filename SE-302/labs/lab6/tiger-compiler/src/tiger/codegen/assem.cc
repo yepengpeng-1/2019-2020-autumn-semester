@@ -95,7 +95,8 @@ static const std::map< std::string, std::string > replacingPair = {
     { "movq (%r13), (%r12)", "movq (%r13), %r10\nmovq %r10, (%r12)" }, { "movq (%r14), (%r13)", "movq (%r14), %r11\nmovq %r11, (%r13)" },
     { "movq (%r12), (%r14)", "movq (%r12), %r10\nmovq %r10, (%r14)" }, { "movq (%r14), (%r12)", "movq (%r14), %r11\nmovq %r11, (%r12)" },
     { "movq (%r12), (%r15)", "movq (%r12), %r10\nmovq %r10, (%r15)" }, { "movq (%r15), (%r12)", "movq (%r15), %r11\nmovq %r11, (%r12)" },
-    { "movq (%r13), (%r8)", "movq (%r13), %r10\nmovq %r10, (%r8)" }
+    { "movq (%r13), (%r8)", "movq (%r13), %r10\nmovq %r10, (%r8)" },   { "movq (%rbx), (%r14)", "movq (%rbx), %r11\nmovq %r11, (%r14)" },
+    { "movq (%r14), (%r15)", "movq (%r14), %r10\nmovq %r10, (%r15)" }
 };  // namespace AS
 
 static const std::string internalRegs = "%r14";
