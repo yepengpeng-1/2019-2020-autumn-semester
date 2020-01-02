@@ -505,21 +505,23 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
             //       allocate 24 bytes of space on the stack
 
             auto moveInstr = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( var1.first, nullptr ) );
-            auto opInstr   = new AS::OperInstr( assem, new TEMP::TempList( r, nullptr ), new TEMP::TempList( var2.first, nullptr ), nullptr );
+            auto opInstr   = new AS::OperInstr( assem, new TEMP::TempList( r, nullptr ), new TEMP::TempList( var2.first, new TEMP::TempList( r, nullptr ) ), nullptr );
             // auto opInstr   = new AS::OperInstr( assem, new TEMP::TempList( r, nullptr ), new TEMP::TempList( r, new TEMP::TempList( var2.first, nullptr ) ), nullptr );
             return smart_pair( r, combine( var1.second, combine( new AS::InstrList( moveInstr, nullptr ), combine( var2.second, new AS::InstrList( opInstr, nullptr ) ) ) ) );
         }
         else if ( e->op == T::MUL_OP ) {
-            auto r             = TEMP::Temp::NewTemp();
-            auto moveInstr     = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
-            auto mulqInstr     = new AS::OperInstr( "imulq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
+            auto r         = TEMP::Temp::NewTemp();
+            auto moveInstr = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
+            auto mulqInstr =
+                new AS::OperInstr( "imulq `s0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var2.first, new TEMP::TempList( f->returnValue(), nullptr ) ), nullptr );
             auto moveBackInstr = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
             return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( moveInstr, new AS::InstrList( mulqInstr, new AS::InstrList( moveBackInstr, nullptr ) ) ) ) ) );
         }
         else if ( e->op == T::DIV_OP ) {
             auto r             = TEMP::Temp::NewTemp();
             auto moveInstr     = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
-            auto divqInstr     = new AS::OperInstr( "xorq %rdx, %rdx\nidivq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
+            auto divqInstr     = new AS::OperInstr( "xorq %rdx, %rdx\nidivq `s0", new TEMP::TempList( f->returnValue(), nullptr ),
+                                                new TEMP::TempList( var2.first, new TEMP::TempList( f->returnValue(), nullptr ) ), nullptr );
             auto moveBackInstr = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
             return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( moveInstr, new AS::InstrList( divqInstr, new AS::InstrList( moveBackInstr, nullptr ) ) ) ) ) );
         }
