@@ -536,16 +536,16 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
     }
     else if ( expNode->kind == T::Exp::CALL && reinterpret_cast< T::CallExp* >( expNode )->fun->kind == T::Exp::NAME ) {
 
-        static std::string saveCallerSavedRegs    = "pushq %rcx\npushq %rdx\npushq %rdi\npushq %rsi\npushq %rsp\npushq %r8\npushq %r9\npushq %r10\npushq %r11\n";
-        static std::string recoverCallerSavedRegs = "popq %r11\npopq %r10\npopq %r9\npopq %r8\npopq %rsp\npopq %rsi\npopq %rdi\npopq %rdx\npopq %rcx";
+        static std::string saveCallerSavedRegs    = "";  // "pushq %rcx\npushq %rdx\npushq %rdi\npushq %rsi\npushq %rsp\npushq %r8\npushq %r9\npushq %r10\npushq %r11\n";
+        static std::string recoverCallerSavedRegs = "";  // "popq %r11\npopq %r10\npopq %r9\npopq %r8\npopq %rsp\npopq %rsi\npopq %rdi\npopq %rdx\npopq %rcx";
         std::cout << "[codegen] fallen into CALL." << std::endl;
         auto exp     = reinterpret_cast< T::CallExp* >( expNode );
         auto args    = exp->args;
         auto funname = reinterpret_cast< T::NameExp* >( reinterpret_cast< T::CallExp* >( expNode )->fun )->name;
         auto l       = munchArgs( f, 0, args );
         std::cout << "\tcallq's funname = " << funname->Name() << ", TEMP::LabelString(funname) = " << TEMP::LabelString( funname ) << std::endl;
-        auto instr = new AS::OperInstr( saveCallerSavedRegs + "callq " + TEMP::LabelString( funname ) + "\n" + recoverCallerSavedRegs,
-                                        new TEMP::TempList( f->stackPointer(), new TEMP::TempList( f->returnValue(), nullptr ) ), new TEMP::TempList( f->stackPointer(), nullptr ), nullptr );
+        auto instr = new AS::OperInstr( saveCallerSavedRegs + "callq " + TEMP::LabelString( funname ) + recoverCallerSavedRegs, f->callerSavedRegs(), new TEMP::TempList( f->stackPointer(), nullptr ),
+                                        nullptr );
         return smart_pair( f->returnValue(), combine( l, new AS::InstrList( instr, nullptr ) ) );
     }
     else if ( expNode->kind == T::Exp::ESEQ ) {

@@ -186,6 +186,22 @@ public:
         return r9;
     }
 
+    static TEMP::Temp* R10() {
+        static TEMP::Temp* r10 = nullptr;
+        if ( !r10 ) {
+            r10 = TEMP::Temp::NewTemp();
+        }
+        return r10;
+    }
+
+    static TEMP::Temp* R11() {
+        static TEMP::Temp* r11 = nullptr;
+        if ( !r11 ) {
+            r11 = TEMP::Temp::NewTemp();
+        }
+        return r11;
+    }
+
     static TEMP::Temp* R12() {
         static TEMP::Temp* r12 = nullptr;
         if ( !r12 ) {
@@ -216,6 +232,24 @@ public:
             r15 = TEMP::Temp::NewTemp();
         }
         return r15;
+    }
+
+    static TEMP::TempList* callerSavedRegs() {
+        return new TEMP::TempList(
+            returnValue(),
+            new TEMP::TempList(
+                RCX(),
+                new TEMP::TempList(
+                    RDX(),
+                    new TEMP::TempList(
+                        RDI(), new TEMP::TempList(
+                                   RSI(), new TEMP::TempList( stackPointer(),
+                                                              new TEMP::TempList( R8(), /* new TEMP::TempList( R9(), new TEMP::TempList( R10(),*/ new TEMP::TempList( R11(), nullptr ) ) ) ) ) ) ) /* ) ) */ );
+    }
+
+    static TEMP::TempList* calleeSavedRegs() {
+        return new TEMP::TempList( framePointer(),
+                                   new TEMP::TempList( RBX(), new TEMP::TempList( R12(), new TEMP::TempList( R13(), new TEMP::TempList( R14(), new TEMP::TempList( R15(), nullptr ) ) ) ) ) );
     }
     // static TEMP::Temp* radioRegister() {
     //     // std::cout << "radioRegister requested" << std::endl;
