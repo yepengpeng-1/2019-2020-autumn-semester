@@ -1,6 +1,7 @@
 # 2019-2020-autumn-semester
 2019 - 2020 Autumn Semester Curricula Materials
 
+![GitHub repo size](https://img.shields.io/github/repo-size/yuetsin/2019-2020-autumn-semester)
 
 | `☐ => ☑`? | [due]       | [course] | [desc]           |
 | ------- | ----------- | -------- | ---------------- |
