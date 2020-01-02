@@ -185,6 +185,40 @@ LiveGraph Liveness( G::Graph< AS::Instr >* flowgraph ) {
         tempNodes.push_back( head );
     }
 
+    // build Use and Def counting graph
+    auto insNode = flowgraph->Nodes();
+    while ( insNode ) {
+        auto node = insNode->head;
+        insNode   = insNode->tail;
+
+        auto useChain = FG::Use( node ), defChain = FG::Def( node );
+        while ( useChain ) {
+            auto content = useChain->head;
+            useChain     = useChain->tail;
+
+            auto foundNode = findNodeByTemp( tempNodes, content );
+            if ( LIVE::maps.find( foundNode ) == maps.end() ) {
+                LIVE::maps.insert( { foundNode, std::pair< size_t, size_t >( 1, 0 ) } );
+            }
+            else {
+                LIVE::maps[ foundNode ].first += 1;
+            }
+        }
+
+        while ( defChain ) {
+            auto content = defChain->head;
+            defChain     = defChain->tail;
+
+            auto foundNode = findNodeByTemp( tempNodes, content );
+            if ( LIVE::maps.find( foundNode ) == maps.end() ) {
+                LIVE::maps.insert( { foundNode, std::pair< size_t, size_t >( 0, 1 ) } );
+            }
+            else {
+                LIVE::maps[ foundNode ].second += 1;
+            }
+        }
+    }
+
     // std::cout << "tempNodes has " << tempNodes.size() << " elements. They are: " << std::endl;
     // for ( auto it = tempNodes.begin(); it != tempNodes.end(); it++ ) {
     // std::cout << " - " << ( *it )->NodeInfo() << std::endl;
@@ -332,7 +366,7 @@ LiveGraph Liveness( G::Graph< AS::Instr >* flowgraph ) {
 
             auto outLive = outLiveMap[ body ];
 
-            addSelfConflicts( tempGraph, U(inLiveMap[ body ], outLiveMap[body] ));
+            addSelfConflicts( tempGraph, U( inLiveMap[ body ], outLiveMap[ body ] ) );
 
             for ( auto it = outLive.begin(); it != outLive.end(); it++ ) {
                 if ( *it == moveSrc ) {
@@ -350,7 +384,7 @@ LiveGraph Liveness( G::Graph< AS::Instr >* flowgraph ) {
             auto defTl   = FG::Def( body );
             auto outLive = outLiveMap[ body ];
 
-            addSelfConflicts( tempGraph, U(inLiveMap[ body ], outLiveMap[body] ));
+            addSelfConflicts( tempGraph, U( inLiveMap[ body ], outLiveMap[ body ] ) );
 
             while ( defTl ) {
                 auto defNode = defTl->head;

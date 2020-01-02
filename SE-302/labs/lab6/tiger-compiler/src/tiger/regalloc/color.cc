@@ -365,12 +365,35 @@ void FreezeMoves( COL::tempNode* u ) {
 }
 
 void SelectSpill() {
-    // todo: use some good strategy to decide which one to spill
-    auto m = *spillWorkList.begin();
-    // spillWorkList.erase( spillWorkList.find( m ) );
-    Sweep( spillWorkList, m );
-    simplifyWorklist.insert( m );
-    FreezeMoves( m );
+
+    if ( false ) {
+        // todo: use some wise strategy to decide which one to spill
+        auto m = *spillWorkList.begin();
+        // spillWorkList.erase( spillWorkList.find( m ) );
+        Sweep( spillWorkList, m );
+        simplifyWorklist.insert( m );
+        FreezeMoves( m );
+    }
+    else {
+        COL::tempNode* minNode  = nullptr;
+        double         priority = 1e8;
+        for ( auto it = spillWorkList.begin(); it != spillWorkList.end(); it++ ) {
+            if ( ( *it )->Degree() == 0 ) {
+                // avoid divided by 0 error
+                continue;
+            }
+            auto useAndDef       = LIVE::maps[ *it ];
+            auto currentPriority = ( useAndDef.first + useAndDef.second ) / double( ( *it )->Degree() );
+            if ( currentPriority <= priority ) {
+                priority = currentPriority;
+                minNode  = *it;
+            }
+        }
+        assert( minNode );
+        Sweep( spillWorkList, minNode );
+        simplifyWorklist.insert( minNode );
+        FreezeMoves( minNode );
+    }
 }
 
 inline void DEBUG_printSet( const std::set< COL::tempNode* >& set ) {

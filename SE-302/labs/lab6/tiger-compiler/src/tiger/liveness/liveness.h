@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <map>
 #include <set>
+#include <utility>
 #include <vector>
 
 namespace LIVE {
@@ -17,6 +18,9 @@ static std::set< TEMP::Temp* >                                    tempSet;
 static std::vector< G::Node< TEMP::Temp >* >                      tempNodes;
 static std::map< G::Node< AS::Instr >*, std::set< TEMP::Temp* > > inLiveMap;
 static std::map< G::Node< AS::Instr >*, std::set< TEMP::Temp* > > outLiveMap;
+
+// use and def counts for each temp
+static std::map< G::Node< TEMP::Temp >*, std::pair< size_t, size_t > > maps;
 
 class MoveList {
 public:

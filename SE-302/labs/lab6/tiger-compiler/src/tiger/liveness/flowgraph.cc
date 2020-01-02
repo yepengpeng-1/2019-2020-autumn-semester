@@ -56,6 +56,18 @@ inline G::Node< AS::Instr >* findLabel( const std::vector< G::Node< AS::Instr >*
 //     nodeL = new G::NodeList< T >( node, nodeL );
 // }
 
+template < class T > inline G::Node< T >* findNodeByTemp( const std::vector< G::Node< T >* >& vec, const T* temp ) {
+    for ( auto it = vec.begin(); it != vec.end(); it++ ) {
+        // std::cout << " [fNbT] compare " << *it << " and " << temp << std::endl;
+        if ( ( *it )->NodeInfo() == temp ) {
+            return *it;
+        }
+    }
+    // std::cout << "You asked me to find " << temp << ", but nothing..." << std::endl;
+    assert( 0 );
+    return nullptr;
+}
+
 G::Graph< AS::Instr >* AssemFlowGraph( AS::InstrList* il, F::Frame* f ) {
     auto                                 instrList = il;
     auto                                 graph     = new G::Graph< AS::Instr >();

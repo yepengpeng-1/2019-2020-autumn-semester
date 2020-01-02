@@ -5,6 +5,7 @@
 #include "tiger/liveness/liveness.h"
 #include "tiger/util/graph.h"
 
+#include <map>
 #include <set>
 #include <vector>
 
