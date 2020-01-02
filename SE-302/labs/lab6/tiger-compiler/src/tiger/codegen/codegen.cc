@@ -496,6 +496,9 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         auto var1 = munchExp( f, e1 );
         auto var2 = munchExp( f, e2 );
 
+        std::string saveRegisters    = "pushq %rax\npushq %rdx";
+        std::string recoverRegisters = "popq %rdx\npopq %rax";
+
         if ( e->op == T::PLUS_OP || e->op == T::MINUS_OP ) {
             auto r = TEMP::Temp::NewTemp();
             // CG::temp_map->Enter( r, nullptr );
@@ -510,19 +513,17 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
             return smart_pair( r, combine( var1.second, combine( new AS::InstrList( moveInstr, nullptr ), combine( var2.second, new AS::InstrList( opInstr, nullptr ) ) ) ) );
         }
         else if ( e->op == T::MUL_OP ) {
-            auto r         = TEMP::Temp::NewTemp();
-            auto moveInstr = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
-            auto mulqInstr =
-                new AS::OperInstr( "imulq `s0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var2.first, new TEMP::TempList( f->returnValue(), nullptr ) ), nullptr );
-            auto moveBackInstr = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
+            auto r             = TEMP::Temp::NewTemp();
+            auto moveInstr     = new AS::MoveInstr( saveRegisters + "\nmovq `s0, `d0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
+            auto mulqInstr     = new AS::OperInstr( "imulq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
+            auto moveBackInstr = new AS::MoveInstr( "movq `s0, `d0\n" + recoverRegisters, new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
             return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( moveInstr, new AS::InstrList( mulqInstr, new AS::InstrList( moveBackInstr, nullptr ) ) ) ) ) );
         }
         else if ( e->op == T::DIV_OP ) {
             auto r             = TEMP::Temp::NewTemp();
-            auto moveInstr     = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
-            auto divqInstr     = new AS::OperInstr( "xorq %rdx, %rdx\nidivq `s0", new TEMP::TempList( f->returnValue(), nullptr ),
-                                                new TEMP::TempList( var2.first, new TEMP::TempList( f->returnValue(), nullptr ) ), nullptr );
-            auto moveBackInstr = new AS::MoveInstr( "movq `s0, `d0", new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
+            auto moveInstr     = new AS::MoveInstr( saveRegisters + "\nmovq `s0, `d0", new TEMP::TempList( f->returnValue(), nullptr ), new TEMP::TempList( var1.first, nullptr ) );
+            auto divqInstr     = new AS::OperInstr( "xorq %rdx, %rdx\nidivq `s0", nullptr, new TEMP::TempList( var2.first, nullptr ), nullptr );
+            auto moveBackInstr = new AS::MoveInstr( "movq `s0, `d0\n" + recoverRegisters, new TEMP::TempList( r, nullptr ), new TEMP::TempList( f->returnValue(), nullptr ) );
             return smart_pair( r, combine( var1.second, combine( var2.second, new AS::InstrList( moveInstr, new AS::InstrList( divqInstr, new AS::InstrList( moveBackInstr, nullptr ) ) ) ) ) );
         }
     }
@@ -544,7 +545,7 @@ static std::pair< TEMP::Temp*, AS::InstrList* > munchExp( F::Frame* f, T::Exp* e
         auto l       = munchArgs( f, 0, args );
         std::cout << "\tcallq's funname = " << funname->Name() << ", TEMP::LabelString(funname) = " << TEMP::LabelString( funname ) << std::endl;
         auto instr = new AS::OperInstr( saveCallerSavedRegs + "callq " + TEMP::LabelString( funname ) + "\n" + recoverCallerSavedRegs,
-                                        new TEMP::TempList( f->stackPointer(), nullptr /* TODO: add caller saved registers */ ), new TEMP::TempList( f->stackPointer(), nullptr ), nullptr );
+                                        new TEMP::TempList( f->stackPointer(), new TEMP::TempList( f->returnValue(), nullptr ) ), new TEMP::TempList( f->stackPointer(), nullptr ), nullptr );
         return smart_pair( f->returnValue(), combine( l, new AS::InstrList( instr, nullptr ) ) );
     }
     else if ( expNode->kind == T::Exp::ESEQ ) {
