@@ -34,7 +34,6 @@ public:
     InFrameAccess( int offset ) : Access( INFRAME ), offset( offset ) {}
 
     T::Exp* ToExp( T::Exp* framePtr ) const {
-        std::cout << "ToExp called" << std::endl;
         return new T::MemExp( new T::BinopExp( T::BinOp::PLUS_OP, framePtr, new T::ConstExp( offset ) ) );
     };
 };
@@ -44,6 +43,10 @@ public:
     TEMP::Temp* reg;
 
     InRegAccess( TEMP::Temp* reg ) : Access( INREG ), reg( reg ) {}
+
+    T::Exp* ToExp( T::Exp* framePtr ) const {
+        return new T::TempExp( reg );
+    };
 };
 
 class AccessList {
@@ -71,6 +74,10 @@ public:
 
     F::Access* InFrame( int offset ) {
         return new F::InFrameAccess( offset );
+    }  // namespace F
+
+    F::Access* InReg() {
+        return new F::InRegAccess( TEMP::Temp::NewTemp() );
     }  // namespace F
 
     TEMP::Map* registers() {

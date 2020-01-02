@@ -221,13 +221,14 @@ static Access* AllocLocal( Level* level, bool escape, std::string sym ) {
     F::Access* newAcc;
     if ( escape ) {
         level->frame->varCount += 1;
-        newAcc      = level->frame->InFrame(  -level->frame->varCount * F::wordSize  );
+        newAcc = new F::InFrameAccess(-level->frame->varCount * F::wordSize);
         std::cout << "INframe. offset = " << -level->frame->varCount * F::wordSize << std::endl;
         newAcc->sym = sym;
     }
     else {
-        // never happens in lab5.
-        // everything is escape
+        newAcc = new F::InRegAccess(TEMP::Temp::NewTemp());
+        std::cout << "INREG. identifier: t" << reinterpret_cast<F::InRegAccess*>(newAcc)->reg->Int() << std::endl;
+        newAcc->sym = sym;
     }
     std::cout << "create newAcc fine." << std::endl;
     level->frame->vars = new F::AccessList( newAcc, level->frame->vars );
@@ -372,27 +373,6 @@ static TY::FieldList* make_fieldlist_from_e( TEnvType tenv, A::EFieldList* field
 
 namespace A {
 
-T::Exp* getExp( F::Access* acc, T::Exp* framePtr ) {
-    std::cout << "called getExp. input framePtr = " << framePtr << std::endl;
-    switch ( acc->kind ) {
-    case F::Access::Kind::INFRAME: {
-        auto acc_m = reinterpret_cast< F::InFrameAccess* >( acc );
-        std::cout << "with a INFRAME access, acc->sym = '" << acc->sym << "', offset = " << acc_m->offset << std::endl;
-        return new T::MemExp( new T::BinopExp( T::BinOp::PLUS_OP, framePtr, new T::ConstExp( acc_m->offset ) ) );
-    }
-
-    case F::Access::Kind::INREG: {
-        std::cout << "deliberately makes a getExp assert, reject INREG type" << std::endl;
-        assert(0);
-        std::cout << "with a INREG access" << std::endl;
-        return new T::TempExp( reinterpret_cast< F::InRegAccess* >( acc )->reg );
-    }
-    }
-    std::cout << "with nothing! dead" << std::endl;
-    assert(0);
-}
-
-
 static TR::Exp* findStaticLink( TR::Level* current, TR::Level* declare ) {
     std::cout << "called findStaticLink " << std::endl;
     T::Exp* result = new T::TempExp( current->frame->framePointer() );
@@ -410,7 +390,7 @@ static TR::Exp* findStaticLink( TR::Level* current, TR::Level* declare ) {
         auto acc = node->frame->args;
         std::cout << "[translate] [fSL] static link traverse: acc->kind = " << acc->head->kind << ", (should be inframe == " << F::Access::INFRAME << ")." << std::endl;
         std::cout << "           and the offset = " << reinterpret_cast<F::InFrameAccess*>(acc->head)->offset << ", sym = " << reinterpret_cast<F::InFrameAccess*>(acc->head)->sym << std::endl;
-        result = getExp(acc->head, result);
+        result = acc->head->ToExp(result);
         std::cout << "getExp done" << std::endl;
         node = node->parent;
     }
@@ -513,7 +493,8 @@ TR::ExpAndTy SimpleVar::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
         std::cout << "gotta varP: " << varP << std::endl;
         auto acc = varP->access;
         std::cout << "gotta acc: " << varP->access << ", acc.offset = " << reinterpret_cast<F::InFrameAccess*>(acc->access)->offset  << std::endl;
-        exp = new TR::ExExp( getExp( acc->access, findStaticLink( level, acc->level )->UnEx() ) );
+
+        exp = new TR::ExExp(acc->access->ToExp(findStaticLink(level, acc->level)->UnEx()));
     }
     else {
         std::cout << "Bad EnvEntry kind " << var->kind << std::endl;
@@ -844,7 +825,7 @@ TR::ExpAndTy RecordExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::
     // for the static link spreading
     auto acc = TR::AllocLocal( level, true, "" );
 
-    auto r = getExp( acc->access, new T::TempExp( level->frame->framePointer() ) );
+    auto r = acc->access->ToExp(new T::TempExp(level->frame->framePointer()));
 
     auto initfield = this->fields;
     auto copyfield = initfield;
@@ -1080,7 +1061,7 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
     }
 
     venv->BeginScope();
-    auto loopVar  = TR::AllocLocal( level, true, this->var->Name() );
+    auto loopVar  = TR::AllocLocal( level, this->escape, this->var->Name() );
     std::cout << "loopvar offset: " << reinterpret_cast<F::InFrameAccess*>(loopVar->access)->offset << std::endl;
     auto envEntry = new E::VarEntry( loopVar, TY::IntTy::Instance(), true );
 
@@ -1094,8 +1075,8 @@ TR::ExpAndTy ForExp::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty 
 
     auto bodyTrans = this->body->Translate( venv, tenv, level, done );
 
-    auto i     = getExp( loopVar->access, new T::TempExp( level->frame->framePointer() ) );
-    auto limit = getExp( newAccess, new T::TempExp( level->frame->framePointer() ) );
+    auto i = loopVar->access->ToExp(new T::TempExp(level->frame->framePointer()));
+    auto limit = newAccess->ToExp(new T::TempExp(level->frame->framePointer()));
 
     venv->EndScope();
     
@@ -1298,7 +1279,7 @@ TR::Exp* FunctionDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty
 
 TR::Exp* VarDec::Translate( S::Table< E::EnvEntry >* venv, S::Table< TY::Ty >* tenv, TR::Level* level, TEMP::Label* label ) const {
     std::cout << "Entered VarDec::Translate. going to declare var: " << this->var->Name() << std::endl;
-    auto access = TR::AllocLocal( level, true, this->var->Name() );
+    auto access = TR::AllocLocal( level, this->escape, this->var->Name() );
     auto initT  = this->init->Translate( venv, tenv, level, label );
     if ( this->typ ) {
         std::cout << "explicit type" << tenv->Look( this->typ ) << std::endl;
