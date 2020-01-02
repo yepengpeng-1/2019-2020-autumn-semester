@@ -73,4 +73,29 @@ Please partition the database according to the previous description and briefly 
 
 I don't see there's any problem according to the implementation in my Hands-on \#3 submission. In the ``docker-compose.yml'' configuration, three differently named services are actually based on the same MongoDB images. Thus, these services won't have to share the same container, the bottleneck should be eased a lot.
 
+And, it would be more robust and gain more fault-tolerance ability when one MongoDB cluster fails, under which circumstance the system won't be totally unavailable and maintain the availability at a basic level.
+
+\section*{Usage Description}
+Some simple descriptions.
+
+Since the Python scripts will stop working every time it was called, we must regularly call them to ensure its in-time update. So there are two bash scripts provided for that.
+
+Files are located at ``./handson4/scheduler\_server.sh'' and ``./handson4/scheduler\_client.sh''.
+
+In order to use them, you should call them with two parameters, the interval time between to every attempt at updating the HOSTS file, and the node name for each one.
+
+Notice that you need to authenticate this script to write to the HOSTS file. Windows environment could use the PowerShell script instead.
+
+In order to solidify that daemon scripts into the Docker image, we can use this script to initialize the docker image:
+
+\begin{verse}
+docker run -i -t <Image's name> /bin/bash -c "./scheduler\_client.sh <Interval Time> <Node's Name> \& > client.log"
+\end{verse}
+
+\begin{verse}
+docker run -i -t <Image's name> /bin/bash -c "./scheduler\_server.sh <Interval Time> <Node's Name> \& > server.log"
+\end{verse}
+
+And that will automatically run the daemon process in the background, and prints the log in respective files.
+
 \end{document}
