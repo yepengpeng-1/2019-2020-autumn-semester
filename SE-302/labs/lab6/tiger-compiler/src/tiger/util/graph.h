@@ -130,6 +130,9 @@ template < class T > bool Node< T >::GoesTo( Node< T >* n ) {
 template < class T > void Graph< T >::AddEdge( Node< T >* from, Node< T >* to ) {
     assert( from );
     assert( to );
+    if ( from == to ) {
+        return;
+    }
     assert( from->mygraph_ == to->mygraph_ );
     if ( from->GoesTo( to ) )
         return;
@@ -146,16 +149,22 @@ template < class T > void Graph< T >::RmEdge( Node< T >* from, Node< T >* to ) {
 template < class T > int Node< T >::InDegree() {
     int            deg = 0;
     NodeList< T >* p;
-    for ( p = this->preds_; p != nullptr; p = p->tail )
+    for ( p = this->preds_; p != nullptr; p = p->tail ) {
+
         deg++;
+    }
     return deg;
 }
 
 template < class T > int Node< T >::OutDegree() {
+    // std::cout << "==traverse outdegree==" << std::endl;
     int            deg = 0;
     NodeList< T >* p;
-    for ( p = this->succs_; p != nullptr; p = p->tail )
+    for ( p = this->succs_; p != nullptr; p = p->tail ) {
         deg++;
+        // std::cout << "#" << deg << ": " << p << ", content = " << p->head << std::endl;
+    }
+    // std::cout << "= over = " << std::endl;
     return deg;
 }
 

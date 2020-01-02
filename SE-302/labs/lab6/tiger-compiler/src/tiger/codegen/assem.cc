@@ -79,8 +79,8 @@ static std::string format( std::string assem, TEMP::TempList* dst, TEMP::TempLis
     return result;
 }
 
-static const std::string useless_craps[]    = { "movq (%r13), (%r13)", "movq (%r10), (%r10)", "movq (%r15), (%r15)" };
-static const size_t      useless_crap_count = 3;
+static const std::string useless_craps[]    = { "movq %r12, %r12", "movq (%r13), (%r13)", "movq (%r10), (%r10)", "movq (%r15), (%r15)" };
+static const size_t      useless_crap_count = 4;
 
 // movq (%r10), (%r15)
 // movq (%r15), (%r10)
@@ -88,10 +88,10 @@ static const size_t      useless_crap_count = 3;
 // movq (%r13), (%r15)
 
 static const std::map< std::string, std::string > replacingPair = {
-    { "movq (%r10), (%r13)", "movq (%r10), %r14\nmovq %r14, (%r13)" }, { "movq (%r13), (%r10)", "movq (%r13), %r14\nmovq %r14, (%r10)" },
-    { "movq (%r10), (%r15)", "movq (%r10), %r14\nmovq %r14, (%r15)" }, { "movq (%r15), (%r13)", "movq (%r15), %r14\nmovq %r14, (%r13)" },
-    { "movq (%r15), (%r10)", "movq (%r15), %r14\nmovq %r14, (%r10)" }, { "movq (%r13), (%r15)", "movq (%r13), %r14\nmovq %r14, (%r15)" },
-    { "movq (%r11), (%r10)", "movq (%r11), %r13\nmovq %r13, (%r10)" }
+    { "movq (%r10), (%r13)", "movq (%r10), %r10\nmovq %r10, (%r13)" }, { "movq (%r13), (%r10)", "movq (%r13), %r11\nmovq %r11, (%r10)" },
+    { "movq (%r10), (%r15)", "movq (%r10), %r10\nmovq %r10, (%r15)" }, { "movq (%r15), (%r13)", "movq (%r15), %r11\nmovq %r11, (%r13)" },
+    { "movq (%r15), (%r10)", "movq (%r15), %r10\nmovq %r10, (%r10)" }, { "movq (%r13), (%r15)", "movq (%r13), %r11\nmovq %r11, (%r15)" },
+    { "movq (%r11), (%r10)", "movq (%r11), %r10\nmovq %r10, (%r10)" }, { "movq (%r15), (%r14)", "movq (%r15), %r11\nmovq %r11, (%r14)" }
 };
 
 static const std::string internalRegs = "%r14";

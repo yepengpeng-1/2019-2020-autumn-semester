@@ -105,8 +105,9 @@ G::Graph< AS::Instr >* AssemFlowGraph( AS::InstrList* il, F::Frame* f ) {
                     auto labelNode = findLabel( nodes, head );
                     if ( labelNode ) {
                         graph->AddEdge( node, labelNode );
-                    } else {
-                        assert(0);
+                    }
+                    else {
+                        assert( 0 );
                     }
                 }
             }

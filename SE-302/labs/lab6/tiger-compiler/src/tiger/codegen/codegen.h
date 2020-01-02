@@ -60,6 +60,7 @@ static AS::Proc* F_procEntryExit3( F::Frame* frame, AS::InstrList* body ) {
                                          new TEMP::TempList( frame->stackPointer(), nullptr ), nullptr );
 
     prologue << "pushq %rbp" << std::endl << "movq %rsp, %rbp" << std::endl << "subq $" << frame->varCount * F::wordSize << ", %rsp" << std::endl;
+    prologue << "pushq %rbx\npushq %r12\npushq %r13\npushq %r14\npushq %r15" << std::endl;
     size_t                   argCounter = 0;
     static const std::string argRegs[]  = { "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9" };
 
@@ -85,12 +86,17 @@ static AS::Proc* F_procEntryExit3( F::Frame* frame, AS::InstrList* body ) {
     auto releaseStack = new AS::OperInstr( "addq $" + std::to_string( frame->varCount * F::wordSize ) + ", `d0", new TEMP::TempList( frame->stackPointer(), nullptr ),
                                            new TEMP::TempList( frame->stackPointer(), nullptr ), nullptr );
 
-    auto popRbp      = new AS::OperInstr( "popq %rbp", nullptr, nullptr, nullptr );
-    auto returnInstr = new AS::OperInstr( "ret", nullptr, nullptr, nullptr );
+    auto recoverCalleeSavedRegs = new AS::OperInstr(
+        "popq %r15\npopq %r14\npopq %r13\npopq %r12\npopq %rbx",
+        new TEMP::TempList( frame->R15(), new TEMP::TempList( frame->R14(), new TEMP::TempList( frame->R13(), new TEMP::TempList( frame->R12(), new TEMP::TempList( frame->RBX(), nullptr ) ) ) ) ),
+        nullptr, nullptr );
+    auto popRbp      = new AS::OperInstr( "popq %rbp", new TEMP::TempList( frame->framePointer(), nullptr ), nullptr, nullptr );
+    auto returnInstr = new AS::OperInstr( "ret", nullptr, new TEMP::TempList( frame->returnValue(), nullptr ), nullptr );
 
-    auto altogetherInstrs = new AS::Proc( prologue.str(),
-                                          /* combine(  new AS::InstrList( manageStack, new AS::InstrList( moveCriticalRegs, new AS::InstrList( allocStack, nullptr ) ) ), */
-                                          combine( body, new AS::InstrList( releaseStack, new AS::InstrList( popRbp, new AS::InstrList( returnInstr, nullptr ) ) ) ), epilogue.str() );
+    auto altogetherInstrs = new AS::Proc(
+        prologue.str(),
+        /* combine(  new AS::InstrList( manageStack, new AS::InstrList( moveCriticalRegs, new AS::InstrList( allocStack, nullptr ) ) ), */
+        combine( body, new AS::InstrList( releaseStack, new AS::InstrList( recoverCalleeSavedRegs, new AS::InstrList( popRbp, new AS::InstrList( returnInstr, nullptr ) ) ) ) ), epilogue.str() );
     std::cout << "Generated altogether " << std::endl;
     return altogetherInstrs;
 }
