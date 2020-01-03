@@ -16,6 +16,8 @@
 using VEnvType = S::Table< E::EnvEntry >*;
 using TEnvType = S::Table< TY::Ty >*;
 
+extern std::set<F::Frame*> frameList;
+
 namespace FRM {
 F::Frame* newFrame( TEMP::Label name, U::BoolList* formals, F::Frame* lastFrame ) {
 
@@ -40,6 +42,8 @@ F::Frame* newFrame( TEMP::Label name, U::BoolList* formals, F::Frame* lastFrame 
     std::cout << "current frame argCount: " << argCount << std::endl;
 
     F::Frame* f = new F::Frame( name );
+    frameList.insert(f);
+    std::cout << "F::frameList insert complete! size = " << frameList.size() << std::endl;
     f->putInfo( F::Frame::Kind::ARGUMENT, argCount, finalAcList );
     f->putInfo( F::Frame::Kind::VARIABLE, 0, nullptr );
     f->lastFrame = lastFrame;
@@ -390,6 +394,9 @@ static TR::Exp* findStaticLink( TR::Level* current, TR::Level* declare ) {
         auto acc = node->frame->args;
         std::cout << "[translate] [fSL] static link traverse: acc->kind = " << acc->head->kind << ", (should be inframe == " << F::Access::INFRAME << ")." << std::endl;
         std::cout << "           and the offset = " << reinterpret_cast<F::InFrameAccess*>(acc->head)->offset << ", sym = " << reinterpret_cast<F::InFrameAccess*>(acc->head)->sym << std::endl;
+        // if (acc->head->kind == F::Access::INFRAME) {
+        //     reinterpret_cast<F::InFrameAccess*>(acc->head)->offset += (node->frame->argCount + node->frame->varCount + 1 + 6) * F::wordSize;
+        // }
         result = acc->head->ToExp(result);
         std::cout << "getExp done" << std::endl;
         node = node->parent;

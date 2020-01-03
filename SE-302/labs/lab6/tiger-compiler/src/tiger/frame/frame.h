@@ -8,6 +8,7 @@
 #include "tiger/codegen/assem.h"
 #include "tiger/translate/tree.h"
 #include "tiger/util/util.h"
+#include <set>
 
 namespace F {
 
@@ -34,7 +35,7 @@ public:
     InFrameAccess( int offset ) : Access( INFRAME ), offset( offset ) {}
 
     T::Exp* ToExp( T::Exp* framePtr ) const {
-        return new T::MemExp( new T::BinopExp( T::BinOp::PLUS_OP, framePtr, new T::ConstExp( offset ) ) );
+        return new T::MemExp( new T::BinopExp( T::BinOp::PLUS_OP, framePtr, new T::ConstExp(  offset ) ) );
     };
 };
 
@@ -57,6 +58,7 @@ public:
     AccessList() {}
     AccessList( Access* head, AccessList* tail ) : head( head ), tail( tail ) {}
 };
+
 
 class Frame {
 public:

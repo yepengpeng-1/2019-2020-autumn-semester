@@ -5,4 +5,5 @@
 namespace F {
 
 class X64Frame : public Frame {};
+
 }  // namespace F

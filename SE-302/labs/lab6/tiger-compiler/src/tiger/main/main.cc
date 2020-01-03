@@ -15,6 +15,8 @@
 
 extern EM::ErrorMsg errormsg;
 
+std::set< F::Frame* > frameList;
+
 A::Exp*       absyn_root;
 std::ifstream infile;
 
@@ -174,6 +176,8 @@ int main( int argc, char** argv ) {
     frags = TR::TranslateProgram( absyn_root );
     if ( errormsg.anyErrors )
         return 1; /* don't continue */
+
+    std::cout << "currently F::frameList.size = " << frameList.size() << std::endl;
 
     /* convert the filename */
     sprintf( outfile, "%s.s", argv[ 1 ] );
