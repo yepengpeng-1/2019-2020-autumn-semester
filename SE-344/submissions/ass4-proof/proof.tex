@@ -6,7 +6,7 @@
 \usepackage{geometry}
 \geometry{a3paper,centering,scale=0.8}
 \usepackage[format=hang,font=small,textfont=it]{caption}
-\usepackage[nottoc]{tocbibind}
+\usepackage[nottoc]{tocbibind} 
 \setromanfont{SourceHanSerifSC-Medium}
 \punctstyle{quanjiao}
 
@@ -35,5 +35,19 @@ $$\frac{\mathrm{d} P(t)} {\mathrm{d} t} = n\sum _{i=0}^{n}(P_{i+1} - P_i)B_{i, n
 将 $t = 0$ 和 $t = 1$ 代入，马上有 ${\lim_{t \to 0} \frac{\mathrm{d} P_0(t)}{\mathrm{d} t} = n(P_1 - P_0)}$，且 ${\lim_{t \to 1} \frac{\mathrm{d} P_n(t)}{\mathrm{d} t} = n(P_n - P_{n-1)}}$。而我们知道两个连续控制点的差对应的就是控制多边形的一条边。特别地，$P_1 - P_0$ 和 $P_n - P_{n-1}$ 分别对应第一条边和最后一条边。
 
 因此，原命题得证。
+
+\section*{Question 2} 证明「$P_{n-1}$、$P_n = Q_0$、$Q_1$ 三点共线」与「他们满足 $G^1$ 连续」互为充分必要条件。
+
+\textbf{证明：}
+先证充分性。
+
+根据 $G^1$ 连续的定义，要满足必须保证其一阶导数连续。在三点共线的情况下，$Q_1 - Q_0 = P_n - P_{n-1}$，即 $\frac{\mathrm{d} (Q_1 - Q_0} {\mathrm{d} t} = \frac{\mathrm{d} (P_n - P_{n-1}} {\mathrm{d} t}$。这里可以保证在 $P_n$（$Q_0$）这点的邻域内导函数处处存在且处处相等。因此可知他们满足 $G^1$ 连续。
+\newline
+
+再证必要性。
+
+在满足 $G^1$ 连续的情况下，左右邻域内的导函数存在且相等。因此我们还是有原式 $\frac{\mathrm{d} (Q_1 - Q_0} {\mathrm{d} t} = \frac{\mathrm{d} (P_n - P_{n-1}} {\mathrm{d} t}$，从而可知 $Q0$、$Q_1$、$P_{n-1}$ 三点共线。
+
+证毕。
 
 \end{document}
