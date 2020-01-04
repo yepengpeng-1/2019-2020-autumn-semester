@@ -26,13 +26,13 @@ $${\displaystyle \mathbf {B} (t)=\sum _{i=0}^{n}{n \choose i}\mathbf {P} _{i}(1-
 
 我们感兴趣的只是 $t$ 对起点和终点的影响，因此直接将其代入得到，因此 ${\lim_{t \to 0} \frac{\mathrm{d} B(t)}{\mathrm{d} t} = \frac{\mathrm{d} P_0(t)}{\mathrm{d} t}}$，且 ${\lim_{t \to 1} \frac{\mathrm{d} B(t)}{\mathrm{d} t} = \frac{\mathrm{d} P_n(t)}{\mathrm{d} t}}$。即，Bezier 曲线的起点及终点的曲线走向完全由 $P_0$ 和 $P_n$ 两函数确定。
 
-而对 $P(t)$ 函数求导，可以得到 $$\frac{\mathrm{d} P(t)} {\mathrm{d} t} = n\sum _{i=0}^{n} P_i[B_{i-1, n-1}(t)-B_{i, n-1}(t)$$
+而对 $P(t)$ 函数求导，可以得到 $$\frac{\mathrm{d} P(t)} {\mathrm{d} t} = n\sum _{i=0}^{n} P_i[B_{i-1, n-1}(t)-B_{i, n-1}(t)]$$
 
 于是就有
 
-$$\frac{\mathrm{d} P(t)} {\mathrm{d} t} = n\sum _{i=0}^{n}(P_{i+1} - P_i)B_{i, n-1}(t)$$。
+$$\frac{\mathrm{d} P(t)} {\mathrm{d} t} = n\sum _{i=0}^{n}(P_{i+1} - P_i)B_{i, n-1}(t)$$
 
-将 $t = 0$ 和 $t = 1$ 代入，马上有 ${\lim_{t \to 0} \frac{\mathrm{d} P_0(t)}{\mathrm{d} t} = n(P_1 - P_0)}$，且 ${\lim_{t \to 1} \frac{\mathrm{d} P_n(t)}{\mathrm{d} t} = n(P_n - P_{n-1)}}$。而我们知道两个连续控制点的差对应的就是控制多边形的一条边。特别地，$P_1 - P_0$ 和 $P_n - P_{n-1}$ 分别对应第一条边和最后一条边。
+将 $t = 0$ 和 $t = 1$ 代入，马上有 ${\lim_{t \to 0} \frac{\mathrm{d} P_0(t)}{\mathrm{d} t} = n(P_1 - P_0)}$，且 ${\lim_{t \to 1} \frac{\mathrm{d} P_n(t)}{\mathrm{d} t} = n(P_n - P_{n-1})}$。而我们知道两个连续控制点的差对应的就是控制多边形的一条边。特别地，$P_1 - P_0$ 和 $P_n - P_{n-1}$ 分别对应第一条边和最后一条边。
 
 因此，原命题得证。
 
@@ -41,12 +41,12 @@ $$\frac{\mathrm{d} P(t)} {\mathrm{d} t} = n\sum _{i=0}^{n}(P_{i+1} - P_i)B_{i, n
 \textbf{证明：}
 先证充分性。
 
-根据 $G^1$ 连续的定义，要满足必须保证其一阶导数连续。在三点共线的情况下，$Q_1 - Q_0 = P_n - P_{n-1}$，即 $\frac{\mathrm{d} (Q_1 - Q_0} {\mathrm{d} t} = \frac{\mathrm{d} (P_n - P_{n-1}} {\mathrm{d} t}$。这里可以保证在 $P_n$（$Q_0$）这点的邻域内导函数处处存在且处处相等。因此可知他们满足 $G^1$ 连续。
+根据 $G^1$ 连续的定义，要满足必须保证其一阶导数连续。在三点共线的情况下，$Q_1 - Q_0 = P_n - P_{n-1}$，即 $\frac{\mathrm{d} (Q_1 - Q_0)} {\mathrm{d} t} = \frac{\mathrm{d} (P_n - P_{n-1})} {\mathrm{d} t}$。这里可以保证在 $P_n$（$Q_0$）这点的邻域内导函数处处存在且处处相等。因此可知他们满足 $G^1$ 连续。
 \newline
 
 再证必要性。
 
-在满足 $G^1$ 连续的情况下，左右邻域内的导函数存在且相等。因此我们还是有原式 $\frac{\mathrm{d} (Q_1 - Q_0} {\mathrm{d} t} = \frac{\mathrm{d} (P_n - P_{n-1}} {\mathrm{d} t}$，从而可知 $Q0$、$Q_1$、$P_{n-1}$ 三点共线。
+在满足 $G^1$ 连续的情况下，左右邻域内的导函数存在且相等。因此我们还是有原式 $\frac{\mathrm{d} (Q_1 - Q_0)} {\mathrm{d} t} = \frac{\mathrm{d} (P_n - P_{n-1})} {\mathrm{d} t}$，从而可知 $Q_0$、$Q_1$、$P_{n-1}$ 三点共线。
 
 证毕。
 
