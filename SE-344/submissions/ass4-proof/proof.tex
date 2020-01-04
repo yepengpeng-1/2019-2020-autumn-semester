@@ -1,0 +1,39 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{CJKpunct}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{a3paper,centering,scale=0.8}
+\usepackage[format=hang,font=small,textfont=it]{caption}
+\usepackage[nottoc]{tocbibind}
+\setromanfont{SourceHanSerifSC-Medium}
+\punctstyle{quanjiao}
+
+\title{SE-344: Computer Graphics}
+\author{Proof Assignment}
+\date{Jan 2020}
+\begin{document}
+\maketitle
+
+\section*{Question 1} 证明对 Bezier 曲线来说，起点终点切矢量方向同控制多边形第一条和最后一条边的方向相同。
+\newline
+
+\textbf{证明：}首先，Bezier 曲线的一般演算式为
+$${\displaystyle \mathbf {B} (t)=\sum _{i=0}^{n}{n \choose i}\mathbf {P} _{i}(1-t)^{n-i}t^{i}={n \choose 0}\mathbf {P} _{0}(1-t)^{n}t^{0}+{n \choose 1}\mathbf {P} _{1}(1-t)^{n-1}t^{1}+\cdots +{n \choose n-1}\mathbf {P} _{n-1}(1-t)^{1}t^{n-1}+{n \choose n}\mathbf {P} _{n}(1-t)^{0}t^{n}{\mbox{ , }}t\in [0,1]}$$
+
+而当 $t$ 取 $0$ 和 $1$ 两值时，恰好对应着曲线的起点和终点。在我们规定 $0^0 = 1$ 的情况下，将两端点值代入算式，得到 $B(0) = P_0$ 且 $B(1) = P_n$。由此可知 ${\lim_{t \to 0} B(t) = P_0(t) + C}$，同理 ${\lim_{t \to 1} B(t) = P_n(t) + C}$。
+
+我们感兴趣的只是 $t$ 对起点和终点的影响，因此直接将其代入得到，因此 ${\lim_{t \to 0} \frac{\mathrm{d} B(t)}{\mathrm{d} t} = \frac{\mathrm{d} P_0(t)}{\mathrm{d} t}}$，且 ${\lim_{t \to 1} \frac{\mathrm{d} B(t)}{\mathrm{d} t} = \frac{\mathrm{d} P_n(t)}{\mathrm{d} t}}$。即，Bezier 曲线的起点及终点的曲线走向完全由 $P_0$ 和 $P_n$ 两函数确定。
+
+而对 $P(t)$ 函数求导，可以得到 $$\frac{\mathrm{d} P(t)} {\mathrm{d} t} = n\sum _{i=0}^{n} P_i[B_{i-1, n-1}(t)-B_{i, n-1}(t)$$
+
+于是就有
+
+$$\frac{\mathrm{d} P(t)} {\mathrm{d} t} = n\sum _{i=0}^{n}(P_{i+1} - P_i)B_{i, n-1}(t)$$。
+
+将 $t = 0$ 和 $t = 1$ 代入，马上有 ${\lim_{t \to 0} \frac{\mathrm{d} P_0(t)}{\mathrm{d} t} = n(P_1 - P_0)}$，且 ${\lim_{t \to 1} \frac{\mathrm{d} P_n(t)}{\mathrm{d} t} = n(P_n - P_{n-1)}}$。而我们知道两个连续控制点的差对应的就是控制多边形的一条边。特别地，$P_1 - P_0$ 和 $P_n - P_{n-1}$ 分别对应第一条边和最后一条边。
+
+因此，原命题得证。
+
+\end{document}

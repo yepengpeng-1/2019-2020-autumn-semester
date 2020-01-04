@@ -2,3 +2,5 @@
 .DS_Store
 SE-302/labs/lab5/.vscode/settings.json
 *.zip
+*.aux
+*.gz
