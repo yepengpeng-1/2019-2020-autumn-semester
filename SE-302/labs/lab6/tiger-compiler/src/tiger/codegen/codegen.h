@@ -96,6 +96,9 @@ static bool replaceImplicitRbp( AS::OperInstr* instr, F::Frame* foundFrame ) {
         }
         ++counter;
     }
+
+    // movq %rbp, ...
+    // leaq stack_size(%rsp), ...
     return false;
 }
 
